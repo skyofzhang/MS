@@ -166,5 +166,16 @@ namespace MoShou.UI
             ClearSelection();
             gameObject.SetActive(false);
         }
+
+        /// <summary>
+        /// 切换显示
+        /// </summary>
+        public void Toggle()
+        {
+            if (gameObject.activeSelf)
+                Hide();
+            else
+                Show();
+        }
     }
 }
