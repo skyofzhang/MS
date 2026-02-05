@@ -1,15 +1,24 @@
 {
-  "task_id": "MS-001",
-  "title": "Unity项目初始化 - 魔兽",
+  "task_id": "MS-002",
+  "title": "魔兽核心玩法开发",
   "status": "pending",
-  "description": "创建Unity项目基础结构，配置URP渲染管线，设置Android ARM64构建目标",
+  "description": "基于小游戏知识库V3.0策略，实现魔兽游戏核心玩法：角色选择、战斗系统、UI界面",
   "acceptance_criteria": [
-    "Unity项目可正常打开无报错",
-    "URP渲染管线配置完成",
-    "Android ARM64构建设置完成",
-    "Assets/Scripts/Editor/BuildScript.cs存在",
-    "主场景MainScene.unity存在"
+    "主菜单UI完成（开始游戏、设置、退出按钮）",
+    "角色选择界面（至少3个角色可选）",
+    "基础战斗场景搭建",
+    "角色可移动和攻击",
+    "敌人AI基础行为",
+    "血条UI显示",
+    "游戏可正常运行无报错"
+  ],
+  "technical_requirements": [
+    "使用Unity UI系统",
+    "角色使用CharacterController或Rigidbody",
+    "战斗使用简单的碰撞检测",
+    "UI使用Canvas + EventSystem"
   ],
   "assigned_to": "cursor",
-  "created_at": "2026-02-05T10:00:00Z"
+  "created_at": "2026-02-05T08:00:00Z",
+  "priority": "high"
 }
