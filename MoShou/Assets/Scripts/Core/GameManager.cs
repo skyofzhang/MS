@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
             Defeat
         }
 
-        [Header("Game State")]
+        // Game State
         public GameState CurrentState { get; private set; } = GameState.Init;
 
         [Header("Current Session")]
