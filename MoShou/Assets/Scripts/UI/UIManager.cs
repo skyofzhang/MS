@@ -1,15 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
-    
+
     [Header("HUD")]
     public Slider playerHealthBar;
-    public TextMeshProUGUI goldText;
-    public TextMeshProUGUI levelText;
+    public Text goldText;
+    public Text levelText;
     
     [Header("Skill Buttons")]
     public Button skill1Button;  // 多重箭

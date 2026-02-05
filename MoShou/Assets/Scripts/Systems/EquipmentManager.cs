@@ -6,6 +6,17 @@ using MoShou.Data;
 namespace MoShou.Systems
 {
     /// <summary>
+    /// 装备属性汇总结构
+    /// </summary>
+    public struct EquipmentStats
+    {
+        public int attack;
+        public int defense;
+        public int health;
+        public float critRate;
+    }
+
+    /// <summary>
     /// 装备管理器 - 管理玩家装备的穿戴和卸下
     /// </summary>
     public class EquipmentManager : MonoBehaviour
@@ -202,6 +213,20 @@ namespace MoShou.Systems
         public Equipment GetEquipmentConfig(string equipmentId)
         {
             return equipmentDatabase.TryGetValue(equipmentId, out Equipment equip) ? equip.Clone() : null;
+        }
+
+        /// <summary>
+        /// 获取装备总属性（供UI显示）
+        /// </summary>
+        public EquipmentStats GetTotalStats()
+        {
+            return new EquipmentStats
+            {
+                attack = TotalAttackBonus,
+                defense = TotalDefenseBonus,
+                health = TotalHpBonus,
+                critRate = TotalCritRateBonus
+            };
         }
 
         /// <summary>

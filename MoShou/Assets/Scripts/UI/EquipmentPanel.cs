@@ -88,9 +88,9 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 装备变化回调
+        /// 装备变化回调（slot=槽位, newEquip=当前装备，旧装备由 Refresh 时已更新故未传）
         /// </summary>
-        private void OnEquipmentChanged(EquipmentSlot slot, Equipment newEquip, Equipment oldEquip)
+        private void OnEquipmentChanged(EquipmentSlot slot, Equipment newEquip)
         {
             if (slotUIs.TryGetValue(slot, out EquipmentSlotUI slotUI))
             {
