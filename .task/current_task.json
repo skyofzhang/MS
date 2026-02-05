@@ -1,23 +1,16 @@
 {
-  "task_id": "MS-003",
-  "title": "P1功能开发 - 装备与背包系统",
+  "task_id": "MS-004",
+  "title": "UI完善与集成测试",
   "status": "completed",
-  "completed_at": "2026-02-05T18:00:00Z",
-  "files_created": [
-    "MoShou/Assets/Scripts/Data/Equipment.cs",
-    "MoShou/Assets/Scripts/Data/PlayerStats.cs",
-    "MoShou/Assets/Scripts/Data/ItemData.cs",
-    "MoShou/Assets/Scripts/Systems/EquipmentManager.cs",
-    "MoShou/Assets/Scripts/Systems/SaveSystem.cs",
-    "MoShou/Assets/Scripts/Systems/LootManager.cs",
-    "MoShou/Assets/Scripts/Systems/InventoryManager.cs",
-    "MoShou/Assets/Scripts/Gameplay/DropPickup.cs"
+  "description": "完善游戏UI界面，集成所有系统，确保可运行",
+  "features": [
+    {"id": "UI-001", "name": "背包界面", "scripts": ["InventoryPanel.cs", "InventorySlotUI.cs"], "status": "done"},
+    {"id": "UI-002", "name": "装备界面", "scripts": ["EquipmentPanel.cs", "EquipmentSlotUI.cs"], "status": "done"},
+    {"id": "UI-003", "name": "主界面HUD", "scripts": ["GameHUD.cs"], "status": "done"},
+    {"id": "UI-004", "name": "伤害飘字", "scripts": ["DamagePopup.cs", "BillboardBehavior.cs"], "status": "done"}
   ],
-  "features_implemented": [
-    {"id": "F008", "name": "装备系统", "status": "completed"},
-    {"id": "F009", "name": "角色数据与存档", "status": "completed"},
-    {"id": "F010", "name": "掉落系统", "status": "completed"},
-    {"id": "F011", "name": "背包系统", "status": "completed"}
+  "additional_files": [
+    {"name": "GameInitializer.cs", "desc": "游戏初始化器，整合所有系统"}
   ],
-  "next_task": "MS-004 UI完善与集成测试"
+  "completed_at": "2026-02-05T18:35:00Z"
 }
