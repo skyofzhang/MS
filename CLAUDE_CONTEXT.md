@@ -36,9 +36,10 @@
 |--------|------|----------|------|
 | MS-001 | Unity项目初始化 | 2026-02-04 | 创建 MoShou 项目，配置 Android/WebGL |
 | MS-002 | 核心战斗系统 | 2026-02-05 | 虚拟摇杆、自动普攻、技能、怪物AI、伤害计算 |
+| MS-003 | P1功能开发 | 2026-02-05 | 装备系统、存档系统、掉落系统、背包系统 |
 
 ### 当前任务
-**MS-003** - 待分配
+**MS-004** - UI完善与集成测试
 
 ### 下一步计划 (按优先级)
 1. **MS-003 UI完善** - 技能CD显示、伤害飘字、怪物血条
@@ -52,13 +53,22 @@ MoShou/Assets/Scripts/
 ├── Core/
 │   ├── GameManager.cs      # 游戏状态管理
 │   └── GameSceneSetup.cs   # 场景初始化
+├── Data/
+│   ├── Equipment.cs        # 装备数据类
+│   ├── PlayerStats.cs      # 玩家属性数据
+│   └── ItemData.cs         # 物品/掉落数据
 ├── Gameplay/
 │   ├── PlayerController.cs # 玩家控制(移动/攻击/技能)
-│   └── MonsterController.cs # 怪物AI
+│   ├── MonsterController.cs # 怪物AI
+│   └── DropPickup.cs       # 掉落物拾取
 ├── Combat/
 │   └── CombatSystem.cs     # 伤害计算(暴击/防御)
 ├── Systems/
-│   └── MonsterSpawner.cs   # 怪物生成器
+│   ├── MonsterSpawner.cs   # 怪物生成器
+│   ├── EquipmentManager.cs # 装备管理
+│   ├── SaveSystem.cs       # 存档系统
+│   ├── LootManager.cs      # 掉落管理
+│   └── InventoryManager.cs # 背包管理
 └── UI/
     ├── VirtualJoystick.cs  # 虚拟摇杆
     ├── UIManager.cs        # UI管理
