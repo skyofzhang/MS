@@ -1,6 +1,6 @@
 # Claude 上下文记忆文件
 > 这个文件是 Claude Code 的持久化记忆，每次新对话开始时请先读取此文件恢复上下文。
-> 最后更新: 2026-02-05 19:05
+> 最后更新: 2026-02-05 19:15
 
 ## 项目基本信息
 - **项目名称**: MS (魔兽小游戏)
@@ -20,10 +20,12 @@
 - **质检**: 代码自检，确保可编译
 - **提交**: git push 触发 n8n 记录进度
 
-### n8n 工作流 (3个)
+### n8n 工作流 (4个)
 1. **NWF-01 Notion需求监听器** - 监听 Notion 需求池变更，通知 Claude
 2. **NWF-02 Git事件分发器** - 监听 GitHub push，根据 commit tag 分发
 3. **NWF-03 状态记录器** - 记录状态到 Notion
+4. **NWF-05 编译错误处理器** - 接收Unity编译错误，触发修复流程
+   - Webhook: `POST http://43.161.249.54:5678/webhook/build-error`
 
 ### Claude 的职责
 - 理解需求 → 生成代码 → git push → n8n 自动记录
@@ -83,7 +85,8 @@ MoShou/Assets/Scripts/
 ├── Test/
 │   └── TestSceneSetup.cs   # 测试场景设置
 └── Editor/
-    └── BuildScript.cs      # 构建脚本
+    ├── BuildScript.cs         # 构建脚本
+    └── BuildErrorReporter.cs  # 编译错误自动上报
 ```
 
 ## 关键凭证
@@ -102,5 +105,6 @@ MoShou/Assets/Scripts/
 4. 如果任务已完成，询问用户下一步计划
 
 ## 变更日志
+- 2026-02-05 19:15: 添加 NWF-05 编译错误处理器，实现Unity编译错误自动上报
 - 2026-02-05 19:05: MS-001 ~ MS-006 全部完成
 - 2026-02-05 17:30: 创建此文件，记录 MS-001/MS-002 完成状态
