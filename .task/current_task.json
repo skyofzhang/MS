@@ -1,24 +1,88 @@
 {
   "task_id": "MS-002",
-  "title": "魔兽核心玩法开发",
+  "title": "核心战斗系统开发（P0功能）",
   "status": "pending",
-  "description": "基于小游戏知识库V3.0策略，实现魔兽游戏核心玩法：角色选择、战斗系统、UI界面",
+  "description": "实现小游戏知识库V3.0定义的P0核心功能：虚拟摇杆、自动普攻、技能释放、怪物AI、伤害计算",
+  "reference": "小游戏知识库V3.0 > PRD > 3.1核心功能",
+  "technical_spec": {
+    "screen": "portrait 1080x1920",
+    "control": "单手操作（虚拟摇杆+技能按钮）",
+    "engine": "Unity 2022.3.47f1c1",
+    "render": "URP 14.x"
+  },
+  "features": [
+    {
+      "id": "F001",
+      "name": "虚拟摇杆移动",
+      "scripts": [
+        "VirtualJoystick.cs",
+        "VirtualJoystickUI.cs"
+      ]
+    },
+    {
+      "id": "F002",
+      "name": "自动普攻",
+      "scripts": [
+        "PlayerController.cs"
+      ]
+    },
+    {
+      "id": "F003",
+      "name": "技能释放",
+      "scripts": [
+        "PlayerController.cs"
+      ],
+      "skills": [
+        "SK001多重箭",
+        "SK002穿透箭"
+      ]
+    },
+    {
+      "id": "F004",
+      "name": "怪物AI",
+      "scripts": [
+        "MonsterController.cs"
+      ]
+    },
+    {
+      "id": "F005",
+      "name": "伤害计算",
+      "scripts": [
+        "CombatSystem.cs"
+      ]
+    }
+  ],
   "acceptance_criteria": [
-    "主菜单UI完成（开始游戏、设置、退出按钮）",
-    "角色选择界面（至少3个角色可选）",
-    "基础战斗场景搭建",
-    "角色可移动和攻击",
-    "敌人AI基础行为",
-    "血条UI显示",
-    "游戏可正常运行无报错"
+    "虚拟摇杆可控制角色8方向移动",
+    "角色自动攻击范围内敌人",
+    "技能按钮可释放多重箭(cone)和穿透箭(line)",
+    "怪物追击玩家并攻击",
+    "伤害公式正确计算（含暴击、防御）",
+    "Unity项目0错误0警告"
   ],
-  "technical_requirements": [
-    "使用Unity UI系统",
-    "角色使用CharacterController或Rigidbody",
-    "战斗使用简单的碰撞检测",
-    "UI使用Canvas + EventSystem"
-  ],
+  "folder_structure": {
+    "Scripts/Core": [
+      "GameManager.cs",
+      "EventManager.cs"
+    ],
+    "Scripts/Gameplay": [
+      "PlayerController.cs",
+      "MonsterController.cs"
+    ],
+    "Scripts/Combat": [
+      "CombatSystem.cs"
+    ],
+    "Scripts/UI": [
+      "VirtualJoystick.cs",
+      "VirtualJoystickUI.cs",
+      "UIManager.cs"
+    ],
+    "Scenes": [
+      "MainScene.unity",
+      "GameScene.unity"
+    ]
+  },
   "assigned_to": "cursor",
-  "created_at": "2026-02-05T08:00:00Z",
-  "priority": "high"
+  "created_at": "2026-02-05T08:30:00Z",
+  "priority": "P0"
 }
