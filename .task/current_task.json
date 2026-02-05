@@ -1,16 +1,12 @@
 {
-  "task_id": "MS-004",
-  "title": "UI完善与集成测试",
-  "status": "completed",
-  "description": "完善游戏UI界面，集成所有系统，确保可运行",
+  "task_id": "MS-005",
+  "title": "测试验证",
+  "status": "in_progress",
+  "description": "验证所有系统可正常编译运行，创建测试场景",
   "features": [
-    {"id": "UI-001", "name": "背包界面", "scripts": ["InventoryPanel.cs", "InventorySlotUI.cs"], "status": "done"},
-    {"id": "UI-002", "name": "装备界面", "scripts": ["EquipmentPanel.cs", "EquipmentSlotUI.cs"], "status": "done"},
-    {"id": "UI-003", "name": "主界面HUD", "scripts": ["GameHUD.cs"], "status": "done"},
-    {"id": "UI-004", "name": "伤害飘字", "scripts": ["DamagePopup.cs", "BillboardBehavior.cs"], "status": "done"}
+    {"id": "TEST-001", "name": "代码结构检查", "desc": "验证命名空间、引用正确"},
+    {"id": "TEST-002", "name": "创建测试场景", "desc": "TestScene用于快速验证功能"},
+    {"id": "TEST-003", "name": "集成测试脚本", "desc": "一键测试所有系统"}
   ],
-  "additional_files": [
-    {"name": "GameInitializer.cs", "desc": "游戏初始化器，整合所有系统"}
-  ],
-  "completed_at": "2026-02-05T18:35:00Z"
+  "created_at": "2026-02-05T18:40:00Z"
 }

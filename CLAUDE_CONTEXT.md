@@ -1,6 +1,6 @@
 # Claude 上下文记忆文件
 > 这个文件是 Claude Code 的持久化记忆，每次新对话开始时请先读取此文件恢复上下文。
-> 最后更新: 2026-02-05 17:30
+> 最后更新: 2026-02-05 18:40
 
 ## 项目基本信息
 - **项目名称**: MS (魔兽小游戏)
@@ -37,22 +37,22 @@
 | MS-001 | Unity项目初始化 | 2026-02-04 | 创建 MoShou 项目，配置 Android/WebGL |
 | MS-002 | 核心战斗系统 | 2026-02-05 | 虚拟摇杆、自动普攻、技能、怪物AI、伤害计算 |
 | MS-003 | P1功能开发 | 2026-02-05 | 装备系统、存档系统、掉落系统、背包系统 |
+| MS-004 | UI完善与集成 | 2026-02-05 | 背包UI、装备UI、HUD、伤害飘字、GameInitializer |
 
 ### 当前任务
-**MS-004** - UI完善与集成测试
+**MS-005** - 测试验证
 
 ### 下一步计划 (按优先级)
-1. **MS-003 UI完善** - 技能CD显示、伤害飘字、怪物血条
-2. **MS-004 波次系统** - 波次生成、BOSS战、通关判定
-3. **MS-005 装备系统** - 装备数据、掉落、穿戴
-4. **MS-006 存档系统** - PlayerPrefs 本地存档
+1. **MS-005 测试验证** - 代码编译检查、功能集成测试
+2. **MS-006 APK打包** - Android打包配置、最终发布
 
 ## 已创建的代码文件
 ```
 MoShou/Assets/Scripts/
 ├── Core/
 │   ├── GameManager.cs      # 游戏状态管理
-│   └── GameSceneSetup.cs   # 场景初始化
+│   ├── GameSceneSetup.cs   # 场景初始化
+│   └── GameInitializer.cs  # 系统初始化器
 ├── Data/
 │   ├── Equipment.cs        # 装备数据类
 │   ├── PlayerStats.cs      # 玩家属性数据
@@ -72,7 +72,12 @@ MoShou/Assets/Scripts/
 └── UI/
     ├── VirtualJoystick.cs  # 虚拟摇杆
     ├── UIManager.cs        # UI管理
-    └── HealthBar.cs        # 血条组件
+    ├── HealthBar.cs        # 血条组件
+    ├── InventoryPanel.cs   # 背包面板
+    ├── InventorySlotUI.cs  # 背包格子UI
+    ├── EquipmentPanel.cs   # 装备面板(含EquipmentSlotUI)
+    ├── GameHUD.cs          # 主界面HUD
+    └── DamagePopup.cs      # 伤害飘字(含BillboardBehavior)
 ```
 
 ## 关键凭证
