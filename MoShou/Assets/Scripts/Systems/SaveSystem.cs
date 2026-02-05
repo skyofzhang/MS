@@ -25,6 +25,8 @@ namespace MoShou.Systems
 
         // 游戏进度
         public int highestLevel = 1;
+        public int highestUnlockedStage = 1;
+        public List<int> clearedStages = new List<int>();
         public int totalPlayTime = 0;
     }
 
@@ -299,6 +301,105 @@ namespace MoShou.Systems
         public bool HasSave()
         {
             return PlayerPrefs.HasKey(SAVE_KEY);
+        }
+
+        /// <summary>
+        /// 检查是否有存档数据 (alias)
+        /// </summary>
+        public bool HasSaveData()
+        {
+            return HasSave();
+        }
+
+        /// <summary>
+        /// 获取最高解锁关卡
+        /// </summary>
+        public int GetHighestUnlockedStage()
+        {
+            if (PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                try
+                {
+                    SaveData data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                    return data?.highestUnlockedStage ?? 1;
+                }
+                catch { }
+            }
+            return 1;
+        }
+
+        /// <summary>
+        /// 检查关卡是否已通关
+        /// </summary>
+        public bool IsStageCleared(int stageId)
+        {
+            if (PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                try
+                {
+                    SaveData data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                    return data?.clearedStages?.Contains(stageId) ?? false;
+                }
+                catch { }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 标记关卡已通关
+        /// </summary>
+        public void MarkStageCleared(int stageId)
+        {
+            Debug.Log($"[SaveSystem] Stage {stageId} cleared!");
+
+            // Update in-memory and save
+            SaveData currentData = null;
+            if (PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                try
+                {
+                    currentData = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                }
+                catch { }
+            }
+
+            if (currentData == null)
+            {
+                currentData = new SaveData();
+                currentData.clearedStages = new List<int>();
+            }
+
+            if (currentData.clearedStages == null)
+                currentData.clearedStages = new List<int>();
+
+            if (!currentData.clearedStages.Contains(stageId))
+            {
+                currentData.clearedStages.Add(stageId);
+            }
+
+            // Unlock next stage
+            if (stageId >= currentData.highestUnlockedStage)
+            {
+                currentData.highestUnlockedStage = stageId + 1;
+                Debug.Log($"[SaveSystem] Unlocked stage {stageId + 1}!");
+            }
+
+            // Update highest level
+            if (stageId > currentData.highestLevel)
+            {
+                currentData.highestLevel = stageId;
+            }
+
+            // Will be persisted on next SaveGame call
+        }
+
+        /// <summary>
+        /// 重置进度（新游戏）
+        /// </summary>
+        public void ResetProgress()
+        {
+            Debug.Log("[SaveSystem] Resetting progress...");
+            DeleteSave();
         }
     }
 }

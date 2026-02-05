@@ -29,6 +29,7 @@ namespace UnityEngine
         public void Invoke(string method, float time) { }
         public void StartCoroutine(IEnumerator routine) { }
         public void StopCoroutine(IEnumerator routine) { }
+        public void StopAllCoroutines() { }
         protected static T Instantiate<T>(T original) where T : Object => default;
         protected static T Instantiate<T>(T original, Transform parent) where T : Object => default;
         protected static T Instantiate<T>(T original, Vector3 position, Quaternion rotation) where T : Object => default;
@@ -71,7 +72,7 @@ namespace UnityEngine
     public enum PrimitiveType { Sphere, Capsule, Cylinder, Cube, Plane, Quad }
     public enum CameraClearFlags { Skybox, SolidColor, Depth, Nothing }
 
-    public class Transform : Component
+    public class Transform : Component, IEnumerable
     {
         public Vector3 position;
         public Vector3 localPosition;
@@ -90,6 +91,7 @@ namespace UnityEngine
         public void Rotate(float x, float y, float z) { }
         public void Translate(Vector3 translation) { }
         public Transform GetChild(int index) => null;
+        public IEnumerator GetEnumerator() => null;
     }
 
     public struct Vector2
@@ -270,6 +272,7 @@ namespace UnityEngine
         public static string dataPath;
         public static string persistentDataPath;
         public static RuntimePlatform platform;
+        public static void Quit() { }
     }
 
     public enum RuntimePlatform { Android, IPhonePlayer, WindowsPlayer, WebGLPlayer }
@@ -280,6 +283,7 @@ namespace UnityEngine
         public static float deltaTime;
         public static float fixedDeltaTime;
         public static float timeScale;
+        public static float realtimeSinceStartup;
     }
 
     public class Input
@@ -364,6 +368,7 @@ namespace UnityEngine
     public class Gizmos { public static Color color; public static void DrawWireSphere(Vector3 center, float radius) { } }
 
     public class WaitForSeconds : YieldInstruction { public WaitForSeconds(float seconds) { } }
+    public class WaitForSecondsRealtime { public WaitForSecondsRealtime(float seconds) { } }
     public class YieldInstruction { }
     public class Coroutine { }
 
@@ -465,8 +470,14 @@ namespace UnityEngine.UI
     }
     public class Button : UnityEngine.Behaviour
     {
+        public bool interactable;
         public ButtonClickedEvent onClick;
-        public class ButtonClickedEvent { public void AddListener(UnityEngine.Events.UnityAction action) { } public void RemoveListener(UnityEngine.Events.UnityAction action) { } }
+        public class ButtonClickedEvent
+        {
+            public void AddListener(UnityEngine.Events.UnityAction action) { }
+            public void RemoveListener(UnityEngine.Events.UnityAction action) { }
+            public void RemoveAllListeners() { }
+        }
     }
     public class Slider : UnityEngine.Behaviour
     {
@@ -513,7 +524,7 @@ namespace UnityEngine.SceneManagement
         public static void LoadScene(int index) { }
         public static AsyncOperation LoadSceneAsync(string name) => null;
     }
-    public class AsyncOperation { public bool isDone; public float progress; }
+    public class AsyncOperation { public bool isDone; public float progress; public bool allowSceneActivation; }
 }
 
 namespace UnityEngine.Rendering

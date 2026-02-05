@@ -4,23 +4,41 @@ using System.Collections.Generic;
 
 public class MonsterSpawner : MonoBehaviour
 {
+    public static MonsterSpawner Instance { get; private set; }
+
     [Header("Spawn Settings")]
     public GameObject monsterPrefab;
     public Transform[] spawnPoints;
     public float spawnInterval = 3f;
     public int maxMonsters = 5;
-    
+
     [Header("Wave Settings")]
     public int currentWave = 1;
     public int monstersPerWave = 3;
     public int wavesPerLevel = 3;
-    
+
     private List<GameObject> activeMonsters = new List<GameObject>();
     private int monstersKilledThisWave = 0;
     private bool isSpawning = false;
-    
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
     void Start()
     {
+        // Auto-start disabled - GameManager will call StartWave
+        // StartCoroutine(SpawnWave());
+    }
+
+    /// <summary>
+    /// Start a specific wave (called by GameManager)
+    /// </summary>
+    public void StartWave(int wave)
+    {
+        currentWave = wave;
+        StopAllCoroutines();
         StartCoroutine(SpawnWave());
     }
     
