@@ -1,13 +1,18 @@
 {
-  "task_id": "MS-006",
-  "title": "APK打包配置",
+  "task_id": "MS-008",
+  "title": "游戏数据配置JSON文件",
   "status": "completed",
-  "description": "配置Android打包设置，准备发布",
+  "description": "创建完整的游戏数据配置文件",
+  "architecture": "V1.2 (Claude Code = 策划+开发)",
   "features": [
-    {"id": "BUILD-001", "name": "Android构建设置", "status": "done"},
-    {"id": "BUILD-002", "name": "构建脚本", "status": "done"},
-    {"id": "BUILD-003", "name": "README更新", "status": "done"}
+    {"id": "CONFIG-001", "name": "EquipmentConfigs.json", "status": "done", "items": 15},
+    {"id": "CONFIG-002", "name": "ItemConfigs.json", "status": "done", "items": 11},
+    {"id": "CONFIG-003", "name": "MonsterConfigs.json", "status": "done", "items": 8},
+    {"id": "CONFIG-004", "name": "StageConfigs.json", "status": "done", "items": 10},
+    {"id": "CONFIG-005", "name": "LootConfigs.json", "status": "done"},
+    {"id": "CONFIG-006", "name": "GameSettings.json", "status": "done"}
   ],
-  "created_at": "2026-02-05T18:50:00Z",
-  "completed_at": "2026-02-05T19:00:00Z"
+  "created_at": "2026-02-05T20:00:00Z",
+  "completed_at": "2026-02-05T20:30:00Z",
+  "next_task": "MS-009 Unity打包测试 (需要用户手动操作Unity)"
 }
