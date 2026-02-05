@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "description": "Claude-Cursor bidirectional communication protocol",
+  "files": {
+    "current_task.json": "Claude writes task, Cursor reads and executes",
+    "task_result.json": "Cursor writes result, Claude reads and verifies",
+    "ask_claude.json": "Cursor asks question, Claude responds",
+    "claude_response.json": "Claude response to Cursor question"
+  },
+  "git_tags": {
+    "NODE_COMPLETE": "Task completed, trigger verification",
+    "PROGRESS": "Progress update",
+    "ASK_CLAUDE": "Question for Claude"
+  }
+}
