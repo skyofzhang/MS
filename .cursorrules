@@ -1,0 +1,60 @@
+# MS Project - Cursor AI Rules V1.1.1
+# AI Game Production Pipeline
+# Created: 2026-02-05
+
+## Project Info
+- Project: MS
+- Engine: Unity 2022.3.47f1c1
+- Unity Path: D:\program\2022.3.47f1c1\Editor\Unity.exe
+- Project Path: E:\AI_Project\MS
+- Platform: Android ARM64
+
+## Development Flow
+
+### 1. Read on Startup
+- .task/current_task.json
+- .task/PROTOCOL.json
+
+### 2. Task Execution
+- Follow acceptance_criteria strictly
+- One step at a time, verify before next step
+
+### 3. Git Commit Tags
+- Task done: git commit -m "[NODE_COMPLETE] MS-XXX: description"
+- Progress: git commit -m "[PROGRESS] MS-XXX: description"
+- Question: write .task/ask_claude.json, git commit -m "[ASK_CLAUDE] question"
+- Always: git push origin main
+
+### 4. Screenshot
+- Save to .task/screenshots/MS-XXX.png
+- Update .task/task_result.json
+
+## Terminal (PowerShell)
+- Use ; to chain commands (not and-and)
+- Quote paths with spaces
+- Remove-Item for delete
+- Copy-Item for copy
+
+## Auto Build SOP
+
+### Step 1: Close Unity
+Get-Process -Name "Unity" -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 5
+
+### Step 2: Build
+and "D:\program\2022.3.47f1c1\Editor\Unity.exe" -batchmode -nographics -projectPath "E:\AI_Project\MS" -executeMethod BuildScript.BuildFromCommandLine -quit -logFile "E:\AI_Project\MS\build.log"
+
+### Step 3: Wait
+while (Get-Process -Name "Unity" -ErrorAction SilentlyContinue) { Start-Sleep -Seconds 10 }
+
+### Step 4: Check
+if (Test-Path "E:\AI_Project\MS\Builds\Android\MS.apk") { Write-Host "BUILD SUCCESS" } else { Get-Content "E:\AI_Project\MS\build.log" -Tail 50 }
+
+### Step 5: Reopen Unity
+Start-Process "D:\program\2022.3.47f1c1\Editor\Unity.exe" -ArgumentList "-projectPath","E:\AI_Project\MS"
+
+## Quality Standards
+- Zero compile errors
+- No NullReferenceException
+- 60fps target
+- Memory under 200MB
+- APK under 100MB
