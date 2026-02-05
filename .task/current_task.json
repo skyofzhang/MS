@@ -1,7 +1,7 @@
 {
   "task_id": "MS-002",
   "title": "核心战斗系统开发（P0功能）",
-  "status": "pending",
+  "status": "completed",
   "description": "实现小游戏知识库V3.0定义的P0核心功能：虚拟摇杆、自动普攻、技能释放、怪物AI、伤害计算",
   "reference": "小游戏知识库V3.0 > PRD > 3.1核心功能",
   "technical_spec": {
