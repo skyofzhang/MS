@@ -73,11 +73,7 @@ namespace MoShou.UI
                 LootManager.Instance.OnGoldPickup += OnGoldPickup;
                 LootManager.Instance.OnExpPickup += OnExpPickup;
             }
-
-            if (SaveSystem.Instance != null && playerStats != null)
-            {
-                playerStats.OnLevelUp += OnLevelUp;
-            }
+            // PlayerStats事件通过轮询方式检查，避免事件订阅的复杂性
         }
 
         /// <summary>
@@ -89,11 +85,6 @@ namespace MoShou.UI
             {
                 LootManager.Instance.OnGoldPickup -= OnGoldPickup;
                 LootManager.Instance.OnExpPickup -= OnExpPickup;
-            }
-
-            if (playerStats != null)
-            {
-                playerStats.OnLevelUp -= OnLevelUp;
             }
         }
 
@@ -123,25 +114,27 @@ namespace MoShou.UI
                 levelText.text = $"Lv.{playerStats.level}";
 
             // 经验值
+            int expToNext = playerStats.GetExpToNextLevel();
             if (expSlider != null)
             {
-                expSlider.maxValue = playerStats.expToNextLevel;
+                expSlider.maxValue = expToNext;
                 expSlider.value = playerStats.experience;
             }
             if (expText != null)
-                expText.text = $"{playerStats.experience}/{playerStats.expToNextLevel}";
+                expText.text = $"{playerStats.experience}/{expToNext}";
 
             // 生命值
             if (healthSlider != null)
             {
-                int maxHealth = playerStats.GetTotalHealth();
+                int maxHealth = playerStats.GetTotalMaxHp();
                 healthSlider.maxValue = maxHealth;
-                healthSlider.value = maxHealth; // 假设满血，实际应该从战斗系统获取
+                healthSlider.value = playerStats.currentHp > 0 ? playerStats.currentHp : maxHealth;
             }
             if (healthText != null)
             {
-                int maxHealth = playerStats.GetTotalHealth();
-                healthText.text = $"{maxHealth}/{maxHealth}";
+                int maxHealth = playerStats.GetTotalMaxHp();
+                int currentHealth = playerStats.currentHp > 0 ? playerStats.currentHp : maxHealth;
+                healthText.text = $"{currentHealth}/{maxHealth}";
             }
 
             // 金币

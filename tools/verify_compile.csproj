@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MoShou</RootNamespace>
+    <AssemblyName>MoShou.VerifyCompile</AssemblyName>
+    <NoWarn>CS0649;CS0169;CS0414;CS0067;CS0219;CS0162</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Unity Stubs -->
+    <Compile Include="UnityStubs.cs" />
+    <!-- Game Scripts (exclude Editor scripts) -->
+    <Compile Include="..\MoShou\Assets\Scripts\**\*.cs" Exclude="..\MoShou\Assets\Scripts\Editor\**\*.cs" />
+  </ItemGroup>
+</Project>

@@ -260,7 +260,7 @@ namespace MoShou.UI
                 case EquipmentSlot.Weapon: return "武器";
                 case EquipmentSlot.Armor: return "护甲";
                 case EquipmentSlot.Helmet: return "头盔";
-                case EquipmentSlot.Boots: return "靴子";
+                case EquipmentSlot.Pants: return "护腿";
                 case EquipmentSlot.Ring: return "戒指";
                 case EquipmentSlot.Necklace: return "项链";
                 default: return slot.ToString();

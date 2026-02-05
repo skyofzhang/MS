@@ -216,6 +216,14 @@ namespace MoShou.Systems
         }
 
         /// <summary>
+        /// 获取所有装备配置
+        /// </summary>
+        public List<Equipment> GetAllEquipmentConfigs()
+        {
+            return new List<Equipment>(equipmentDatabase.Values);
+        }
+
+        /// <summary>
         /// 获取装备总属性（供UI显示）
         /// </summary>
         public EquipmentStats GetTotalStats()
