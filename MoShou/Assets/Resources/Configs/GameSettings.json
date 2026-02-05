@@ -1,0 +1,55 @@
+{
+  "gameSettings": {
+    "version": "1.0.0",
+    "targetFrameRate": 60,
+    "defaultVolume": {
+      "master": 1.0,
+      "music": 0.8,
+      "sfx": 1.0
+    }
+  },
+  "playerSettings": {
+    "startingGold": 100,
+    "startingLevel": 1,
+    "baseMaxHp": 100,
+    "baseAttack": 10,
+    "baseDefense": 5,
+    "baseCritRate": 0.05,
+    "baseCritDamage": 1.5,
+    "moveSpeed": 5.0,
+    "attackRange": 1.5,
+    "attackSpeed": 1.0
+  },
+  "combatSettings": {
+    "damageFormula": "(attacker.attack * skillMultiplier - defender.defense) * randomRange(0.9, 1.1)",
+    "criticalFormula": "baseDamage * critDamageMultiplier",
+    "minDamage": 1,
+    "knockbackForce": 3.0,
+    "invincibilityDuration": 0.5
+  },
+  "skillSettings": {
+    "skill1_multiShot": {
+      "name": "Multi Shot",
+      "chineseName": "Multi Shot",
+      "cooldown": 5.0,
+      "damageMultiplier": 0.8,
+      "projectileCount": 3,
+      "spreadAngle": 30
+    },
+    "skill2_pierceShot": {
+      "name": "Pierce Shot",
+      "chineseName": "Pierce Shot",
+      "cooldown": 8.0,
+      "damageMultiplier": 1.5,
+      "pierceCount": 5,
+      "range": 10.0
+    }
+  },
+  "uiSettings": {
+    "damagePopupDuration": 1.0,
+    "damagePopupRiseHeight": 50,
+    "healthBarWidth": 100,
+    "healthBarHeight": 10
+  },
+  "autoSaveInterval": 60
+}

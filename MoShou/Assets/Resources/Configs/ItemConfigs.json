@@ -1,0 +1,138 @@
+{
+  "items": [
+    {
+      "id": "POTION_HP_SMALL",
+      "name": "小型生命药水",
+      "type": "Consumable",
+      "rarity": 0,
+      "maxStack": 99,
+      "sellPrice": 10,
+      "description": "恢复50点生命值",
+      "iconPath": "Icons/Items/hp_potion_small",
+      "effect": {
+        "type": "heal",
+        "value": 50
+      }
+    },
+    {
+      "id": "POTION_HP_MEDIUM",
+      "name": "中型生命药水",
+      "type": "Consumable",
+      "rarity": 1,
+      "maxStack": 99,
+      "sellPrice": 30,
+      "description": "恢复150点生命值",
+      "iconPath": "Icons/Items/hp_potion_medium",
+      "effect": {
+        "type": "heal",
+        "value": 150
+      }
+    },
+    {
+      "id": "POTION_HP_LARGE",
+      "name": "大型生命药水",
+      "type": "Consumable",
+      "rarity": 2,
+      "maxStack": 99,
+      "sellPrice": 80,
+      "description": "恢复400点生命值",
+      "iconPath": "Icons/Items/hp_potion_large",
+      "effect": {
+        "type": "heal",
+        "value": 400
+      }
+    },
+    {
+      "id": "SCROLL_ATK_BUFF",
+      "name": "力量卷轴",
+      "type": "Consumable",
+      "rarity": 1,
+      "maxStack": 20,
+      "sellPrice": 50,
+      "description": "30秒内攻击力提升20%",
+      "iconPath": "Icons/Items/scroll_atk",
+      "effect": {
+        "type": "buff",
+        "stat": "attack",
+        "value": 0.2,
+        "duration": 30
+      }
+    },
+    {
+      "id": "SCROLL_DEF_BUFF",
+      "name": "坚韧卷轴",
+      "type": "Consumable",
+      "rarity": 1,
+      "maxStack": 20,
+      "sellPrice": 50,
+      "description": "30秒内防御力提升20%",
+      "iconPath": "Icons/Items/scroll_def",
+      "effect": {
+        "type": "buff",
+        "stat": "defense",
+        "value": 0.2,
+        "duration": 30
+      }
+    },
+    {
+      "id": "MAT_IRON_ORE",
+      "name": "铁矿石",
+      "type": "Material",
+      "rarity": 0,
+      "maxStack": 999,
+      "sellPrice": 5,
+      "description": "可用于锻造装备的铁矿石",
+      "iconPath": "Icons/Materials/iron_ore"
+    },
+    {
+      "id": "MAT_MAGIC_STONE",
+      "name": "魔法石",
+      "type": "Material",
+      "rarity": 1,
+      "maxStack": 999,
+      "sellPrice": 20,
+      "description": "蕴含魔力的神秘石头",
+      "iconPath": "Icons/Materials/magic_stone"
+    },
+    {
+      "id": "MAT_MONSTER_CORE",
+      "name": "怪物核心",
+      "type": "Material",
+      "rarity": 2,
+      "maxStack": 99,
+      "sellPrice": 50,
+      "description": "从强力怪物体内获取的核心",
+      "iconPath": "Icons/Materials/monster_core"
+    },
+    {
+      "id": "GEM_RUBY",
+      "name": "红宝石",
+      "type": "Gem",
+      "rarity": 2,
+      "maxStack": 99,
+      "sellPrice": 100,
+      "description": "镶嵌在装备上可增加攻击力",
+      "iconPath": "Icons/Gems/ruby"
+    },
+    {
+      "id": "GEM_SAPPHIRE",
+      "name": "蓝宝石",
+      "type": "Gem",
+      "rarity": 2,
+      "maxStack": 99,
+      "sellPrice": 100,
+      "description": "镶嵌在装备上可增加法力值",
+      "iconPath": "Icons/Gems/sapphire"
+    },
+    {
+      "id": "GOLD_COIN",
+      "name": "金币",
+      "type": "Currency",
+      "rarity": 0,
+      "maxStack": 99999,
+      "sellPrice": 0,
+      "description": "通用货币",
+      "iconPath": "Icons/Currency/gold_coin"
+    }
+  ]
+}

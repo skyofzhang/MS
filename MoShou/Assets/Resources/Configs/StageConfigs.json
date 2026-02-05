@@ -1,0 +1,194 @@
+{
+  "stages": [
+    {
+      "id": 1,
+      "name": "新手村外",
+      "chapter": 1,
+      "description": "离开新手村后的第一片森林，适合刚开始冒险。",
+      "difficulty": 1,
+      "recommendedLevel": 1,
+      "goldReward": 70,
+      "expReward": 45,
+      "waveCount": 3,
+      "waves": [
+        {"enemyIds": ["MON_SLIME_001", "MON_SLIME_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_SLIME_001", "MON_GOBLIN_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 1.5}
+      ],
+      "firstClearReward": {"itemId": "WPN_001", "count": 1},
+      "backgroundMusic": "bgm_forest_01"
+    },
+    {
+      "id": 2,
+      "name": "幽暗森林",
+      "chapter": 1,
+      "description": "阳光难以穿透的密林，小心潜伏的危险。",
+      "difficulty": 1,
+      "recommendedLevel": 2,
+      "goldReward": 90,
+      "expReward": 60,
+      "waveCount": 3,
+      "waves": [
+        {"enemyIds": ["MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_WOLF_001", "MON_GOBLIN_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_WOLF_001", "MON_WOLF_001"], "spawnDelay": 1.5}
+      ],
+      "firstClearReward": {"itemId": "ARM_001", "count": 1},
+      "backgroundMusic": "bgm_forest_02"
+    },
+    {
+      "id": 3,
+      "name": "古老遗迹入口",
+      "chapter": 1,
+      "description": "发现了一处古老的遗迹，门前守着亡灵。",
+      "difficulty": 2,
+      "recommendedLevel": 3,
+      "goldReward": 110,
+      "expReward": 75,
+      "waveCount": 3,
+      "waves": [
+        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_SKELETON_001", "MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_WOLF_001"], "spawnDelay": 1.5}
+      ],
+      "firstClearReward": {"itemId": "HLM_001", "count": 1},
+      "backgroundMusic": "bgm_ruins_01"
+    },
+    {
+      "id": 4,
+      "name": "遗迹深处",
+      "chapter": 1,
+      "description": "遗迹内部充满了陷阱和不死生物。",
+      "difficulty": 2,
+      "recommendedLevel": 5,
+      "goldReward": 130,
+      "expReward": 90,
+      "waveCount": 4,
+      "waves": [
+        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_WOLF_001", "MON_WOLF_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_ORC_001"], "spawnDelay": 0}
+      ],
+      "firstClearReward": {"itemId": "RNG_001", "count": 1},
+      "backgroundMusic": "bgm_ruins_02"
+    },
+    {
+      "id": 5,
+      "name": "黑暗沼泽",
+      "chapter": 2,
+      "description": "离开遗迹后进入了毒雾弥漫的沼泽地带。",
+      "difficulty": 3,
+      "recommendedLevel": 7,
+      "goldReward": 150,
+      "expReward": 105,
+      "waveCount": 4,
+      "waves": [
+        {"enemyIds": ["MON_GOBLIN_001", "MON_GOBLIN_001", "MON_WOLF_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_ORC_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_WOLF_001", "MON_WOLF_001", "MON_WOLF_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_ORC_001", "MON_ORC_001"], "spawnDelay": 1}
+      ],
+      "firstClearReward": {"itemId": "WPN_002", "count": 1},
+      "backgroundMusic": "bgm_swamp_01"
+    },
+    {
+      "id": 6,
+      "name": "废弃要塞",
+      "chapter": 2,
+      "description": "敌人的前哨站，戒备森严。",
+      "difficulty": 3,
+      "recommendedLevel": 9,
+      "goldReward": 180,
+      "expReward": 120,
+      "waveCount": 4,
+      "waves": [
+        {"enemyIds": ["MON_ORC_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_DARK_KNIGHT_001"], "spawnDelay": 0},
+        {"enemyIds": ["MON_ORC_001", "MON_ORC_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_SKELETON_001"], "spawnDelay": 1}
+      ],
+      "firstClearReward": {"itemId": "ARM_002", "count": 1},
+      "backgroundMusic": "bgm_fortress_01"
+    },
+    {
+      "id": 7,
+      "name": "要塞核心",
+      "chapter": 2,
+      "description": "要塞最深处，黑暗骑士团的驻地。",
+      "difficulty": 4,
+      "recommendedLevel": 11,
+      "goldReward": 220,
+      "expReward": 150,
+      "waveCount": 5,
+      "waves": [
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_SKELETON_001"], "spawnDelay": 2},
+        {"enemyIds": ["MON_MAGE_001", "MON_ORC_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_MAGE_001", "MON_MAGE_001", "MON_SKELETON_001"], "spawnDelay": 1},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001"], "spawnDelay": 1}
+      ],
+      "firstClearReward": {"itemId": "NCK_002", "count": 1},
+      "backgroundMusic": "bgm_fortress_02"
+    },
+    {
+      "id": 8,
+      "name": "诅咒墓地",
+      "chapter": 3,
+      "description": "传说中的墓地，不死生物源源不断地复活。",
+      "difficulty": 4,
+      "recommendedLevel": 14,
+      "goldReward": 270,
+      "expReward": 180,
+      "waveCount": 5,
+      "waves": [
+        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_MAGE_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001"], "spawnDelay": 1},
+        {"enemyIds": ["MON_MAGE_001", "MON_MAGE_001", "MON_MAGE_001"], "spawnDelay": 1},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 0.5}
+      ],
+      "firstClearReward": {"itemId": "WPN_003", "count": 1},
+      "backgroundMusic": "bgm_graveyard_01"
+    },
+    {
+      "id": 9,
+      "name": "火山之路",
+      "chapter": 3,
+      "description": "通往龙巢的必经之路，炽热的熔岩四处流淌。",
+      "difficulty": 5,
+      "recommendedLevel": 17,
+      "goldReward": 350,
+      "expReward": 230,
+      "waveCount": 5,
+      "waves": [
+        {"enemyIds": ["MON_ORC_001", "MON_ORC_001", "MON_ORC_001"], "spawnDelay": 1.5},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001"], "spawnDelay": 1},
+        {"enemyIds": ["MON_MAGE_001", "MON_MAGE_001", "MON_ORC_001", "MON_ORC_001"], "spawnDelay": 1},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 0.5},
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_MAGE_001", "MON_MAGE_001", "MON_ORC_001", "MON_ORC_001"], "spawnDelay": 0.5}
+      ],
+      "firstClearReward": {"itemId": "ARM_003", "count": 1},
+      "backgroundMusic": "bgm_volcano_01"
+    },
+    {
+      "id": 10,
+      "name": "黑龙巢穴",
+      "chapter": 3,
+      "description": "最终决战！击败黑龙，拯救大陆！",
+      "difficulty": 5,
+      "recommendedLevel": 20,
+      "goldReward": 500,
+      "expReward": 350,
+      "waveCount": 3,
+      "waves": [
+        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001", "MON_MAGE_001"], "spawnDelay": 1},
+        {"enemyIds": ["MON_ORC_001", "MON_ORC_001", "MON_ORC_001", "MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 0.5},
+        {"enemyIds": ["MON_BOSS_DRAGON_001"], "spawnDelay": 0}
+      ],
+      "firstClearReward": {"itemId": "WPN_004", "count": 1},
+      "backgroundMusic": "bgm_boss_01",
+      "isFinalStage": true
+    }
+  ]
+}

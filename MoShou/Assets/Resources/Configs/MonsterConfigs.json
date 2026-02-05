@@ -1,0 +1,134 @@
+{
+  "monsters": [
+    {
+      "id": "MON_SLIME_001",
+      "name": "史莱姆",
+      "type": "Normal",
+      "baseHp": 30,
+      "baseAttack": 5,
+      "baseDefense": 2,
+      "moveSpeed": 2.0,
+      "goldDrop": 10,
+      "expDrop": 5,
+      "dropTable": [
+        {"itemId": "MAT_SLIME_CORE", "chance": 0.3},
+        {"itemId": "POTION_HP_SMALL", "chance": 0.1}
+      ],
+      "description": "最弱的怪物，适合新手练习。"
+    },
+    {
+      "id": "MON_GOBLIN_001",
+      "name": "哥布林",
+      "type": "Normal",
+      "baseHp": 50,
+      "baseAttack": 8,
+      "baseDefense": 4,
+      "moveSpeed": 1.5,
+      "goldDrop": 15,
+      "expDrop": 8,
+      "dropTable": [
+        {"itemId": "MAT_IRON_ORE", "chance": 0.2},
+        {"itemId": "POTION_HP_SMALL", "chance": 0.15}
+      ],
+      "description": "狡猾的小妖精，常成群出现。"
+    },
+    {
+      "id": "MON_WOLF_001",
+      "name": "灰狼",
+      "type": "Normal",
+      "baseHp": 70,
+      "baseAttack": 12,
+      "baseDefense": 5,
+      "moveSpeed": 3.0,
+      "goldDrop": 20,
+      "expDrop": 12,
+      "dropTable": [
+        {"itemId": "MAT_WOLF_PELT", "chance": 0.25},
+        {"itemId": "POTION_HP_MEDIUM", "chance": 0.1}
+      ],
+      "description": "敏捷的野狼，擅长追踪猎物。"
+    },
+    {
+      "id": "MON_SKELETON_001",
+      "name": "骷髅兵",
+      "type": "Normal",
+      "baseHp": 60,
+      "baseAttack": 10,
+      "baseDefense": 8,
+      "moveSpeed": 1.2,
+      "goldDrop": 18,
+      "expDrop": 10,
+      "dropTable": [
+        {"itemId": "MAT_BONE", "chance": 0.4},
+        {"itemId": "WPN_001", "chance": 0.05}
+      ],
+      "description": "不死的骷髅战士，没有痛觉。"
+    },
+    {
+      "id": "MON_ORC_001",
+      "name": "兽人战士",
+      "type": "Elite",
+      "baseHp": 150,
+      "baseAttack": 20,
+      "baseDefense": 12,
+      "moveSpeed": 1.8,
+      "goldDrop": 50,
+      "expDrop": 30,
+      "dropTable": [
+        {"itemId": "MAT_ORC_TUSK", "chance": 0.3},
+        {"itemId": "ARM_002", "chance": 0.08}
+      ],
+      "description": "强壮的兽人，力大无穷。"
+    },
+    {
+      "id": "MON_DARK_KNIGHT_001",
+      "name": "黑暗骑士",
+      "type": "Elite",
+      "baseHp": 200,
+      "baseAttack": 25,
+      "baseDefense": 20,
+      "moveSpeed": 1.5,
+      "goldDrop": 80,
+      "expDrop": 50,
+      "dropTable": [
+        {"itemId": "MAT_DARK_ESSENCE", "chance": 0.25},
+        {"itemId": "WPN_003", "chance": 0.05}
+      ],
+      "description": "堕落的骑士，装备精良。"
+    },
+    {
+      "id": "MON_MAGE_001",
+      "name": "黑暗法师",
+      "type": "Elite",
+      "baseHp": 120,
+      "baseAttack": 35,
+      "baseDefense": 8,
+      "moveSpeed": 1.2,
+      "goldDrop": 70,
+      "expDrop": 45,
+      "dropTable": [
+        {"itemId": "MAT_MAGIC_STONE", "chance": 0.4},
+        {"itemId": "SCROLL_ATK_BUFF", "chance": 0.15}
+      ],
+      "description": "掌握黑魔法的邪恶法师。"
+    },
+    {
+      "id": "MON_BOSS_DRAGON_001",
+      "name": "黑龙",
+      "type": "Boss",
+      "baseHp": 1000,
+      "baseAttack": 50,
+      "baseDefense": 30,
+      "moveSpeed": 2.0,
+      "goldDrop": 500,
+      "expDrop": 300,
+      "dropTable": [
+        {"itemId": "MAT_DRAGON_SCALE", "chance": 1.0},
+        {"itemId": "WPN_004", "chance": 0.1},
+        {"itemId": "GEM_RUBY", "chance": 0.3}
+      ],
+      "description": "恐怖的黑龙，喷吐毁灭之火。",
+      "skills": ["fire_breath", "tail_sweep", "dragon_roar"]
+    }
+  ]
+}
