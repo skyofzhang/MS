@@ -1,0 +1,77 @@
+{
+  "plan_id": "MS-009",
+  "title": "主页面添加【开始游戏】按钮",
+  "requirement": "给游戏的主页面增加一个【开始游戏】按钮",
+  "created_at": "2026-02-06T13:40:00Z",
+  "created_by": "Claude",
+
+  "analysis": {
+    "current_state": "MainMenuManager.cs已有startButton引用和OnStartClick逻辑，但Unity场景中缺少实际UI按钮",
+    "solution": "在MainMenu场景中创建Canvas和开始按钮UI，绑定到MainMenuManager"
+  },
+
+  "tasks": [
+    {
+      "task_id": "MS-009-01",
+      "title": "创建MainMenu场景UI结构",
+      "description": "在MainMenu场景创建Canvas，添加开始游戏按钮",
+      "acceptance_criteria": [
+        "MainMenu场景有Canvas组件",
+        "Canvas下有Button命名为StartButton",
+        "Button显示文字【开始游戏】",
+        "Button位置居中偏下(屏幕中央Y=-100)"
+      ],
+      "implementation": {
+        "scene": "MainMenu",
+        "hierarchy": [
+          "Canvas (ScreenSpace-Overlay, CanvasScaler=ScaleWithScreenSize 1920x1080)",
+          "  └─ StartButton (Button, 宽400高80)",
+          "       └─ Text (字号36, 白色, 内容:开始游戏)"
+        ],
+        "button_style": {
+          "normal_color": "#4A90D9",
+          "highlighted_color": "#5BA0E9",
+          "pressed_color": "#3A80C9",
+          "font_size": 36,
+          "font_color": "#FFFFFF"
+        }
+      },
+      "output_files": ["Assets/Scenes/MainMenu.unity"],
+      "screenshot_required": true
+    },
+    {
+      "task_id": "MS-009-02",
+      "title": "绑定按钮事件",
+      "description": "将StartButton的OnClick事件绑定到MainMenuManager.OnStartClick",
+      "acceptance_criteria": [
+        "MainMenuManager组件挂载到场景中某个GameObject",
+        "StartButton的OnClick绑定到MainMenuManager",
+        "点击按钮后跳转到StageSelect场景"
+      ],
+      "implementation": {
+        "steps": [
+          "1. 创建空GameObject命名为MainMenuManager",
+          "2. 挂载MainMenuManager.cs脚本",
+          "3. 在Inspector中将StartButton拖拽到startButton字段",
+          "4. 或使用代码在Awake中FindObjectOfType绑定"
+        ]
+      },
+      "output_files": ["Assets/Scenes/MainMenu.unity"],
+      "screenshot_required": true
+    }
+  ],
+
+  "resources_needed": [],
+
+  "verification": {
+    "method": "运行MainMenu场景，点击【开始游戏】按钮",
+    "expected_result": "成功跳转到StageSelect场景",
+    "screenshot_points": [
+      "MainMenu场景运行时UI截图",
+      "点击按钮后StageSelect场景截图"
+    ]
+  },
+
+  "estimated_time": "15分钟",
+  "priority": "high"
+}

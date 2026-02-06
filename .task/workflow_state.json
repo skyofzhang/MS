@@ -1,9 +1,9 @@
 {
   "version": "1.0",
   "project": "MS",
-  "current_phase": "idle",
-  "current_task": null,
-  "updated_at": "2026-02-06T00:00:00Z",
+  "current_phase": "quality_check",
+  "current_task": "MS-009",
+  "updated_at": "2026-02-06T13:40:00Z",
 
   "phases": {
     "idle": {
@@ -67,7 +67,7 @@
     }
   },
 
-  "task_queue": [],
+  "task_queue": ["MS-009-01", "MS-009-02"],
   "completed_tasks": [],
 
   "history": [
@@ -76,6 +76,18 @@
       "from": null,
       "to": "idle",
       "reason": "初始化状态机"
+    },
+    {
+      "timestamp": "2026-02-06T13:40:00Z",
+      "from": "idle",
+      "to": "planning",
+      "reason": "检测到新需求: 主页面添加开始游戏按钮"
+    },
+    {
+      "timestamp": "2026-02-06T13:40:30Z",
+      "from": "planning",
+      "to": "quality_check",
+      "reason": "策划案已生成: MS-009"
     }
   ]
 }
