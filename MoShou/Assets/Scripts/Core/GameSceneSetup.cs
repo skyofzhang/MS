@@ -309,19 +309,19 @@ public class GameSceneSetup : MonoBehaviour
         Material templateMat = Resources.Load<Material>("Materials/URP_Template");
         if (templateMat != null)
         {
-            Material mat = new Material(templateMat);
-            SetMaterialColor(mat, color);
-            return mat;
+            Material newMat1 = new Material(templateMat);
+            SetMaterialColor(newMat1, color);
+            return newMat1;
         }
 
         // 方法2: 尝试从Ground_Grass材质复制shader
         Material grassMat = Resources.Load<Material>("Materials/Ground_Grass");
         if (grassMat != null && grassMat.shader != null)
         {
-            Material mat = new Material(grassMat.shader);
-            SetMaterialColor(mat, color);
+            Material newMat2 = new Material(grassMat.shader);
+            SetMaterialColor(newMat2, color);
             Debug.Log($"[GameSceneSetup] 使用Ground_Grass的Shader: {grassMat.shader.name}");
-            return mat;
+            return newMat2;
         }
 
         // 方法3: 尝试从现有Renderer获取shader
@@ -330,10 +330,10 @@ public class GameSceneSetup : MonoBehaviour
             existingRenderer.sharedMaterial.shader != null &&
             !existingRenderer.sharedMaterial.shader.name.Contains("Error"))
         {
-            Material mat = new Material(existingRenderer.sharedMaterial.shader);
-            SetMaterialColor(mat, color);
+            Material newMat3 = new Material(existingRenderer.sharedMaterial.shader);
+            SetMaterialColor(newMat3, color);
             Debug.Log($"[GameSceneSetup] 使用现有Shader: {existingRenderer.sharedMaterial.shader.name}");
-            return mat;
+            return newMat3;
         }
 
         // 方法4: 尝试多种Shader名称
@@ -341,9 +341,7 @@ public class GameSceneSetup : MonoBehaviour
             "Universal Render Pipeline/Lit",
             "Universal Render Pipeline/Simple Lit",
             "Universal Render Pipeline/Unlit",
-            "Shader Graphs/URP_Lit",
-            "Sprites/Default",
-            "UI/Default"
+            "Sprites/Default"
         };
 
         Shader shader = null;
@@ -357,10 +355,9 @@ public class GameSceneSetup : MonoBehaviour
             }
         }
 
-        // 方法5: 使用默认Sprite材质（总是可用）
+        // 方法5: 使用默认Sprite材质
         if (shader == null)
         {
-            Debug.LogWarning("[GameSceneSetup] 使用Sprites/Default作为后备");
             shader = Shader.Find("Sprites/Default");
         }
 
@@ -370,15 +367,9 @@ public class GameSceneSetup : MonoBehaviour
             return new Material(Shader.Find("Hidden/InternalErrorShader"));
         }
 
-        Material mat = new Material(shader);
-
-        // 根据不同shader设置颜色
-        if (mat.HasProperty("_BaseColor"))
-        {
-            mat.SetColor("_BaseColor", color); // URP使用_BaseColor
-        }
-        SetMaterialColor(mat, color);
-        return mat;
+        Material finalMat = new Material(shader);
+        SetMaterialColor(finalMat, color);
+        return finalMat;
     }
 
     /// <summary>
