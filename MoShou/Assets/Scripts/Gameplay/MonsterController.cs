@@ -133,14 +133,44 @@ public class MonsterController : MonoBehaviour
     {
         if (Time.time - lastAttackTime < attackCooldown) return;
         lastAttackTime = Time.time;
-        
+
         Debug.Log($"[{monsterName}] Attacking player!");
-        
+
+        // 面向玩家
+        Vector3 dir = (player.position - transform.position).normalized;
+        dir.y = 0;
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
+
+        // 创建攻击特效
+        CreateAttackVFX();
+
+        // 造成伤害
         var playerController = player.GetComponent<PlayerController>();
         if (playerController != null)
         {
             CombatSystem.DealDamage(this.gameObject, player.gameObject, attackDamage);
         }
+    }
+
+    void CreateAttackVFX()
+    {
+        // 简单的攻击特效
+        GameObject vfx = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        vfx.name = "MonsterAttackVFX";
+        vfx.transform.position = transform.position + transform.forward * 0.5f + Vector3.up * 0.5f;
+        vfx.transform.localScale = Vector3.one * 0.4f;
+
+        Destroy(vfx.GetComponent<Collider>());
+
+        var renderer = vfx.GetComponent<Renderer>();
+        Material mat = new Material(Shader.Find("Sprites/Default"));
+        mat.color = new Color(1f, 0.2f, 0.2f, 0.7f); // 红色
+        renderer.material = mat;
+
+        vfx.AddComponent<FadeAndDestroy>();
     }
     
     public void TakeDamage(float damage)
@@ -163,16 +193,54 @@ public class MonsterController : MonoBehaviour
     {
         isDead = true;
         Debug.Log($"[{monsterName}] Died! Dropping {expReward} EXP, {goldReward} Gold");
-        
+
         // 给玩家奖励
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.AddExp(expReward);
-            GameManager.Instance.AddGold(goldReward);
+            GameManager.Instance.AddKill(goldReward, expReward);
         }
-        
+
+        // 创建死亡特效
+        CreateDeathVFX();
+
+        // 通知MonsterSpawner
+        if (MonsterSpawner.Instance != null)
+        {
+            MonsterSpawner.Instance.OnMonsterKilled();
+        }
+
         // 播放死亡效果后销毁
         Destroy(gameObject, 0.5f);
+    }
+
+    void CreateDeathVFX()
+    {
+        // 死亡爆炸特效
+        for (int i = 0; i < 5; i++)
+        {
+            GameObject particle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            particle.name = "DeathParticle";
+            particle.transform.position = transform.position + Vector3.up * 0.5f;
+            particle.transform.localScale = Vector3.one * 0.2f;
+
+            Destroy(particle.GetComponent<Collider>());
+
+            var renderer = particle.GetComponent<Renderer>();
+            Material mat = new Material(Shader.Find("Sprites/Default"));
+            mat.color = new Color(0.5f, 0.5f, 0.5f, 0.8f);
+            renderer.material = mat;
+
+            // 添加随机飞散
+            var rb = particle.AddComponent<Rigidbody>();
+            rb.useGravity = true;
+            rb.velocity = new Vector3(
+                Random.Range(-3f, 3f),
+                Random.Range(2f, 5f),
+                Random.Range(-3f, 3f)
+            );
+
+            Destroy(particle, 1f);
+        }
     }
     
     // 配置怪物属性(从配置加载)

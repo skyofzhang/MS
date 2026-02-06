@@ -238,7 +238,7 @@ public class MonsterSpawner : MonoBehaviour
         {
             return spawnPoints[Random.Range(0, spawnPoints.Length)].position;
         }
-        
+
         // 随机位置
         return new Vector3(
             Random.Range(-10f, 10f),
@@ -246,5 +246,41 @@ public class MonsterSpawner : MonoBehaviour
             Random.Range(-10f, 10f)
         );
     }
-    
+
+    /// <summary>
+    /// 当怪物被杀死时调用
+    /// </summary>
+    public void OnMonsterKilled()
+    {
+        monstersKilledThisWave++;
+        Debug.Log($"[Spawner] 怪物被击杀! 本波已击杀: {monstersKilledThisWave}");
+
+        // 清理空引用
+        activeMonsters.RemoveAll(m => m == null);
+
+        // 如果所有怪物都死了且没有正在生成
+        if (activeMonsters.Count == 0 && !isSpawning)
+        {
+            Debug.Log($"[Spawner] 波次 {currentWave} 完成!");
+
+            // 检查是否通关
+            if (currentWave >= wavesPerLevel)
+            {
+                Debug.Log("[Spawner] 关卡通关!");
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.OnWaveCleared();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 获取当前活着的怪物数量
+    /// </summary>
+    public int GetAliveMonsterCount()
+    {
+        activeMonsters.RemoveAll(m => m == null);
+        return activeMonsters.Count;
+    }
 }

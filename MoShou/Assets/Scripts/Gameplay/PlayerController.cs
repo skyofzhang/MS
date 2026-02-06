@@ -167,6 +167,15 @@ public class PlayerController : MonoBehaviour
     void Attack(GameObject target)
     {
         Debug.Log($"[Player] Attacking {target.name}");
+
+        // 播放攻击动画
+        if (animator != null)
+        {
+            animator.SetTrigger(AnimAttack);
+        }
+
+        // 创建攻击特效
+        CreateAttackVFX(target.transform.position);
         
         // 面向目标
         Vector3 direction = (target.transform.position - transform.position).normalized;
@@ -254,6 +263,33 @@ public class PlayerController : MonoBehaviour
             var vfx = Instantiate(vfxPrefab, transform.position, transform.rotation);
             Destroy(vfx, 2f);
         }
+    }
+
+    /// <summary>
+    /// 创建攻击特效（简单的发光球）
+    /// </summary>
+    void CreateAttackVFX(Vector3 targetPos)
+    {
+        // 创建简单的攻击特效
+        GameObject vfx = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        vfx.name = "AttackVFX";
+        vfx.transform.position = transform.position + Vector3.up;
+        vfx.transform.localScale = Vector3.one * 0.3f;
+
+        // 移除碰撞
+        Destroy(vfx.GetComponent<Collider>());
+
+        // 设置材质
+        var renderer = vfx.GetComponent<Renderer>();
+        Material mat = new Material(Shader.Find("Sprites/Default"));
+        mat.color = new Color(1f, 0.8f, 0.2f, 0.8f); // 金黄色
+        renderer.material = mat;
+
+        // 添加移动和销毁逻辑
+        var mover = vfx.AddComponent<ProjectileMover>();
+        mover.target = targetPos;
+        mover.speed = 20f;
+        mover.destroyDelay = 0.5f;
     }
     
     public void TakeDamage(float damage)
