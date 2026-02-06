@@ -59,43 +59,61 @@ public class GameSceneSetup : MonoBehaviour
     void CreatePlayer()
     {
         // 知识库§2 RULE-RES-001: 加载玩家模型
-        // 优先加载Prefab（更可靠），其次尝试FBX
         GameObject player = null;
 
-        // 1. 首先尝试加载Prefab（由ProjectSetupTool生成）
-        var prefab = Resources.Load<GameObject>("Prefabs/Characters/Player_Archer");
+        // 尝试多个路径加载
+        string[] prefabPaths = {
+            "Prefabs/Characters/Player_Archer",
+            "Prefabs/Characters/human/120033_ain_LOD1",  // everclan人类模型
+            "Models/Player/Player_Archer"
+        };
 
-        // 2. 如果Prefab不存在，尝试加载FBX
-        if (prefab == null)
+        GameObject prefab = null;
+        foreach (string path in prefabPaths)
         {
-            prefab = Resources.Load<GameObject>("Models/Player/Player_Archer");
+            prefab = Resources.Load<GameObject>(path);
             if (prefab != null)
-                Debug.Log("[GameSceneSetup] 从FBX加载玩家模型");
-        }
-        else
-        {
-            Debug.Log("[GameSceneSetup] 从Prefab加载玩家模型");
+            {
+                Debug.Log($"[GameSceneSetup] 找到玩家模型: {path}");
+                break;
+            }
+            else
+            {
+                Debug.Log($"[GameSceneSetup] 尝试加载失败: {path}");
+            }
         }
 
         if (prefab != null)
         {
-            player = Instantiate(prefab, new Vector3(0, 0, 0), Quaternion.identity);
+            player = Instantiate(prefab, new Vector3(0, 1, 0), Quaternion.identity);
             player.name = "Player";
-            Debug.Log("[GameSceneSetup] 玩家模型加载成功: Player_Archer");
-        }
 
-        // 如果都加载失败，使用FALLBACK
-        if (player == null)
+            // 确保材质正确（修复URP粉色问题）
+            FixMaterials(player);
+
+            Debug.Log("[GameSceneSetup] 玩家模型加载成功!");
+        }
+        else
         {
-            // FALLBACK: 知识库允许的降级策略
-            Debug.LogWarning("[GameSceneSetup] 玩家模型未找到，使用FALLBACK胶囊体");
+            // FALLBACK: 使用可见的胶囊体
+            Debug.LogWarning("[GameSceneSetup] 所有玩家模型路径都失败，使用FALLBACK");
             player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_FALLBACK";
-            player.GetComponent<Renderer>().material.color = Color.green;
+            player.transform.position = new Vector3(0, 1, 0);
+
+            // 使用URP兼容的材质
+            var renderer = player.GetComponent<Renderer>();
+            renderer.material = CreateURPMaterial(Color.blue);
         }
 
         player.tag = "Player";
-        player.layer = 8; // 知识库§5: Layer 8 = Player
+        player.layer = 8; // Layer 8 = Player
+
+        // 设置所有子对象的Layer
+        foreach (Transform child in player.GetComponentsInChildren<Transform>(true))
+        {
+            child.gameObject.layer = 8;
+        }
 
         // 确保有PlayerController
         if (player.GetComponent<PlayerController>() == null)
@@ -112,6 +130,37 @@ public class GameSceneSetup : MonoBehaviour
             cc.center = new Vector3(0, 1, 0);
         }
     }
+
+    /// <summary>
+    /// 修复材质（解决URP粉色问题）
+    /// </summary>
+    void FixMaterials(GameObject obj)
+    {
+        foreach (var renderer in obj.GetComponentsInChildren<Renderer>(true))
+        {
+            if (renderer.sharedMaterial == null || renderer.sharedMaterial.shader.name.Contains("Error"))
+            {
+                renderer.material = CreateURPMaterial(Color.gray);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 创建URP兼容材质
+    /// </summary>
+    Material CreateURPMaterial(Color color)
+    {
+        // 尝试找URP Lit shader
+        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+        if (shader == null)
+            shader = Shader.Find("Standard");
+        if (shader == null)
+            shader = Shader.Find("Unlit/Color");
+
+        Material mat = new Material(shader);
+        mat.color = color;
+        return mat;
+    }
     
     void CreateGround()
     {
@@ -126,10 +175,9 @@ public class GameSceneSetup : MonoBehaviour
         ground.transform.localScale = new Vector3(10, 1, 10); // 100x100单位
         ground.layer = 11;
 
-        // 地面材质 - 草地颜色
+        // 地面材质 - 草地颜色 (URP兼容)
         var groundRenderer = ground.GetComponent<Renderer>();
-        groundRenderer.material = new Material(Shader.Find("Standard"));
-        groundRenderer.material.color = new Color(0.25f, 0.45f, 0.2f);
+        groundRenderer.material = CreateURPMaterial(new Color(0.25f, 0.45f, 0.2f));
 
         // 2. 创建边界墙（透明但有碰撞）
         CreateBoundaryWalls(terrainParent.transform, 50f);
@@ -212,7 +260,7 @@ public class GameSceneSetup : MonoBehaviour
         trunk.transform.parent = tree.transform;
         trunk.transform.localPosition = new Vector3(0, 1.5f, 0);
         trunk.transform.localScale = new Vector3(0.4f, 1.5f, 0.4f);
-        trunk.GetComponent<Renderer>().material.color = new Color(0.4f, 0.25f, 0.1f);
+        trunk.GetComponent<Renderer>().material = CreateURPMaterial(new Color(0.4f, 0.25f, 0.1f));
         trunk.layer = 11;
 
         // 树冠
@@ -220,7 +268,7 @@ public class GameSceneSetup : MonoBehaviour
         crown.transform.parent = tree.transform;
         crown.transform.localPosition = new Vector3(0, 4f, 0);
         crown.transform.localScale = new Vector3(3f, 3f, 3f);
-        crown.GetComponent<Renderer>().material.color = new Color(0.15f, 0.4f, 0.15f);
+        crown.GetComponent<Renderer>().material = CreateURPMaterial(new Color(0.15f, 0.4f, 0.15f));
         crown.layer = 11;
 
         // 碰撞体
@@ -238,7 +286,7 @@ public class GameSceneSetup : MonoBehaviour
         rock.transform.position = pos;
         float scale = Random.Range(0.5f, 1.2f);
         rock.transform.localScale = new Vector3(scale * 1.5f, scale * 0.7f, scale);
-        rock.GetComponent<Renderer>().material.color = new Color(0.45f, 0.45f, 0.45f);
+        rock.GetComponent<Renderer>().material = CreateURPMaterial(new Color(0.45f, 0.45f, 0.45f));
         rock.layer = 11;
     }
 
