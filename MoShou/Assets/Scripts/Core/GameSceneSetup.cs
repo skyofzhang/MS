@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using MoShou.Utils;
 
 /// <summary>
@@ -6,8 +7,43 @@ using MoShou.Utils;
 /// </summary>
 public class GameSceneSetup : MonoBehaviour
 {
+    /// <summary>
+    /// 自动在GameScene加载时创建GameSceneSetup
+    /// </summary>
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void OnSceneLoaded()
+    {
+        SceneManager.sceneLoaded += OnSceneLoadedCallback;
+
+        // 检查当前场景
+        CheckCurrentScene();
+    }
+
+    static void OnSceneLoadedCallback(Scene scene, LoadSceneMode mode)
+    {
+        CheckCurrentScene();
+    }
+
+    static void CheckCurrentScene()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+
+        // 只在GameScene中创建
+        if (currentScene.name == "GameScene")
+        {
+            // 检查是否已存在
+            if (FindObjectOfType<GameSceneSetup>() == null)
+            {
+                Debug.Log("[GameSceneSetup] 自动创建GameSceneSetup...");
+                var go = new GameObject("GameSceneSetup");
+                go.AddComponent<GameSceneSetup>();
+            }
+        }
+    }
+
     void Awake()
     {
+        Debug.Log("[GameSceneSetup] Awake - 开始初始化场景");
         SetupScene();
     }
     
