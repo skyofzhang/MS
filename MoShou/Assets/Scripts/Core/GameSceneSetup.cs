@@ -49,36 +49,46 @@ public class GameSceneSetup : MonoBehaviour
     
     void SetupScene()
     {
+        Debug.Log("[GameSceneSetup] SetupScene开始...");
+
         // 确保有GameManager
         if (GameManager.Instance == null)
         {
             var gmGO = new GameObject("GameManager");
             gmGO.AddComponent<GameManager>();
+            Debug.Log("[GameSceneSetup] GameManager已创建");
         }
-        
-        // 创建玩家
-        if (GameObject.FindGameObjectWithTag("Player") == null)
-        {
-            CreatePlayer();
-        }
-        
-        // 创建地面
+
+        // 创建地面（先创建地面，让玩家有地方站）
         if (GameObject.Find("Ground") == null)
         {
             CreateGround();
         }
-        
+
+        // 创建主摄像机(如果没有) - 在玩家之前创建
+        if (Camera.main == null)
+        {
+            CreateCamera();
+            Debug.Log("[GameSceneSetup] 主摄像机已创建");
+        }
+
+        // 创建玩家
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            CreatePlayer();
+            player = GameObject.FindGameObjectWithTag("Player");
+        }
+
+        // 确保摄像机跟随玩家 - 玩家创建后立即设置
+        SetupCameraFollow();
+
         // 创建怪物生成器
         if (FindObjectOfType<MonsterSpawner>() == null)
         {
             var spawnerGO = new GameObject("MonsterSpawner");
             spawnerGO.AddComponent<MonsterSpawner>();
-        }
-        
-        // 创建主摄像机(如果没有)
-        if (Camera.main == null)
-        {
-            CreateCamera();
+            Debug.Log("[GameSceneSetup] MonsterSpawner已创建");
         }
 
         // 创建UI资源绑定器 - 自动应用美术资源到UI组件
@@ -89,28 +99,73 @@ public class GameSceneSetup : MonoBehaviour
             Debug.Log("[GameSceneSetup] UIResourceBinder已创建");
         }
 
-        // 确保摄像机跟随玩家
-        SetupCameraFollow();
-
         Debug.Log("[GameSceneSetup] Scene setup complete!");
 
         // 通知GameManager场景准备完成，开始游戏！
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnGameSceneReady();
-            Debug.Log("[GameSceneSetup] 通知GameManager开始游戏");
+            Debug.Log($"[GameSceneSetup] 游戏状态已切换为: {GameManager.Instance.CurrentState}");
+        }
+        else
+        {
+            Debug.LogError("[GameSceneSetup] GameManager.Instance为null，无法开始游戏!");
+        }
+
+        // 验证摄像机跟随设置
+        VerifyCameraSetup();
+    }
+
+    /// <summary>
+    /// 验证摄像机设置是否正确
+    /// </summary>
+    void VerifyCameraSetup()
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+        {
+            Debug.LogError("[GameSceneSetup] 验证失败: 未找到主摄像机!");
+            return;
+        }
+
+        CameraFollow follow = cam.GetComponent<CameraFollow>();
+        if (follow == null)
+        {
+            Debug.LogError("[GameSceneSetup] 验证失败: 摄像机没有CameraFollow组件!");
+            return;
+        }
+
+        if (follow.target == null)
+        {
+            Debug.LogWarning("[GameSceneSetup] 验证警告: CameraFollow.target为null，尝试重新设置...");
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                follow.target = player.transform;
+                Debug.Log("[GameSceneSetup] 已重新设置摄像机目标: " + player.name);
+            }
+        }
+        else
+        {
+            Debug.Log($"[GameSceneSetup] 验证成功: 摄像机正在跟随 {follow.target.name}");
         }
     }
 
     void SetupCameraFollow()
     {
         Camera cam = Camera.main;
-        if (cam == null) return;
+        if (cam == null)
+        {
+            Debug.LogWarning("[GameSceneSetup] 未找到主摄像机!");
+            return;
+        }
 
+        // 确保摄像机有CameraFollow组件
         CameraFollow follow = cam.GetComponent<CameraFollow>();
         if (follow == null)
         {
             follow = cam.gameObject.AddComponent<CameraFollow>();
+            Debug.Log("[GameSceneSetup] 添加CameraFollow组件到摄像机");
         }
 
         // 查找玩家并设置跟随
@@ -118,7 +173,16 @@ public class GameSceneSetup : MonoBehaviour
         if (player != null)
         {
             follow.target = player.transform;
-            Debug.Log("[GameSceneSetup] 摄像机跟随玩家设置完成");
+
+            // 立即设置摄像机位置
+            cam.transform.position = player.transform.position + follow.offset;
+            cam.transform.LookAt(player.transform.position + Vector3.up * 1.5f);
+
+            Debug.Log("[GameSceneSetup] 摄像机跟随玩家设置完成，玩家位置: " + player.transform.position);
+        }
+        else
+        {
+            Debug.LogWarning("[GameSceneSetup] 未找到玩家，摄像机跟随将延迟初始化");
         }
     }
     
@@ -417,34 +481,94 @@ public class GameSceneSetup : MonoBehaviour
         camGO.tag = "MainCamera";
         var cam = camGO.AddComponent<Camera>();
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.2f, 0.3f, 0.4f);
-        
-        // 设置为俯视角
-        camGO.transform.position = new Vector3(0, 15, -10);
-        camGO.transform.rotation = Quaternion.Euler(50, 0, 0);
-        
-        // 添加简单跟随脚本
-        camGO.AddComponent<CameraFollow>();
+        cam.backgroundColor = new Color(0.4f, 0.6f, 0.8f); // 天蓝色背景
+
+        // 添加AudioListener
+        if (FindObjectOfType<AudioListener>() == null)
+        {
+            camGO.AddComponent<AudioListener>();
+        }
+
+        // 设置初始第三人称视角
+        camGO.transform.position = new Vector3(0, 12, -8);
+        camGO.transform.rotation = Quaternion.Euler(45, 0, 0);
+
+        // 添加跟随脚本
+        var follow = camGO.AddComponent<CameraFollow>();
+
+        // 立即查找玩家
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            follow.target = player.transform;
+            camGO.transform.position = player.transform.position + follow.offset;
+            camGO.transform.LookAt(player.transform.position + Vector3.up * 1.5f);
+            Debug.Log("[GameSceneSetup] 新摄像机已创建并跟随玩家");
+        }
     }
 }
 
-// 简单的摄像机跟随
+/// <summary>
+/// 第三人称摄像机跟随 - 始终跟随玩家
+/// </summary>
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
-    public Vector3 offset = new Vector3(0, 15, -10);
-    public float smoothSpeed = 5f;
-    
-    void LateUpdate()
+    public Vector3 offset = new Vector3(0, 12, -8);  // 第三人称偏移
+    public float smoothSpeed = 8f;
+    public float lookAtHeight = 1.5f;  // 看向玩家的高度偏移
+
+    private bool initialized = false;
+
+    void Start()
+    {
+        InitializeTarget();
+    }
+
+    void InitializeTarget()
     {
         if (target == null)
         {
             var player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null) target = player.transform;
-            return;
+            if (player != null)
+            {
+                target = player.transform;
+                initialized = true;
+                Debug.Log("[CameraFollow] 目标设置成功: " + player.name);
+
+                // 立即设置初始位置
+                transform.position = target.position + offset;
+                transform.LookAt(target.position + Vector3.up * lookAtHeight);
+            }
         }
-        
+    }
+
+    void LateUpdate()
+    {
+        // 每帧尝试查找目标（以防玩家延迟创建）
+        if (target == null)
+        {
+            InitializeTarget();
+            if (target == null) return;
+        }
+
+        // 计算目标位置
         Vector3 desiredPosition = target.position + offset;
+
+        // 平滑移动摄像机
         transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
+
+        // 始终看向玩家
+        Vector3 lookAtPos = target.position + Vector3.up * lookAtHeight;
+        transform.LookAt(lookAtPos);
+    }
+
+    void OnEnable()
+    {
+        // 重新激活时也尝试初始化
+        if (!initialized)
+        {
+            InitializeTarget();
+        }
     }
 }

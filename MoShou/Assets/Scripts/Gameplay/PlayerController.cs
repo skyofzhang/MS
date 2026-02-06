@@ -57,9 +57,21 @@ public class PlayerController : MonoBehaviour
     
     void Update()
     {
-        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing)
-            return;
-        
+        // 检查游戏状态（允许在没有GameManager时也能移动，用于测试）
+        if (GameManager.Instance != null)
+        {
+            if (GameManager.Instance.CurrentState != GameManager.GameState.Playing)
+            {
+                // 调试信息：显示为什么不能移动
+                if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.A) ||
+                    Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D))
+                {
+                    Debug.Log($"[PlayerController] 无法移动，当前状态: {GameManager.Instance.CurrentState}");
+                }
+                return;
+            }
+        }
+
         HandleMovement();
         HandleAutoAttack();
     }
