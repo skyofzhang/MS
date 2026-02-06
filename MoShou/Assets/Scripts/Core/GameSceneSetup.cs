@@ -7,44 +7,69 @@ using MoShou.Utils;
 /// </summary>
 public class GameSceneSetup : MonoBehaviour
 {
-    /// <summary>
-    /// 自动在GameScene加载时创建GameSceneSetup
-    /// </summary>
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void OnSceneLoaded()
-    {
-        SceneManager.sceneLoaded += OnSceneLoadedCallback;
+    private static bool isInitialized = false;
 
-        // 检查当前场景
-        CheckCurrentScene();
+    /// <summary>
+    /// 自动在游戏启动时注册场景加载回调
+    /// </summary>
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void Initialize()
+    {
+        isInitialized = false;
+        SceneManager.sceneLoaded += OnSceneLoadedCallback;
+        Debug.Log("[GameSceneSetup] 已注册场景加载回调");
     }
 
     static void OnSceneLoadedCallback(Scene scene, LoadSceneMode mode)
     {
-        CheckCurrentScene();
-    }
-
-    static void CheckCurrentScene()
-    {
-        Scene currentScene = SceneManager.GetActiveScene();
+        Debug.Log($"[GameSceneSetup] 场景加载: {scene.name}");
 
         // 只在GameScene中创建
-        if (currentScene.name == "GameScene")
+        if (scene.name == "GameScene")
         {
-            // 检查是否已存在
+            // 延迟一帧创建，确保场景完全加载
+            var temp = new GameObject("_TempLoader");
+            temp.AddComponent<DelayedSetup>();
+        }
+    }
+
+    /// <summary>
+    /// 延迟初始化辅助类
+    /// </summary>
+    private class DelayedSetup : MonoBehaviour
+    {
+        void Start()
+        {
             if (FindObjectOfType<GameSceneSetup>() == null)
             {
-                Debug.Log("[GameSceneSetup] 自动创建GameSceneSetup...");
+                Debug.Log("[GameSceneSetup] 创建GameSceneSetup...");
                 var go = new GameObject("GameSceneSetup");
                 go.AddComponent<GameSceneSetup>();
             }
+            Destroy(gameObject);
         }
     }
 
     void Awake()
     {
+        if (isInitialized)
+        {
+            Debug.LogWarning("[GameSceneSetup] 已存在实例，销毁重复");
+            Destroy(gameObject);
+            return;
+        }
+        isInitialized = true;
+
         Debug.Log("[GameSceneSetup] Awake - 开始初始化场景");
         SetupScene();
+    }
+
+    void OnDestroy()
+    {
+        if (isInitialized)
+        {
+            isInitialized = false;
+        }
     }
     
     void SetupScene()
@@ -280,35 +305,69 @@ public class GameSceneSetup : MonoBehaviour
     /// </summary>
     Material CreateURPMaterial(Color color)
     {
-        // 尝试多种Shader（按优先级）
+        // 方法1: 尝试加载预设的URP材质模板
+        Material templateMat = Resources.Load<Material>("Materials/URP_Template");
+        if (templateMat != null)
+        {
+            Material mat = new Material(templateMat);
+            SetMaterialColor(mat, color);
+            return mat;
+        }
+
+        // 方法2: 尝试从Ground_Grass材质复制shader
+        Material grassMat = Resources.Load<Material>("Materials/Ground_Grass");
+        if (grassMat != null && grassMat.shader != null)
+        {
+            Material mat = new Material(grassMat.shader);
+            SetMaterialColor(mat, color);
+            Debug.Log($"[GameSceneSetup] 使用Ground_Grass的Shader: {grassMat.shader.name}");
+            return mat;
+        }
+
+        // 方法3: 尝试从现有Renderer获取shader
+        Renderer existingRenderer = FindObjectOfType<Renderer>();
+        if (existingRenderer != null && existingRenderer.sharedMaterial != null &&
+            existingRenderer.sharedMaterial.shader != null &&
+            !existingRenderer.sharedMaterial.shader.name.Contains("Error"))
+        {
+            Material mat = new Material(existingRenderer.sharedMaterial.shader);
+            SetMaterialColor(mat, color);
+            Debug.Log($"[GameSceneSetup] 使用现有Shader: {existingRenderer.sharedMaterial.shader.name}");
+            return mat;
+        }
+
+        // 方法4: 尝试多种Shader名称
         string[] shaderNames = {
             "Universal Render Pipeline/Lit",
             "Universal Render Pipeline/Simple Lit",
             "Universal Render Pipeline/Unlit",
+            "Shader Graphs/URP_Lit",
             "Sprites/Default",
-            "Standard",
-            "Unlit/Color",
-            "Legacy Shaders/Diffuse"
+            "UI/Default"
         };
 
         Shader shader = null;
         foreach (string name in shaderNames)
         {
             shader = Shader.Find(name);
-            if (shader != null)
+            if (shader != null && !shader.name.Contains("Error"))
             {
                 Debug.Log($"[GameSceneSetup] 使用Shader: {name}");
                 break;
             }
         }
 
+        // 方法5: 使用默认Sprite材质（总是可用）
+        if (shader == null)
+        {
+            Debug.LogWarning("[GameSceneSetup] 使用Sprites/Default作为后备");
+            shader = Shader.Find("Sprites/Default");
+        }
+
         if (shader == null)
         {
             Debug.LogError("[GameSceneSetup] 无法找到任何可用Shader!");
-            // 最后尝试获取默认材质的shader
-            var defaultMat = new Material(Shader.Find("Hidden/InternalErrorShader"));
-            defaultMat.color = color;
-            return defaultMat;
+            return new Material(Shader.Find("Hidden/InternalErrorShader"));
         }
 
         Material mat = new Material(shader);
@@ -318,15 +377,31 @@ public class GameSceneSetup : MonoBehaviour
         {
             mat.SetColor("_BaseColor", color); // URP使用_BaseColor
         }
-        if (mat.HasProperty("_Color"))
-        {
-            mat.SetColor("_Color", color); // Standard使用_Color
-        }
-        mat.color = color;
-
+        SetMaterialColor(mat, color);
         return mat;
     }
-    
+
+    /// <summary>
+    /// 设置材质颜色（兼容多种shader）
+    /// </summary>
+    void SetMaterialColor(Material mat, Color color)
+    {
+        if (mat.HasProperty("_BaseColor"))
+        {
+            mat.SetColor("_BaseColor", color); // URP使用_BaseColor
+        }
+        if (mat.HasProperty("_Color"))
+        {
+            mat.SetColor("_Color", color); // Standard/Sprites使用_Color
+        }
+        if (mat.HasProperty("_TintColor"))
+        {
+            mat.SetColor("_TintColor", color);
+        }
+        // 尝试设置主颜色
+        try { mat.color = color; } catch { }
+    }
+
     void CreateGround()
     {
         // 创建完整的游戏地形
