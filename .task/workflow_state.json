@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "project": "MS",
+  "current_phase": "idle",
+  "current_task": null,
+  "updated_at": "2026-02-06T00:00:00Z",
+
+  "phases": {
+    "idle": {
+      "description": "等待新需求",
+      "next_on_trigger": "planning",
+      "trigger": "NWF-01检测到Notion新需求"
+    },
+    "planning": {
+      "description": "Claude写策划案",
+      "next_on_success": "quality_check",
+      "next_on_fail": "planning",
+      "output": ".task/plan_draft.json"
+    },
+    "quality_check": {
+      "description": "DeepSeek质检策划案",
+      "next_on_success": "resource_pull",
+      "next_on_fail": "planning",
+      "input": ".task/plan_draft.json",
+      "output": ".task/plan_review.json"
+    },
+    "resource_pull": {
+      "description": "Claude从资源库拉取资源",
+      "next_on_success": "task_assign",
+      "next_on_fail": "resource_pull"
+    },
+    "task_assign": {
+      "description": "Claude拆解并分配任务给Cursor",
+      "next_on_success": "cursor_execute",
+      "output": ".task/current_task.json"
+    },
+    "cursor_execute": {
+      "description": "Cursor在Unity中执行任务",
+      "next_on_success": "screenshot_review",
+      "next_on_fail": "cursor_execute",
+      "output": ".task/task_result.json"
+    },
+    "screenshot_review": {
+      "description": "Claude验收截图",
+      "next_on_success": "check_completion",
+      "next_on_fail": "task_assign",
+      "input": ".task/screenshots/"
+    },
+    "check_completion": {
+      "description": "检查是否所有任务完成",
+      "next_if_more_tasks": "task_assign",
+      "next_if_all_done": "build_apk"
+    },
+    "build_apk": {
+      "description": "Cursor打包APK",
+      "next_on_success": "human_review",
+      "next_on_fail": "build_apk"
+    },
+    "human_review": {
+      "description": "人类体验验收",
+      "next_on_success": "completed",
+      "next_on_fail": "task_assign"
+    },
+    "completed": {
+      "description": "项目完成",
+      "next": "idle"
+    }
+  },
+
+  "task_queue": [],
+  "completed_tasks": [],
+
+  "history": [
+    {
+      "timestamp": "2026-02-06T00:00:00Z",
+      "from": null,
+      "to": "idle",
+      "reason": "初始化状态机"
+    }
+  ]
+}
