@@ -1,18 +1,87 @@
 {
-  "task_id": "MS-008",
-  "title": "游戏数据配置JSON文件",
-  "status": "completed",
-  "description": "创建完整的游戏数据配置文件",
-  "architecture": "V1.2 (Claude Code = 策划+开发)",
-  "features": [
-    {"id": "CONFIG-001", "name": "EquipmentConfigs.json", "status": "done", "items": 15},
-    {"id": "CONFIG-002", "name": "ItemConfigs.json", "status": "done", "items": 11},
-    {"id": "CONFIG-003", "name": "MonsterConfigs.json", "status": "done", "items": 8},
-    {"id": "CONFIG-004", "name": "StageConfigs.json", "status": "done", "items": 10},
-    {"id": "CONFIG-005", "name": "LootConfigs.json", "status": "done"},
-    {"id": "CONFIG-006", "name": "GameSettings.json", "status": "done"}
+  "task_id": "MS-009",
+  "title": "主页面添加【开始游戏】按钮",
+  "description": "在MainMenu场景创建开始游戏按钮UI，绑定到MainMenuManager",
+  "status": "assigned",
+  "assigned_at": "2026-02-06T13:45:00Z",
+  "assigned_by": "Claude",
+
+  "acceptance_criteria": [
+    "MainMenu场景有Canvas组件（ScreenSpace-Overlay）",
+    "Canvas下有Button命名为StartButton",
+    "Button显示文字【开始游戏】",
+    "Button尺寸：宽400 高80",
+    "Button位置：屏幕中央偏下（anchoredPosition: 0, -100）",
+    "MainMenuManager挂载到场景并绑定StartButton",
+    "点击按钮后跳转到StageSelect场景"
   ],
-  "created_at": "2026-02-05T20:00:00Z",
-  "completed_at": "2026-02-05T20:30:00Z",
-  "next_task": "MS-009 Unity打包测试 (需要用户手动操作Unity)"
+
+  "implementation_steps": [
+    {
+      "step": 1,
+      "action": "打开MainMenu场景（Assets/Scenes/MainMenu.unity）"
+    },
+    {
+      "step": 2,
+      "action": "创建UI Canvas",
+      "details": {
+        "hierarchy": "右键 > UI > Canvas",
+        "settings": {
+          "Render_Mode": "Screen Space - Overlay",
+          "Canvas_Scaler_UI_Scale_Mode": "Scale With Screen Size",
+          "Reference_Resolution": "1920 x 1080",
+          "Match": 0.5
+        }
+      }
+    },
+    {
+      "step": 3,
+      "action": "创建开始按钮",
+      "details": {
+        "hierarchy": "Canvas下右键 > UI > Button",
+        "name": "StartButton",
+        "anchoredPosition": "(0, -100)",
+        "sizeDelta": "(400, 80)",
+        "Normal_Color": "#4A90D9FF",
+        "Highlighted_Color": "#5BA0E9FF",
+        "Pressed_Color": "#3A80C9FF"
+      }
+    },
+    {
+      "step": 4,
+      "action": "设置按钮文字",
+      "details": {
+        "text": "开始游戏",
+        "fontSize": 36,
+        "color": "#FFFFFFFF",
+        "alignment": "Center Middle"
+      }
+    },
+    {
+      "step": 5,
+      "action": "创建MainMenuManager对象并绑定",
+      "details": {
+        "create": "空GameObject命名为MainMenuManager",
+        "add_script": "Scripts/Core/MainMenuManager.cs",
+        "bind": "将StartButton拖拽到startButton字段"
+      }
+    },
+    {
+      "step": 6,
+      "action": "保存场景并测试"
+    }
+  ],
+
+  "output_files": [
+    "Assets/Scenes/MainMenu.unity"
+  ],
+
+  "screenshot_required": true,
+  "screenshot_path": ".task/screenshots/MS-009/",
+
+  "related_files": [
+    "Assets/Scripts/Core/MainMenuManager.cs"
+  ],
+
+  "notes": "MainMenuManager.cs已有完整的按钮事件处理逻辑，只需在Unity编辑器中创建UI并绑定即可"
 }
