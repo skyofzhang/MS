@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster_Slime
       objectReference: {fileID: 0}
+    - target: {fileID: 1732262497782115334, guid: 40e1fadf1d6dc2844ba92158906da03a, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 2732fc408dbf1db469f4052a920b6b5b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster_Wolf
       objectReference: {fileID: 0}
+    - target: {fileID: 7227399524291396375, guid: faf61a38b461d7b4e8d89f866e7e2931, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 5488f638ca9218e4bb965427bf8a3a6d, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

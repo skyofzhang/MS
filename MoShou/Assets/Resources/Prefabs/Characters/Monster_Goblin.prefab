@@ -48,6 +48,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6350048661938801596, guid: 844c679e7b8e2a14794a030ebff39d25, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 497e8e6c1776a4d4c9c7b47cc8abfbd8, type: 2}
     - target: {fileID: 919132149155446097, guid: 844c679e7b8e2a14794a030ebff39d25, type: 3}
       propertyPath: m_Name
       value: Monster_Goblin
