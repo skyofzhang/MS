@@ -203,7 +203,37 @@ namespace MoShou.Core
         {
             selectedStage = stageData;
             selectedStageIndex = stageData.stageId;
-            ShowStageInfo(stageData);
+
+            // 如果有信息面板，显示它；否则直接开始游戏
+            if (stageInfoPanel != null)
+            {
+                ShowStageInfo(stageData);
+            }
+            else
+            {
+                // 直接开始游戏
+                StartStage(stageData);
+            }
+        }
+
+        /// <summary>
+        /// Start the selected stage
+        /// </summary>
+        private void StartStage(StageData stageData)
+        {
+            Debug.Log($"[StageSelect] Starting Stage {stageData.stageId}...");
+
+            // Set current stage in GameManager
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.CurrentLevel = stageData.stageId;
+            }
+
+            // Store stage data for battle scene
+            StageDataHolder.CurrentStage = stageData;
+
+            // Load game scene
+            SceneManager.LoadScene("GameScene");
         }
 
         /// <summary>
@@ -248,20 +278,7 @@ namespace MoShou.Core
         private void OnPlayClick()
         {
             if (selectedStage == null) return;
-
-            Debug.Log($"[StageSelect] Starting Stage {selectedStage.stageId}...");
-
-            // Set current stage in GameManager
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.CurrentLevel = selectedStage.stageId;
-            }
-
-            // Store stage data for battle scene
-            StageDataHolder.CurrentStage = selectedStage;
-
-            // Load game scene
-            SceneManager.LoadScene("GameScene");
+            StartStage(selectedStage);
         }
 
         /// <summary>
