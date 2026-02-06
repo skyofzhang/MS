@@ -1,0 +1,259 @@
+{
+  "name": "NWF-08 状态机监听器 (V1.0)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "state-change",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json.body || $input.first().json;\nconst commit = payload.head_commit || {};\nconst message = commit.message || '';\n\n// 检查是否是状态变更提交\nconst isStateChange = message.includes('[STATE]');\nconst isTaskResult = message.includes('[TASK_RESULT]');\nconst isPlanReady = message.includes('[PLAN_READY]');\n\nreturn {\n  is_state_change: isStateChange,\n  is_task_result: isTaskResult,\n  is_plan_ready: isPlanReady,\n  commit_message: message,\n  commit_id: commit.id || 'unknown',\n  author: commit.author?.username || 'unknown',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "parse-commit",
+      "name": "Parse Commit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.is_state_change }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-state-change",
+      "name": "IF State Change",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/skyofzhang/MS/contents/.task/workflow_state.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3.raw"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-state",
+      "name": "Get workflow_state.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "github-token",
+          "name": "GitHub Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const stateData = JSON.parse($input.first().json.body || JSON.stringify($input.first().json));\nconst currentPhase = stateData.current_phase;\nconst history = stateData.history || [];\n\n// 记录状态变更日志\nconst logEntry = {\n  timestamp: new Date().toISOString(),\n  phase: currentPhase,\n  commit_id: $('Parse Commit').first().json.commit_id,\n  commit_message: $('Parse Commit').first().json.commit_message\n};\n\nreturn {\n  current_phase: currentPhase,\n  project: stateData.project,\n  history_count: history.length,\n  log_entry: logEntry,\n  next_action: getNextAction(currentPhase)\n};\n\nfunction getNextAction(phase) {\n  const actions = {\n    'idle': 'wait_for_notion_trigger',\n    'planning': 'wait_for_plan_draft',\n    'quality_check': 'trigger_nwf07',\n    'resource_pull': 'pull_resources',\n    'task_assign': 'wait_for_cursor',\n    'cursor_execute': 'monitor_cursor',\n    'screenshot_review': 'review_screenshots',\n    'check_completion': 'verify_completion',\n    'build_apk': 'wait_for_build',\n    'human_review': 'notify_human',\n    'completed': 'archive_task'\n  };\n  return actions[phase] || 'unknown';\n}"
+      },
+      "id": "analyze-state",
+      "name": "Analyze State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.current_phase }}",
+              "value2": "quality_check"
+            }
+          ]
+        }
+      },
+      "id": "if-quality-check",
+      "name": "IF Quality Check Phase",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1350, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://43.161.249.54:5678/webhook/plan-quality-check",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"trigger\": \"state_machine\", \"phase\": \"{{ $json.current_phase }}\" }",
+        "options": {}
+      },
+      "id": "trigger-nwf07",
+      "name": "Trigger NWF-07",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1570, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 记录状态变更到日志\nconst logEntry = $('Analyze State').first().json.log_entry;\n\nreturn {\n  logged: true,\n  entry: logEntry,\n  message: `State logged: ${logEntry.phase}`\n};"
+      },
+      "id": "log-state",
+      "name": "Log State Change",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1570, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"processed\", \"phase\": \"{{ $('Analyze State').first().json.current_phase }}\", \"next_action\": \"{{ $('Analyze State').first().json.next_action }}\" }"
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1790, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"skipped\", \"reason\": \"not_state_change\" }"
+      },
+      "id": "respond-skip",
+      "name": "Respond Skip",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [910, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Commit": {
+      "main": [
+        [
+          {
+            "node": "IF State Change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF State Change": {
+      "main": [
+        [
+          {
+            "node": "Get workflow_state.json",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get workflow_state.json": {
+      "main": [
+        [
+          {
+            "node": "Analyze State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze State": {
+      "main": [
+        [
+          {
+            "node": "IF Quality Check Phase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Quality Check Phase": {
+      "main": [
+        [
+          {
+            "node": "Trigger NWF-07",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log State Change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger NWF-07": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log State Change": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-02-06T05:00:00.000Z",
+  "versionId": "1"
+}
