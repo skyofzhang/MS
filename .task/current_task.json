@@ -1,46 +1,38 @@
 {
-  "task_id": "MS-009-SCREENSHOT",
-  "title": "运行Unity截图验收",
-  "description": "运行MainMenu场景，截图验证开始游戏按钮",
+  "task_id": "MS-009-BUILD",
+  "title": "打包APK",
   "status": "assigned",
-  "assigned_at": "2026-02-06T14:05:00Z",
-  "assigned_by": "Claude",
+  "mode": "AUTO_EXECUTE",
+  "human_intervention": false,
 
-  "steps": [
+  "instructions": "自动执行APK打包，不需要人类介入",
+
+  "powershell_commands": [
     {
       "step": 1,
-      "action": "打开Unity项目",
-      "command": "Start-Process 'D:\\program\\2022.3.47f1c1\\Editor\\Unity.exe' -ArgumentList '-projectPath','E:\\AI_Project\\MS\\MoShou'"
+      "description": "关闭Unity",
+      "command": "Get-Process -Name 'Unity' -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 5"
     },
     {
       "step": 2,
-      "action": "打开MainMenu场景",
-      "path": "Assets/Scenes/MainMenu.unity"
+      "description": "批处理打包APK",
+      "command": "& 'D:\\program\\2022.3.47f1c1\\Editor\\Unity.exe' -batchmode -nographics -projectPath 'E:\\AI_Project\\MS\\MoShou' -executeMethod BuildScript.BuildAndroid -quit -logFile 'E:\\AI_Project\\MS\\build.log'"
     },
     {
       "step": 3,
-      "action": "运行场景并截图",
-      "screenshot_path": ".task/screenshots/MS-009/MainMenu_StartButton.png"
+      "description": "等待打包完成",
+      "command": "while (Get-Process -Name 'Unity' -ErrorAction SilentlyContinue) { Start-Sleep -Seconds 10; Write-Host 'Building...' }"
     },
     {
       "step": 4,
-      "action": "点击开始游戏按钮，验证跳转到StageSelect"
-    },
-    {
-      "step": 5,
-      "action": "截图StageSelect场景",
-      "screenshot_path": ".task/screenshots/MS-009/StageSelect.png"
-    },
-    {
-      "step": 6,
-      "action": "提交截图",
-      "git_commit": "[TASK_RESULT] MS-009: 截图验收完成"
+      "description": "检查APK是否生成",
+      "command": "if (Test-Path 'E:\\AI_Project\\MS\\Builds\\Android\\*.apk') { Write-Host 'BUILD SUCCESS'; Get-ChildItem 'E:\\AI_Project\\MS\\Builds\\Android\\*.apk' } else { Write-Host 'BUILD FAILED'; Get-Content 'E:\\AI_Project\\MS\\build.log' -Tail 50 }"
     }
   ],
 
-  "acceptance_criteria": [
-    "MainMenu场景显示【开始游戏】按钮",
-    "按钮位置居中偏下",
-    "点击后成功跳转到StageSelect场景"
-  ]
+  "output": {
+    "apk_path": "E:\\AI_Project\\MS\\Builds\\Android\\MS.apk",
+    "on_success": "通知Claude APK已完成",
+    "on_failure": "检查build.log并修复"
+  }
 }
