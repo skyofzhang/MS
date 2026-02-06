@@ -1,40 +1,32 @@
 {
-  "task_id": "MS-008",
+  "task_id": "MS-009",
   "status": "completed",
-  "completed_at": "2026-02-05T20:30:00Z",
-  "architecture": "V1.2 (Claude Code统一开发)",
-  "files_created": [
-    "Resources/Configs/EquipmentConfigs.json",
-    "Resources/Configs/ItemConfigs.json",
-    "Resources/Configs/MonsterConfigs.json",
-    "Resources/Configs/StageConfigs.json",
-    "Resources/Configs/LootConfigs.json",
-    "Resources/Configs/GameSettings.json",
-    "Scripts/Core/MainMenuManager.cs",
-    "Scripts/Core/StageSelectManager.cs",
-    "Scripts/Core/LoadingManager.cs"
+  "completed_at": "2026-02-06T14:00:00Z",
+  "title": "主页面添加【开始游戏】按钮",
+  "acceptance_criteria": [
+    "MainMenu场景有Canvas组件（ScreenSpace-Overlay）",
+    "Canvas下有Button命名为StartButton",
+    "Button显示文字【开始游戏】",
+    "Button尺寸：宽400 高80",
+    "Button位置：屏幕中央偏下（anchoredPosition: 0, -100）",
+    "MainMenuManager挂载到场景并绑定StartButton",
+    "点击按钮后跳转到StageSelect场景"
   ],
-  "features_implemented": [
-    "MS-007: 关卡选择场景",
-    "MS-007: 主菜单管理",
-    "MS-007: 异步加载系统",
-    "MS-008: 15件装备配置",
-    "MS-008: 11种物品配置",
-    "MS-008: 8种怪物配置",
-    "MS-008: 10个关卡配置",
-    "MS-008: 掉落表配置",
-    "MS-008: 游戏设置配置"
+  "implementation_done": [
+    "MainMenu.unity 已有 Canvas (MainMenuCanvas)，RenderMode=Screen Space Overlay",
+    "Canvas Scaler 已设为 Scale With Screen Size，Reference Resolution 1920x1080，Match 0.5",
+    "StartButton 已存在：尺寸改为 400x80，位置改为 (0, -100)",
+    "StartButton 文字改为「开始游戏」，字号 36，颜色白",
+    "StartButton 按钮颜色：Normal #4A90D9，Highlighted #5BA0E9，Pressed #3A80C9",
+    "MainMenuManager 的 startButton 已绑定到 StartButton (fileID: 1573172094)",
+    "EditorBuildSettings 已加入 MainMenu、StageSelect、GameScene，确保 LoadScene 可用"
   ],
-  "compile_status": {
-    "method": "dotnet build (UnityStubs)",
-    "errors": 0,
-    "warnings": 3
-  },
-  "git_commits": [
-    {"hash": "752e4f2", "message": "[MS-007] 关卡选择场景和完整游戏流程"},
-    {"hash": "e26ce75", "message": "[MS-008] 游戏数据配置JSON文件"}
+  "files_modified": [
+    "Assets/Scenes/MainMenu.unity",
+    "ProjectSettings/EditorBuildSettings.asset"
   ],
-  "completed_tasks": ["MS-001", "MS-002", "MS-003", "MS-004", "MS-005", "MS-006", "MS-007", "MS-008"],
-  "next_task": "MS-009 Unity打包测试",
-  "notes": "所有代码通过本地编译验证。下一步需要用户在Unity中创建场景(MainMenu/StageSelect/GameScene)并进行打包测试。"
+  "screenshot_required": true,
+  "screenshot_path": ".task/screenshots/MS-009/",
+  "screenshot_note": "请在 Unity 中打开 MainMenu 场景运行后截屏保存至上述目录。",
+  "next_step": "在 Unity 中打开 MainMenu 场景，运行后点击【开始游戏】验证跳转到 StageSelect。"
 }
