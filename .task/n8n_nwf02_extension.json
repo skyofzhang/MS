@@ -1,0 +1,121 @@
+{
+  "task": "NWF-02 扩展 ASK_CLAUDE 处理分支",
+  "description": "在现有的Git事件分发器中添加[ASK_CLAUDE]标签处理逻辑",
+  "n8n_server": "http://43.161.249.54:5678",
+  "workflow_id": "NWF-02",
+  "status": "待人类在n8n中配置",
+
+  "current_flow": {
+    "trigger": "GitHub Webhook /webhook/git-push",
+    "existing_branches": [
+      "[NODE_COMPLETE] → NWF-04 质检",
+      "普通提交 → Log Normal Commit"
+    ]
+  },
+
+  "extension_required": {
+    "new_branch": "[ASK_CLAUDE] → 处理Cursor提问",
+    "nodes_to_add": [
+      {
+        "order": 1,
+        "type": "IF",
+        "name": "Check ASK_CLAUDE Tag",
+        "condition": "commit.message.includes('[ASK_CLAUDE]')"
+      },
+      {
+        "order": 2,
+        "type": "HTTP Request",
+        "name": "Read ask_claude.json from GitHub",
+        "config": {
+          "method": "GET",
+          "url": "https://api.github.com/repos/skyofzhang/MS/contents/.task/ask_claude.json",
+          "headers": {
+            "Authorization": "Bearer {{$credentials.github_token}}",
+            "Accept": "application/vnd.github.v3.raw"
+          }
+        }
+      },
+      {
+        "order": 3,
+        "type": "Code",
+        "name": "Build AI Prompt",
+        "code": "const askData = JSON.parse($input.first().json.body);\nlet systemPrompt = '';\nswitch(askData.type) {\n  case 'question':\n    systemPrompt = '你是一个Unity游戏开发专家，请回答以下技术问题。';\n    break;\n  case 'kb_lookup':\n    systemPrompt = '请查阅知识库后回答问题。';\n    break;\n  case 'issue_report':\n    systemPrompt = '请分析这个问题属于代码问题、策划问题还是知识库缺失。';\n    break;\n  case 'decision':\n    systemPrompt = '请给出多个可行方案，让人类做决策。';\n    break;\n}\nreturn {\n  request_id: askData.request_id,\n  prompt: systemPrompt + '\\n\\n问题: ' + askData.question + '\\n\\n上下文: ' + askData.context,\n  related_files: askData.related_files\n};"
+      },
+      {
+        "order": 4,
+        "type": "HTTP Request",
+        "name": "Call DeepSeek API",
+        "config": {
+          "method": "POST",
+          "url": "https://api.deepseek.com/chat/completions",
+          "headers": {
+            "Authorization": "Bearer {{$credentials.deepseek_api_key}}",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "model": "deepseek-chat",
+            "messages": [
+              {"role": "system", "content": "{{$node.BuildAIPrompt.json.prompt}}"},
+              {"role": "user", "content": "请回答这个问题"}
+            ]
+          }
+        }
+      },
+      {
+        "order": 5,
+        "type": "Code",
+        "name": "Format Response",
+        "code": "const response = $input.first().json;\nconst requestId = $('Build AI Prompt').first().json.request_id;\nconst answer = response.choices[0].message.content;\n\nreturn {\n  request_id: requestId,\n  status: 'answered',\n  answer: answer,\n  references: [],\n  next_action: 'continue',\n  timestamp: new Date().toISOString()\n};"
+      },
+      {
+        "order": 6,
+        "type": "HTTP Request",
+        "name": "Write claude_response.json to GitHub",
+        "config": {
+          "method": "PUT",
+          "url": "https://api.github.com/repos/skyofzhang/MS/contents/.task/claude_response.json",
+          "headers": {
+            "Authorization": "Bearer {{$credentials.github_token}}",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "message": "[N8N] Auto-response to Cursor question",
+            "content": "{{$node.FormatResponse.json | base64}}",
+            "sha": "{{需要先获取现有文件的sha}}"
+          },
+          "note": "需要先GET获取sha，或者如果文件不存在则不传sha"
+        }
+      }
+    ]
+  },
+
+  "alternative_approach": {
+    "description": "如果直接修改GitHub文件复杂，可以改用Notion作为中间存储",
+    "flow": [
+      "1. ASK_CLAUDE触发",
+      "2. 读取ask_claude.json",
+      "3. DeepSeek生成回答",
+      "4. 写入Notion数据库(Cursor Questions)",
+      "5. Cursor定期拉取Notion获取回答"
+    ]
+  },
+
+  "testing": {
+    "simulate_cursor_question": {
+      "create_file": ".task/ask_claude.json",
+      "content": {
+        "request_id": "REQ-20260206-001",
+        "type": "question",
+        "context": "正在开发背包系统的物品拖拽功能",
+        "question": "ItemSlot.cs的OnDrop事件和InventoryManager的SwapItems方法怎么连接？",
+        "related_files": ["Assets/Scripts/UI/ItemSlot.cs"],
+        "urgency": "normal",
+        "timestamp": "2026-02-06T00:00:00Z"
+      },
+      "then_commit": "git commit -m '[ASK_CLAUDE] how to connect OnDrop with SwapItems'"
+    }
+  },
+
+  "human_action_required": "请在n8n中打开NWF-02工作流，按照nodes_to_add的顺序添加节点",
+  "created_at": "2026-02-06T00:00:00Z"
+}
