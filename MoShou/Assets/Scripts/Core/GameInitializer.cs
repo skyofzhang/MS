@@ -1,6 +1,7 @@
 using UnityEngine;
 using MoShou.Systems;
 using MoShou.UI;
+using MoShou.Utils;
 
 namespace MoShou.Core
 {
@@ -64,13 +65,16 @@ namespace MoShou.Core
             // 4. 初始化掉落管理器
             InitializeSystem<LootManager>("LootManager");
 
-            // 5. 加载玩家数据
+            // 5. 初始化UI资源绑定器
+            InitializeSystem<UIResourceBinder>("UIResourceBinder");
+
+            // 6. 加载玩家数据
             if (SaveSystem.Instance != null)
             {
                 SaveSystem.Instance.LoadGame();
             }
 
-            // 6. 添加测试物品（调试用）
+            // 7. 添加测试物品（调试用）
             if (addTestItems)
             {
                 AddTestItems();
