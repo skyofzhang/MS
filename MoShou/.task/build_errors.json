@@ -1,14 +1,77 @@
 {
     "project": "MoShou",
-    "timestamp": "2026-02-06T22:43:49Z",
-    "error_count": 1,
+    "timestamp": "2026-02-06T22:52:37Z",
+    "error_count": 10,
     "errors": [
         {
-            "file": "Assets\\Editor\\ProjectSetupTool.cs",
-            "line": 214,
-            "column": 43,
-            "message": "Assets\\Editor\\ProjectSetupTool.cs(214,43): error CS0234: The type or namespace name 'StageButtonUI' does not exist in the namespace 'MoShou.Core' (are you missing an assembly reference?)",
-            "code": "CS0234"
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 167,
+            "column": 34,
+            "message": "Assets\\Editor\\ModelImporter.cs(167,34): error CS0039: Cannot convert type 'UnityEditor.AssetImporter' to 'ModelImporter' via a reference conversion, boxing conversion, unboxing conversion, wrapping conversion, or null type conversion",
+            "code": "CS0039"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 171,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(171,18): error CS1061: 'ModelImporter' does not contain a definition for 'globalScale' and no accessible extension method 'globalScale' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 172,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(172,18): error CS1061: 'ModelImporter' does not contain a definition for 'useFileScale' and no accessible extension method 'useFileScale' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 173,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(173,18): error CS1061: 'ModelImporter' does not contain a definition for 'importBlendShapes' and no accessible extension method 'importBlendShapes' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 174,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(174,18): error CS1061: 'ModelImporter' does not contain a definition for 'importVisibility' and no accessible extension method 'importVisibility' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 175,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(175,18): error CS1061: 'ModelImporter' does not contain a definition for 'importCameras' and no accessible extension method 'importCameras' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 176,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(176,18): error CS1061: 'ModelImporter' does not contain a definition for 'importLights' and no accessible extension method 'importLights' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 179,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(179,18): error CS1061: 'ModelImporter' does not contain a definition for 'materialImportMode' and no accessible extension method 'materialImportMode' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 182,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(182,18): error CS1061: 'ModelImporter' does not contain a definition for 'animationType' and no accessible extension method 'animationType' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Editor\\ModelImporter.cs",
+            "line": 185,
+            "column": 18,
+            "message": "Assets\\Editor\\ModelImporter.cs(185,18): error CS1061: 'ModelImporter' does not contain a definition for 'SaveAndReimport' and no accessible extension method 'SaveAndReimport' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
         }
     ]
 }

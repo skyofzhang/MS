@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// 模型资源导入器 - 从共享目录导入everclan模型资源
+/// Everclan模型资源导入器 - 从共享目录导入everclan模型资源
 /// 自动创建完整预制体(FBX + 材质 + 贴图 + 动画)
 /// </summary>
-public class ModelImporter : Editor
+public class EverclanModelImporter : Editor
 {
     // 共享目录路径
     private const string SOURCE_ROOT = @"\\192.168.1.198\共享\AI目录\art-assets-ai\assets\models\everclan";
@@ -89,7 +89,7 @@ public class ModelImporter : Editor
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[ModelImporter] 导入失败: {modelId} - {e.Message}");
+                Debug.LogError($"[EverclanImporter] 导入失败: {modelId} - {e.Message}");
             }
         }
 
@@ -98,7 +98,7 @@ public class ModelImporter : Editor
         AssetDatabase.Refresh();
 
         string message = $"导入完成!\n- 导入: {imported} 个模型\n- 跳过: {skipped} 个模型";
-        Debug.Log($"[ModelImporter] {message}");
+        Debug.Log($"[EverclanImporter] {message}");
         EditorUtility.DisplayDialog("导入完成", message, "OK");
     }
 
@@ -115,7 +115,7 @@ public class ModelImporter : Editor
         string[] fbxFiles = Directory.GetFiles(sourceDir, "*.fbx");
         if (fbxFiles.Length == 0)
         {
-            Debug.LogWarning($"[ModelImporter] 未找到FBX: {modelId}");
+            Debug.LogWarning($"[EverclanImporter] 未找到FBX: {modelId}");
             return;
         }
 
@@ -156,7 +156,7 @@ public class ModelImporter : Editor
         // 创建预制体
         CreatePrefab(targetFbx, modelId, modelType);
 
-        Debug.Log($"[ModelImporter] 导入成功: {modelId} ({modelType})");
+        Debug.Log($"[EverclanImporter] 导入成功: {modelId} ({modelType})");
     }
 
     /// <summary>
@@ -164,14 +164,13 @@ public class ModelImporter : Editor
     /// </summary>
     private static void ConfigureFbxImport(string fbxPath, string modelType)
     {
-        ModelImporter importer = AssetImporter.GetAtPath(fbxPath) as ModelImporter;
+        UnityEditor.ModelImporter importer = AssetImporter.GetAtPath(fbxPath) as UnityEditor.ModelImporter;
         if (importer == null) return;
 
         // 基础设置
         importer.globalScale = 1f;
         importer.useFileScale = false;
         importer.importBlendShapes = false;
-        importer.importVisibility = false;
         importer.importCameras = false;
         importer.importLights = false;
 
@@ -236,7 +235,7 @@ public class ModelImporter : Editor
         GameObject fbxAsset = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
         if (fbxAsset == null)
         {
-            Debug.LogWarning($"[ModelImporter] 无法加载FBX: {fbxPath}");
+            Debug.LogWarning($"[EverclanImporter] 无法加载FBX: {fbxPath}");
             return;
         }
 
@@ -294,7 +293,7 @@ public class ModelImporter : Editor
 
         if (!File.Exists(TYPE_MAPPING_PATH))
         {
-            Debug.LogWarning("[ModelImporter] 类型映射文件不存在，使用默认类型");
+            Debug.LogWarning("[EverclanImporter] 类型映射文件不存在，使用默认类型");
             return mapping;
         }
 
@@ -317,7 +316,7 @@ public class ModelImporter : Editor
                 int colonPos = json.IndexOf(":", modelIdPos);
                 int quoteStart = json.IndexOf("\"", colonPos + 1);
                 int quoteEnd = json.IndexOf("\"", quoteStart + 1);
-                string modelId = json.Substring(quoteStart + 1, quoteEnd - quoteStart - 1);
+                string modelIdValue = json.Substring(quoteStart + 1, quoteEnd - quoteStart - 1);
 
                 int typePos = json.IndexOf("\"type\"", quoteEnd);
                 if (typePos < 0 || typePos > json.IndexOf("}", quoteEnd))
@@ -331,15 +330,15 @@ public class ModelImporter : Editor
                 int typeQuoteEnd = json.IndexOf("\"", typeQuoteStart + 1);
                 string type = json.Substring(typeQuoteStart + 1, typeQuoteEnd - typeQuoteStart - 1);
 
-                mapping[modelId] = type;
+                mapping[modelIdValue] = type;
                 pos = typeQuoteEnd + 1;
             }
 
-            Debug.Log($"[ModelImporter] 加载类型映射: {mapping.Count} 个模型");
+            Debug.Log($"[EverclanImporter] 加载类型映射: {mapping.Count} 个模型");
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"[ModelImporter] 解析类型映射失败: {e.Message}");
+            Debug.LogError($"[EverclanImporter] 解析类型映射失败: {e.Message}");
         }
 
         return mapping;
