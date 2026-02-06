@@ -1,0 +1,35 @@
+{
+    "project": "MoShou",
+    "timestamp": "2026-02-06T22:42:29Z",
+    "error_count": 4,
+    "errors": [
+        {
+            "file": "Assets\\Scripts\\UI\\StageButtonUI.cs",
+            "line": 25,
+            "column": 32,
+            "message": "Assets\\Scripts\\UI\\StageButtonUI.cs(25,32): error CS0246: The type or namespace name 'StageData' could not be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS0246"
+        },
+        {
+            "file": "Assets\\Scripts\\UI\\StageButtonUI.cs",
+            "line": 25,
+            "column": 95,
+            "message": "Assets\\Scripts\\UI\\StageButtonUI.cs(25,95): error CS0246: The type or namespace name 'StageData' could not be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS0246"
+        },
+        {
+            "file": "Assets\\Scripts\\UI\\StageButtonUI.cs",
+            "line": 19,
+            "column": 17,
+            "message": "Assets\\Scripts\\UI\\StageButtonUI.cs(19,17): error CS0246: The type or namespace name 'StageData' could not be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS0246"
+        },
+        {
+            "file": "Assets\\Scripts\\UI\\StageButtonUI.cs",
+            "line": 20,
+            "column": 31,
+            "message": "Assets\\Scripts\\UI\\StageButtonUI.cs(20,31): error CS0246: The type or namespace name 'StageData' could not be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS0246"
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using MoShou.Data;
+using MoShou.Core;
 
 namespace MoShou.UI
 {
