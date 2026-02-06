@@ -3,7 +3,12 @@ guid: c56750cf671cf6d41ad567bc15a2cc31
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: gong_05
+    second: {fileID: 2100000, guid: a704e50b0762ee0468b32124a61c00ab, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

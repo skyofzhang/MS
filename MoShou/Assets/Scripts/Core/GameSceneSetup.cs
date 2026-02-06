@@ -89,7 +89,37 @@ public class GameSceneSetup : MonoBehaviour
             Debug.Log("[GameSceneSetup] UIResourceBinder已创建");
         }
 
+        // 确保摄像机跟随玩家
+        SetupCameraFollow();
+
         Debug.Log("[GameSceneSetup] Scene setup complete!");
+
+        // 通知GameManager场景准备完成，开始游戏！
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnGameSceneReady();
+            Debug.Log("[GameSceneSetup] 通知GameManager开始游戏");
+        }
+    }
+
+    void SetupCameraFollow()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        CameraFollow follow = cam.GetComponent<CameraFollow>();
+        if (follow == null)
+        {
+            follow = cam.gameObject.AddComponent<CameraFollow>();
+        }
+
+        // 查找玩家并设置跟随
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            follow.target = player.transform;
+            Debug.Log("[GameSceneSetup] 摄像机跟随玩家设置完成");
+        }
     }
     
     void CreatePlayer()
@@ -246,9 +276,18 @@ public class GameSceneSetup : MonoBehaviour
         ground.transform.localScale = new Vector3(10, 1, 10); // 100x100单位
         ground.layer = 11;
 
-        // 地面材质 - 草地颜色 (URP兼容)
+        // 地面材质 - 尝试加载预设材质
         var groundRenderer = ground.GetComponent<Renderer>();
-        groundRenderer.material = CreateURPMaterial(new Color(0.25f, 0.45f, 0.2f));
+        Material grassMat = Resources.Load<Material>("Materials/Ground_Grass");
+        if (grassMat != null)
+        {
+            groundRenderer.material = grassMat;
+            Debug.Log("[GameSceneSetup] 使用预设草地材质");
+        }
+        else
+        {
+            groundRenderer.material = CreateURPMaterial(new Color(0.25f, 0.45f, 0.2f));
+        }
 
         // 2. 创建边界墙（透明但有碰撞）
         CreateBoundaryWalls(terrainParent.transform, 50f);
