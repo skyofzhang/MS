@@ -1,0 +1,41 @@
+﻿版本: V3.0 | 更新时间: 2026-02-04 | 架构师: Claude Opus 4.5
+核心原则: 面向对象是AI，不是人类 · Cursor/Claude是知识库唯一大脑 · 人类是物理限制突破助手 · 扁平化≤ 2级可达
+## 项目总控面板
+[CODE] {
+  "project": "我叫MT之魔兽归来",
+  "code": "MS",
+  "engine": "Unity 2022.3.47f1c1",
+  "render": "URP 14.x",
+  "screen": "portrait 1080x1920",
+  "platform": ["抖音小游戏", "Android", "iOS"],
+  "team": 3,
+  "target": "每月量产5-10款小游戏",
+  "current_phase": "Phase 5 已完成",
+  "overall_progress": "P0: 100% | P1: 100% | P2: 0%"
+}
+## 12层架构导航
+[PAGE]  (id:2faba9f9-9f58-814e-9813-f9fc424eb4af)
+[PAGE]  (id:2faba9f9-9f58-8118-8aba-e3e5200c3b47)
+[PAGE]  (id:2faba9f9-9f58-8149-9780-de23ee8970c8)
+[PAGE]  (id:2faba9f9-9f58-81db-9405-d78a41aa07ae)
+[PAGE]  (id:2faba9f9-9f58-81fa-a18a-c20c453bc7d0)
+[PAGE]  (id:2faba9f9-9f58-816c-9bf9-d70909dd1644)
+[PAGE]  (id:2faba9f9-9f58-810f-a26a-c6c8008350bc)
+[PAGE]  (id:2faba9f9-9f58-8128-a53c-f0fb4f19c7ed)
+[PAGE]  (id:2faba9f9-9f58-81db-b4a6-f8f3b3350065)
+[PAGE]  (id:2faba9f9-9f58-81e3-aba6-d3fbb0b74e36)
+[PAGE]  (id:2faba9f9-9f58-81c7-bdf2-ef3549c09e14)
+[PAGE]  (id:2faba9f9-9f58-81e3-8651-d1c8c4958dd1)
+## V3.0 升级要点（相对V2.0）
+1. 工程现状同步: Unity版本、脚本目录、功能状态全部与实际工程对齐
+1. 施工图体系: 新增UI布局施工图、状态机图、数据流图等AI可解析图示
+1. 清理重复: 删除重复L12页面、合并L4中“执行版”与“AI可执行版”重复文档
+1. AI语言标准: 所有文档采用JSON+代码+Mermaid图格式，禁止主观词汇
+1. 填充率提升: 从V2.0的~25%提升至~75%，核心层级全部完成
+## 当前工程实现状态（来源: E:AI_ProjectMT 实际代码）
+总计: 68个C#脚本 + 10个Editor脚本 + 6个JSON配置 + 1个测试文件 = 85个文件已完成
+## AI角色快速查询
+[PAGE]  (id:2fbba9f9-9f58-8023-8697-cf501f1006ba)
+[PAGE]  (id:2fbba9f9-9f58-8013-ba40-f2962677b0e5)
+[PAGE]  (id:2fdba9f9-9f58-8166-9c17-fecbde95bcd7)
+[PAGE]  (id:2fcba9f9-9f58-80a1-8396-c4ea9444f1ad)

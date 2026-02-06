@@ -12,8 +12,10 @@ namespace MoShou.Editor
     {
         private static readonly string[] SCENES = new string[]
         {
-            "Assets/Scenes/MainScene.unity",
-            "Assets/Scenes/GameScene.unity"
+            "Assets/Scenes/MainMenu.unity",
+            "Assets/Scenes/StageSelect.unity",
+            "Assets/Scenes/GameScene.unity",
+            "Assets/Scenes/MainScene.unity"
         };
 
         /// <summary>
@@ -123,11 +125,11 @@ namespace MoShou.Editor
                 UnityEngine.Rendering.GraphicsDeviceType.Vulkan
             });
 
-            // 其他设置
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
-            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
-            PlayerSettings.allowedAutorotateToLandscapeRight = true;
-            PlayerSettings.allowedAutorotateToPortrait = false;
+            // 屏幕方向设置 - 竖屏
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = false;
+            PlayerSettings.allowedAutorotateToLandscapeRight = false;
+            PlayerSettings.allowedAutorotateToPortrait = true;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
 
             Debug.Log("[BuildScript] Android设置配置完成");

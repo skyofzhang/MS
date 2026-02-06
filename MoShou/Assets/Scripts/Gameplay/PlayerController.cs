@@ -1,24 +1,40 @@
 using UnityEngine;
 
+/// <summary>
+/// 玩家控制器 - 符合AI开发知识库§4属性规范
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
-    [Header("Movement")]
-    public float moveSpeed = 5f;
+    [Header("Movement - 知识库§4")]
+    public float moveSpeed = 4.0f;      // MoveSpeed: 4.0
     public float rotationSpeed = 10f;
-    
-    [Header("Combat")]
-    public float attackRange = 2f;
-    public float attackDamage = 10f;
-    public float attackCooldown = 1f;
-    public float autoAttackInterval = 1.5f;
-    
-    [Header("Stats")]
-    public float maxHealth = 100f;
+
+    [Header("Combat - 知识库§4")]
+    public float attackRange = 8.0f;     // AttackRange: 8.0
+    public float attackDamage = 15f;     // Attack: 15
+    public float attackCooldown = 1.0f;  // AttackSpeed: 1.0
+    public float autoAttackInterval = 1.0f;
+    public float critChance = 0.10f;     // CritChance: 0.10
+    public float critDamage = 0.50f;     // CritDamage: 0.50
+
+    [Header("Stats - 知识库§4")]
+    public float maxHealth = 150f;       // HP: 150
+    public float defense = 10f;          // Defense: 10
     public float currentHealth;
-    
-    [Header("Skills")]
-    public float skill1Cooldown = 8f;  // 多重箭
-    public float skill2Cooldown = 10f; // 穿透箭
+
+    [Header("Skills - 知识库§4技能数据表")]
+    // SK001 多重箭: CD=8s, 倍率=0.8, 箭数=5, 范围=10m, 角度=60°
+    public float skill1Cooldown = 8f;
+    public float skill1Multiplier = 0.8f;
+    public int skill1ArrowCount = 5;
+    public float skill1Range = 10f;
+    public float skill1Angle = 60f;
+
+    // SK002 穿透箭: CD=10s, 倍率=2.0, 穿透=true, 范围=15m
+    public float skill2Cooldown = 10f;
+    public float skill2Multiplier = 2.0f;
+    public float skill2Range = 15f;
+    public float skill2Width = 1f;
     
     private CharacterController controller;
     private Vector3 moveDirection;
@@ -132,61 +148,78 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    // 技能1: 多重箭 (锥形范围)
+    // 技能1: 多重箭 (锥形范围) - 知识库§4 SK001
     public void UseSkill1()
     {
         if (Time.time - lastSkill1Time < skill1Cooldown) return;
         lastSkill1Time = Time.time;
-        
-        Debug.Log("[Player] Skill1: 多重箭!");
-        
+
+        Debug.Log($"[Player] Skill1: 多重箭! 范围={skill1Range}m, 角度={skill1Angle}°, 箭数={skill1ArrowCount}");
+
+        // 播放特效 (知识库§2 RULE-RES-011)
+        PlaySkillVFX("VFX_MultiShot");
+
         // 锥形范围攻击
-        float coneAngle = 60f;
-        float coneRange = 10f;
-        int arrowCount = 5;
-        float damageMultiplier = 0.8f;
-        
+        int hitCount = 0;
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (var enemy in enemies)
         {
+            if (hitCount >= skill1ArrowCount) break;
+
             Vector3 toEnemy = enemy.transform.position - transform.position;
             float angle = Vector3.Angle(transform.forward, toEnemy);
             float distance = toEnemy.magnitude;
-            
-            if (angle <= coneAngle / 2 && distance <= coneRange)
+
+            if (angle <= skill1Angle / 2 && distance <= skill1Range)
             {
-                CombatSystem.DealDamage(this.gameObject, enemy, attackDamage * damageMultiplier);
+                CombatSystem.DealDamage(this.gameObject, enemy, attackDamage * skill1Multiplier);
+                hitCount++;
             }
         }
+
+        Debug.Log($"[Player] 多重箭命中 {hitCount} 个目标");
     }
-    
-    // 技能2: 穿透箭 (直线范围)
+
+    // 技能2: 穿透箭 (直线范围) - 知识库§4 SK002
     public void UseSkill2()
     {
         if (Time.time - lastSkill2Time < skill2Cooldown) return;
         lastSkill2Time = Time.time;
-        
-        Debug.Log("[Player] Skill2: 穿透箭!");
-        
-        // 直线范围攻击
-        float lineRange = 15f;
-        float lineWidth = 1f;
-        float damageMultiplier = 2.0f;
-        
+
+        Debug.Log($"[Player] Skill2: 穿透箭! 范围={skill2Range}m, 倍率={skill2Multiplier}x");
+
+        // 播放特效 (知识库§2 RULE-RES-011)
+        PlaySkillVFX("VFX_PierceShot");
+
+        // 直线范围攻击（穿透所有敌人）
+        int hitCount = 0;
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (var enemy in enemies)
         {
             Vector3 toEnemy = enemy.transform.position - transform.position;
             float distance = toEnemy.magnitude;
-            
+
             // 检查是否在直线范围内
             Vector3 projected = Vector3.Project(toEnemy, transform.forward);
             float perpDistance = (toEnemy - projected).magnitude;
-            
-            if (distance <= lineRange && perpDistance <= lineWidth && Vector3.Dot(toEnemy, transform.forward) > 0)
+
+            if (distance <= skill2Range && perpDistance <= skill2Width && Vector3.Dot(toEnemy, transform.forward) > 0)
             {
-                CombatSystem.DealDamage(this.gameObject, enemy, attackDamage * damageMultiplier);
+                CombatSystem.DealDamage(this.gameObject, enemy, attackDamage * skill2Multiplier);
+                hitCount++;
             }
+        }
+
+        Debug.Log($"[Player] 穿透箭穿透 {hitCount} 个目标");
+    }
+
+    void PlaySkillVFX(string vfxName)
+    {
+        var vfxPrefab = Resources.Load<GameObject>($"Prefabs/VFX/{vfxName}");
+        if (vfxPrefab != null)
+        {
+            var vfx = Instantiate(vfxPrefab, transform.position, transform.rotation);
+            Destroy(vfx, 2f);
         }
     }
     

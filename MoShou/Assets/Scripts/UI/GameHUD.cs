@@ -231,12 +231,21 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 设置按钮点击
+        /// 设置按钮点击 - 打开设置面板
         /// </summary>
         private void OnSettingsClick()
         {
-            Debug.Log("[GameHUD] 设置按钮点击 - 功能待实现");
-            // 打开设置面板
+            Debug.Log("[GameHUD] 设置按钮点击");
+            // 查找并打开设置面板
+            var settingsPanel = FindObjectOfType<SettingsPanel>(true);
+            if (settingsPanel != null)
+            {
+                settingsPanel.Toggle();
+            }
+            else
+            {
+                Debug.LogWarning("[GameHUD] SettingsPanel not found in scene");
+            }
         }
 
         /// <summary>

@@ -1,0 +1,239 @@
+﻿[CODE] {
+  "meta": {
+    "version": "1.0",
+    "created": "2026-02-04",
+    "purpose": "AI每次策划的顶层依赖，包含通用的游戏开发规范和AI协作规则",
+    "audience": "AI（Claude/Cursor/Codex/Manus）",
+    "position": "知识库树状架构的根节点，所有游戏类型分支的共同依赖"
+  }
+}
+## 一、本知识库的定位
+[CODE] {
+  "architecture": {
+    "this": "AI游戏开发基础知识库 ← 你在这里",
+    "children": [
+      {
+        "branch": "小游戏",
+        "knowledge_base": "小游戏知识库 V3.0",
+        "template_base": "小游戏开发模板知识库",
+        "project": "《MT》项目知识库v1.0"
+      },
+      {
+        "branch": "直播弹幕游戏",
+        "knowledge_base": "直播弹幕游戏知识库（待建设）",
+        "template_base": "直播弹幕开发模板知识库（待建设）"
+      }
+    ],
+    "rule": "AI每次启动新项目时，先读本库获取通用规则，再读对应游戏类型分支获取专属规则"
+  }
+}
+## 二、AI间沟通语言规范
+[CODE] {
+  "communication_protocol": {
+    "version": "1.0",
+    "core_rule": "所有AI间的通信使用JSON格式，不允许自然语言描述",
+    "data_types": {
+      "color": "HEX格式 #RRGGBB 或 #RRGGBBAA",
+      "size": "像素值(px) 或 Android自适应单位(dp/sp)",
+      "position": "Unity坐标系 [x, y, z] 或 UI锚点 {anchorMin, anchorMax, pivot}",
+      "time": "秒(s) 或 毫秒(ms)，必须标注单位",
+      "percentage": "0-1小数 或 0-100整数，必须标注是哪种",
+      "path": "绝对路径或从项目根目录起的相对路径"
+    },
+    "forbidden_words": [
+      "大概", "差不多", "好看", "流畅", "适当", "合理",
+      "小一点", "大一点", "快一些", "慢一些",
+      "参考xxx", "类似xxx的效果"
+    ],
+    "forbidden_words_note": "以上词汇不允许出现在AI输出的任何文档中，必须替换为精确数值",
+    "message_format": {
+      "task_assign": {
+        "task_id": "string",
+        "type": "enum: code | art | review | test",
+        "description": "string (精确描述)",
+        "input": "object (输入资源和参数)",
+        "output": "object (期望输出的精确定义)",
+        "acceptance_criteria": "array[string] (逐条验收标准)"
+      },
+      "task_result": {
+        "task_id": "string",
+        "status": "enum: completed | blocked | failed",
+        "output": "object (实际输出)",
+        "issues": "array[string] (遇到的问题)",
+        "screenshots": "array[string] (截图路径)"
+      }
+    }
+  }
+}
+## 三、人类语言 → AI精确语言 转换规则库
+[CODE] {
+  "translation_rules": {
+    "purpose": "人类用模糊语言描述需求，Claude负责翻译为AI可执行的精确参数",
+    "visual_style": [
+      {"human": "好看的按钮", "ai": {"corner_radius": "8px", "gradient": "linear(#4A90D9, #357ABD)", "shadow": "0 2px 4px rgba(0,0,0,0.2)", "font_size": "16sp", "padding": "12dp 24dp"}},
+      {"human": "简洁的UI", "ai": {"max_elements_per_screen": 8, "color_palette_size": 4, "font_weights": ["regular", "bold"], "spacing_unit": "8dp"}},
+      {"human": "卡通风格", "ai": {"outline_weight": "2-3px", "color_saturation": "70-90%", "shadow_style": "hard", "proportion": "exaggerated_2:3_head_to_body"}}
+    ],
+    "gameplay_feel": [
+      {"human": "流畅的战斗", "ai": {"target_fps": 60, "hit_feedback_delay_ms": 50, "animation_blend_time_s": 0.1, "camera_shake_duration_s": 0.15, "hit_pause_ms": 30}},
+      {"human": "爽快的打击感", "ai": {"screen_shake_intensity": 5, "damage_number_scale": 1.5, "hit_flash_duration_ms": 80, "knockback_force": 3.0}},
+      {"human": "刷刷刷RPG", "ai": {"core_loop": "combat>loot>equip>stronger>harder_combat", "avg_session_min": 3, "loot_per_battle": "2-5", "rarity_tiers": 5, "power_growth_per_hour": "15-25%"}}
+    ],
+    "scope_terms": [
+      {"human": "小游戏", "ai": {"apk_size_max_mb": 100, "dev_time_max_days": 14, "feature_count_max": 8, "scene_count_max": 5}},
+      {"human": "竖屏", "ai": {"orientation": "portrait", "resolution": "1080x1920", "safe_area_top_dp": 48, "safe_area_bottom_dp": 34}},
+      {"human": "MT风格", "ai": {"art_style": "cartoon_3d", "color_tone": "warm_vibrant", "character_proportion": "chibi_2.5_head", "ui_theme": "fantasy_medieval"}}
+    ],
+    "evolution_note": "此规则库会随着项目经验积累不断扩充。每次人类提出新的模糊词汇，Claude应当在完成翻译后将新规则追加到本库"
+  }
+}
+## 四、通用开发流程规范
+[CODE] {
+  "development_standards": {
+    "engine": "Unity 2022.3.47f1c1 (LTS)",
+    "render_pipeline": "Built-In Render Pipeline (3D)",
+    "unity_hub": "3.3.3-c5",
+    "project_root": "E:\\Ai\\",
+    "language": "C#",
+    "build_targets": ["Android ARM64", "iOS"],
+    "code_standards": {
+      "naming": {
+        "class": "PascalCase",
+        "method": "PascalCase",
+        "variable": "camelCase",
+        "constant": "UPPER_SNAKE_CASE",
+        "private_field": "_camelCase",
+        "file": "与类同名.cs"
+      },
+      "structure": {
+        "max_lines_per_file": 300,
+        "max_methods_per_class": 15,
+        "single_responsibility": true,
+        "comment_language": "English"
+      }
+    },
+    "git_workflow": {
+      "main_branch": "main",
+      "feature_branch_format": "feature/{feature-name}",
+      "commit_tags": {
+        "[NODE_COMPLETE]": "Cursor完成一个任务节点",
+        "[ASK_CLAUDE]": "Cursor向Claude提问",
+        "[ART_READY]": "美术资源就位",
+        "[STAGE_DONE]": "阶段性开发完成",
+        "[APK_READY]": "APK打包完成"
+      },
+      "task_communication_dir": ".task/",
+      "protected_files": [".task/", "ProjectSettings/", "Packages/"]
+    },
+    "unity_project_structure": {
+      "Assets/Art/": "美术资源（Characters/Monsters/Scenes/UI/VFX）",
+      "Assets/Audio/": "音频资源（Music/SFX）",
+      "Assets/Editor/": "编辑器工具脚本",
+      "Assets/Prefabs/": "预制件",
+      "Assets/Resources/": "运行时加载资源（Config/Models/UI/VFX）",
+      "Assets/Scenes/": "场景文件",
+      "Assets/Scripts/": "代码（Combat/Core/Data/Environment/Gameplay/Systems/UI）",
+      "Assets/Settings/": "URP渲染管线配置",
+      "Assets/Tests/": "测试代码"
+    }
+  }
+}
+## 五、质量标准与验收规则
+[CODE] {
+  "quality_standards": {
+    "code_review": {
+      "auto_checks": ["no_compiler_errors", "no_warnings", "naming_convention", "file_size_limit"],
+      "ai_review_items": ["代码规范符合度", "bug风险", "性能风险", "架构合理性"],
+      "pass_threshold": "0个critical + 0个major"
+    },
+    "stage_review": {
+      "method": "Cursor提交截图，Claude对照策划案逐条核对",
+      "focus": ["功能实现正确性", "体验是否符合策划", "UI布局/尺寸/颜色与策划框一致"],
+      "report_format": {
+        "each_item": "PASS | FAIL | PARTIAL",
+        "fail_requires": "具体问题描述 + 修改建议 + 参考策划案条目编号"
+      }
+    },
+    "final_review": {
+      "method": "ffmpeg抽取视频关键帧 + 策划案逐条对比",
+      "video_format": "MP4 720p+",
+      "frame_extract": "ffmpeg -i video.mp4 -vf fps=1 frame_%04d.png",
+      "key_difference": "不只看功能能不能用，更要看体验是否符合策划意图"
+    },
+    "apk_test": {
+      "method": "Claude在Android模拟器中实际操作游戏",
+      "check_items": ["启动无崩溃", "所有策划功能可操作", "帧率达标", "UI适配正确"],
+      "delivery_threshold": "80%策划条目通过即可交付，剩余迭代优化"
+    }
+  }
+}
+## 六、工具链使用规范
+[CODE] {
+  "toolchain": {
+    "n8n": {
+      "server": "43.161.249.54:5678",
+      "role": "工作流调度中心，串联所有环节",
+      "api_auth": "X-N8N-API-KEY header",
+      "webhook_base": "http://43.161.249.54:5678/webhook/"
+    },
+    "github": {
+      "org": "skyofzhang",
+      "repos": {
+        "warcraft-return": "主项目工程（Unity）",
+        "ai-game-templates": "可复用模板库",
+        "ai-resources": "美术资源库（私有）"
+      },
+      "webhook": "push事件 → n8n"
+    },
+    "notion": {
+      "role": "知识库 + 策划文档 + 需求池 + 进度跟踪",
+      "api": "Notion API + MCP集成"
+    },
+    "ai_apis": {
+      "deepseek": {"model": "deepseek-chat", "role": "备用AI后端"},
+      "nano_banana": {"role": "美术资源生成", "integration": "API调用"},
+      "claude": {
+        "model": "claude-sonnet-4",
+        "role": "核心AI",
+        "status": "✅ 已开通并配置到n8n",
+        "config_location": "n8n > Credentials > Anthropic account",
+        "updated": "2026-02-05"
+      }
+    },
+    "cursor": {
+      "role": "程序开发AI",
+      "environment": "Windows本地 + Unity Editor",
+      "communication": ".task/目录 via Git"
+    }
+  }
+}
+## 七、角色权责矩阵（通用版）
+[CODE] {
+  "role_matrix": {
+    "human": {
+      "can": ["提需求", "确认Unity环境", "接收APK", "最终否决"],
+      "cannot": ["介入具体开发细节"],
+      "frequency": "仅在流程标注的节点介入"
+    },
+    "claude": {
+      "can": ["翻译需求", "出策划", "拆解任务", "调度美术资源", "准备工程", "阶段验收", "最终验收", "APK测试", "管理知识库", "迭代工作流"],
+      "cannot": ["在Unity中运行代码", "直接生成美术资源"],
+      "principle": "谁策划谁验收，不委托"
+    },
+    "cursor": {
+      "can": ["写代码", "本地运行测试", "提交截图/视频", "打包APK"],
+      "cannot": ["修改策划案", "自行决定体验设计"],
+      "limitation": "只关注功能实现，体验验收由Claude负责"
+    },
+    "codex_manus": {
+      "can": ["校验策划案", "提供第二意见", "评估可行性"],
+      "cannot": ["直接执行开发任务"],
+      "role": "参谋，不是执行者"
+    },
+    "nano_banana": {
+      "can": ["生成UI", "生成美术资源", "切图"],
+      "cannot": ["写代码", "做策划"],
+      "integration": "API调用，Manus可辅助操作"
+    }
+  }
+}

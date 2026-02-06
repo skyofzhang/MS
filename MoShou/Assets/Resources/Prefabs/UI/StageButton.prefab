@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2032334912694396404}
   - component: {fileID: 4475224125452686118}
   - component: {fileID: 2430043762286020523}
-  - component: {fileID: 2364365360971913816}
+  - component: {fileID: 9219942398846825523}
   m_Layer: 0
   m_Name: StageButton
   m_TagString: Untagged
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2364365360971913816
+--- !u!114 &9219942398846825523
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

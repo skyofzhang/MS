@@ -1,0 +1,478 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-Administrator" at "2026-02-06T06:10:12.9037385Z"
+[Licensing::Client] Error: Code 10 while verifying Licensing Client signature (process Id: 31228, path: "D:/Program Files/Unity Hub/UnityLicensingClient_V1/Unity.Licensing.Client.exe")
+[Licensing::Module] Error: LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.16.1+e780b2e
+  Session Id:              cf5f12802f3d43f19a26e4f6305e5952
+  Correlation Id:          cc624fdbf3f3c6d747d9c2754e55d0fa
+  External correlation Id: 3793770124489033500
+  Machine Id:              UW3Hg6lsQPJSZvuLPQt3jBJgghE=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-Administrator" (connect: 0.00s, validation: 0.01s, handshake: 0.03s)
+[Licensing::IpcConnector] Successfully connected to the License Notification on channel: "LicenseClient-Administrator-notifications" at "2026-02-06T06:10:12.9433958Z"
+[Licensing::Client] Successfully updated the access token
+[Licensing::Module] Successfully updated the access token sAVq2sgTw0...
+[Licensing::Client] Successfully updated license
+Built from '2022.3/china_unity/release' branch; Version is '2022.3.47f1c1 (28b00139a434) revision 2666497'; Using compiler version '192829333'; Build Type 'Release'
+OS: 'Windows 11  (10.0.26100) 64bit CoreCountrySpecific' Language: 'zh' Physical Memory: 32579 MB
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Serial number assigned to: "F4-UKD5-UZ7P-HVXS-HT94-XXXX"
+BatchMode: 0, IsHumanControllingUs: 1, StartBugReporterOnCrash: 1, Is64bit: 1, IsPro: 0
+[Licensing::Client] Successfully resolved entitlement details
+
+COMMAND LINE ARGUMENTS:
+D:\program\2022.3.47f1c1\Editor\Unity.exe
+-projectpath
+E:\AI_Project\MS\MoShou
+-useHub
+-hubIPC
+-cloudEnvironment
+production
+-licensingIpc
+LicenseClient-Administrator
+-hubSessionId
+28902cd0-01e2-11f1-95de-e5da8d68c6ca
+-accessToken
+sAVq2sgTw0jWSC3z5PYk_keLLy9hrXkN7dl7sUF0qSM01ef
+-projectPath
+E:\AI_Project\MS\MoShou
+-executeMethod
+MoShou.Editor.AutoBuild.SceneModifier.AddStartButtonToMainMenu
+-logFile
+E:\AI_Project\MS\scene_modify.log
+Successfully changed project path to: E:\AI_Project\MS\MoShou
+E:/AI_Project/MS/MoShou
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Player connection [19952]  Target information:
+
+Player connection [19952]  * "[IP] 192.168.1.25 [Port] 55504 [Flags] 2 [Guid] 2692185256 [EditorId] 2692185256 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-4S9CU1E) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [19952]  * "[IP] 10.8.0.5 [Port] 55504 [Flags] 2 [Guid] 2692185256 [EditorId] 2692185256 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-4S9CU1E) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [19952] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [19952] Host joined alternative multi-casting on [225.0.0.222:34997]...
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+[Package Manager] UpmClient::Connect -- Connected to IPC stream "Upm-38792" after 0.3 seconds.
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 34 packages:
+  Built-in packages:
+    com.unity.2d.sprite@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.2d.sprite@1.0.0)
+    com.unity.ugui@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.ugui@1.0.0)
+    com.unity.modules.ai@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.ai@1.0.0)
+    com.unity.modules.androidjni@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.androidjni@1.0.0)
+    com.unity.modules.animation@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.animation@1.0.0)
+    com.unity.modules.assetbundle@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.assetbundle@1.0.0)
+    com.unity.modules.audio@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.audio@1.0.0)
+    com.unity.modules.cloth@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.cloth@1.0.0)
+    com.unity.modules.director@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.director@1.0.0)
+    com.unity.modules.imageconversion@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.imageconversion@1.0.0)
+    com.unity.modules.imgui@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.imgui@1.0.0)
+    com.unity.modules.jsonserialize@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.jsonserialize@1.0.0)
+    com.unity.modules.particlesystem@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.particlesystem@1.0.0)
+    com.unity.modules.physics@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.physics@1.0.0)
+    com.unity.modules.physics2d@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.physics2d@1.0.0)
+    com.unity.modules.screencapture@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.screencapture@1.0.0)
+    com.unity.modules.terrain@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.terrain@1.0.0)
+    com.unity.modules.terrainphysics@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.terrainphysics@1.0.0)
+    com.unity.modules.tilemap@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.tilemap@1.0.0)
+    com.unity.modules.ui@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.ui@1.0.0)
+    com.unity.modules.uielements@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.uielements@1.0.0)
+    com.unity.modules.umbra@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.umbra@1.0.0)
+    com.unity.modules.unityanalytics@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.unityanalytics@1.0.0)
+    com.unity.modules.unitywebrequest@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.unitywebrequest@1.0.0)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.unitywebrequestassetbundle@1.0.0)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.unitywebrequestaudio@1.0.0)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.unitywebrequesttexture@1.0.0)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.unitywebrequestwww@1.0.0)
+    com.unity.modules.vehicles@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.vehicles@1.0.0)
+    com.unity.modules.video@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.video@1.0.0)
+    com.unity.modules.vr@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.vr@1.0.0)
+    com.unity.modules.wind@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.wind@1.0.0)
+    com.unity.modules.xr@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.xr@1.0.0)
+    com.unity.modules.subsystems@1.0.0 (location: E:\AI_Project\MS\MoShou\Library\PackageCache\com.unity.modules.subsystems@1.0.0)
+[Subsystems] No new subsystems found in resolved package list.
+Package Manager log level set to [2]
+[Package Manager] Done registering packages in 0.20 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 2022.3.47f1c1 (28b00139a434)
+[Subsystems] Discovering subsystems at path D:/program/2022.3.47f1c1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path E:/AI_Project/MS/MoShou/Assets
+GfxDevice: creating device client; threaded=1; jobified=0
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce RTX 4060 (ID=0x2882)
+    Vendor:   NVIDIA
+    VRAM:     7957 MB
+    Driver:   32.0.15.6614
+[Licensing::Client] Successfully resolved entitlement details
+Initialize mono
+Mono path[0] = 'D:/program/2022.3.47f1c1/Editor/Data/Managed'
+Mono path[1] = 'D:/program/2022.3.47f1c1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'D:/program/2022.3.47f1c1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56792
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: D:/program/2022.3.47f1c1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+Register platform support module: D:/program/2022.3.47f1c1/Editor/Data/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Register platform support module: D:/program/2022.3.47f1c1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.021468 seconds.
+- Loaded All Assemblies, in  0.285 seconds
+Native extension for WindowsStandalone target not found
+Native extension for Android target not found
+Native extension for WebGL target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.258 seconds
+Domain Reload Profiling: 540ms
+	BeginReloadAssembly (81ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (1ms)
+	RebuildCommonClasses (24ms)
+	RebuildNativeTypeToScriptingClass (7ms)
+	initialDomainReloadingComplete (62ms)
+	LoadAllAssembliesAndSetupDomain (107ms)
+		LoadAssemblies (78ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (105ms)
+			TypeCache.Refresh (103ms)
+				TypeCache.ScanAssembly (94ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (0ms)
+	FinalizeReload (259ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (225ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (92ms)
+			SetLoadedEditorAssemblies (4ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (2ms)
+			ProcessInitializeOnLoadAttributes (88ms)
+			ProcessInitializeOnLoadMethodAttributes (40ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[ScriptCompilation] Requested script compilation because: Assetdatabase observed changes in script compilation related files
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:80
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: E:\AI_Project\MS\MoShou\
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc - - 200 - application/grpc 40.2860ms
+Starting: D:\program\2022.3.47f1c1\Editor\Data\bee_backend.exe --dont-print-to-structured-log --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: E:/AI_Project/MS/MoShou
+ExitCode: 4 Duration: 0s337ms
+Rebuilding DAG because FileSignature timestamp changed: Library/Bee/1900b0aE-inputdata.json
+*** Tundra requires additional run (0.05 seconds), 0 items updated, 135 evaluated
+Starting: D:\program\2022.3.47f1c1\Editor\Data\Tools\netcorerun\netcorerun.exe "D:\program\2022.3.47f1c1\Editor\Data\Tools\BuildPipeline\ScriptCompilationBuildProgram.exe" "Library/Bee/1900b0aE.dag.json" "Library/Bee/1900b0aE-inputdata.json" "Library\Bee\buildprogram0.traceevents"
+WorkingDir: E:/AI_Project/MS/MoShou
+ExitCode: 0 Duration: 0s354ms
+Starting: D:\program\2022.3.47f1c1\Editor\Data\bee_backend.exe --dont-print-to-structured-log --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aE.dag" --continue-on-failure --dagfilejson="Library\Bee\1900b0aE.dag.json" --profile="Library/Bee/backend2.traceevents" ScriptAssemblies
+WorkingDir: E:/AI_Project/MS/MoShou
+ExitCode: 0 Duration: 1s169ms
+Finished compiling graph: 138 nodes, 797 flattened edges (751 ToBuild, 10 ToUse), maximum node priority 63
+[112/135    0s] WriteText Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp-Editor.rsp
+[132/135    1s] Csc Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp-Editor.dll (+2 others)
+[133/135    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[134/135    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+*** Tundra build success (1.15 seconds), 4 items updated, 135 evaluated
+AssetDatabase: script compilation time: 3.356092s
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.211 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Start importing ProjectSettings/EditorBuildSettings.asset using Guid(0000000000000000b000000000000000) Importer(-1,00000000000000000000000000000000) [PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ -> (artifact id: 'cf1171fb612d4b4ceb5873c0926d5af5') in 0.013812 seconds
+Start importing Assets/Editor/AutoBuild using Guid(a96f8f96f47957d43bd58e4c6aadd8c7) Importer(-1,00000000000000000000000000000000) [PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ -> (artifact id: 'da87e0b8e1f040be76ca9b45f77cb668') in 0.002041 seconds
+Start importing Assets/Editor/AutoBuild/SceneModifier.cs using Guid(5a38baa7646e2a04c862eddf41d17dcb) Importer(-1,00000000000000000000000000000000) [PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ -> (artifact id: 'be7c36514d6717adc758a39f4a708309') in 0.003729 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Total cache size 268429134
+Total cache size after purge 268429134
+Native extension for WindowsStandalone target not found
+Native extension for Android target not found
+Native extension for WebGL target not found
+[BuildErrorReporter] 编译错误监听已启动
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.BuildErrorReporter:.cctor () (at Assets/Editor/BuildErrorReporter.cs:37)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Editor/BuildErrorReporter.cs Line: 37)
+
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.251 seconds
+Domain Reload Profiling: 457ms
+	BeginReloadAssembly (129ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (4ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (23ms)
+	RebuildCommonClasses (24ms)
+	RebuildNativeTypeToScriptingClass (8ms)
+	initialDomainReloadingComplete (23ms)
+	LoadAllAssembliesAndSetupDomain (23ms)
+		LoadAssemblies (69ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (19ms)
+			TypeCache.Refresh (15ms)
+				TypeCache.ScanAssembly (9ms)
+			ScanForSourceGeneratedMonoScriptInfo (1ms)
+			ResolveRequiredComponents (1ms)
+	FinalizeReload (251ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (170ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (21ms)
+			SetLoadedEditorAssemblies (3ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (11ms)
+			ProcessInitializeOnLoadAttributes (112ms)
+			ProcessInitializeOnLoadMethodAttributes (15ms)
+			AfterProcessingInitializeOnLoad (8ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (5ms)
+Start importing Assets/Scenes/MainScene.unity using Guid(c85823fd0088f604aa89785671ffe581) Importer(-1,00000000000000000000000000000000) [PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ -> (artifact id: 'e30e45df5cc8de0b884859b59abab685') in 0.000968 seconds
+Start importing Assets/Scenes/MainMenu.unity using Guid(f8981c0df1edc184186b1678aee793cd) Importer(-1,00000000000000000000000000000000) [PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ -> (artifact id: '17ff009f0c61963ba69f57a053ee4d21') in 0.000720 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=19533c1dcb372d340a4bdbaaaca9fa8d): Total: 4.164 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=5 (actual=5, local cache=0, cache server=0)
+		Asset DB Process Time: managed=3 ms, native=262 ms
+		Asset DB Callback time: managed=40 ms, native=2 ms
+		Scripting: domain reloads=1, domain reload time=487 ms, compile time=3356 ms, other=10 ms
+		Project Asset Count: scripts=459, non-scripts=83
+		Asset File Changes: new=2, changed=5, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokeBeforeRefreshCallbacks: 1.267ms
+	ApplyChangesToAssetFolders: 0.037ms
+	Scan: 25.280ms
+	OnSourceAssetsModified: 2.362ms
+	GetAllGuidsForCategorization: 0.051ms
+	CategorizeAssets: 4.183ms
+	ImportOutOfDateAssets: 283.987ms (-3101.012ms without children)
+		ImportManagerImport: 26.839ms (4.714ms without children)
+			ImportInProcess: 22.088ms
+			UpdateCategorizedAssets: 0.037ms
+		CompileScripts: 3356.197ms
+		ReloadNativeAssets: 0.001ms
+		UnloadImportedAssets: 1.669ms
+		ReloadImportedAssets: 0.000ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.106ms
+		InitializingProgressBar: 0.001ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.000ms
+		OnDemandSchedulerStart: 0.187ms
+	PostProcessAllAssets: 38.379ms
+	Hotreload: 1.569ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.000ms
+	UnloadStreamsBegin: 1.054ms
+	PersistCurrentRevisions: 0.099ms
+	UnloadStreamsEnd: 0.007ms
+	GenerateScriptTypeHashes: 0.387ms
+	Untracked: 3805.707ms
+Application.AssetDatabase Initial Refresh End
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.05 seconds
+Scanning for USB devices : 3.598ms
+Initializing Unity extensions:
+[Licensing::Client] Successfully resolved entitlement details
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-MoShou
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ProgressiveSceneManager::Cancel()
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 17 unused Assets / (469.8 KB). Loaded Objects now: 817.
+Memory consumption went from 91.3 MB to 90.8 MB.
+Total: 2.391300 ms (FindLiveObjects: 0.052800 ms CreateObjectMapping: 0.010300 ms MarkObjects: 2.144600 ms  DeleteObjects: 0.182900 ms)
+
+[LAYOUT] About to load UserSettings\Layouts\default-2022.dwlt, keepMainWindow=False
+<RI> Initialized touch support.
+<RI> Initialized touch support.
+<RI> Initialized touch support.
+<RI> Initialized touch support.
+<RI> Initialized touch support.
+<RI> Initialized touch support.
+<RI> Initialized touch support.
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+[MODES] ModeService[default].InitializeCurrentMode
+[MODES] ModeService[default].RaiseModeChanged(default, default)
+[SceneModifier] Starting AddStartButtonToMainMenu...
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:22)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 22)
+
+Opening scene 'Assets/Scenes/MainMenu.unity'
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/MainMenu.unity'
+	Deserialize:            6.396 ms
+	Integration:            32.193 ms
+	Integration of assets:  0.008 ms
+	Thread Wait Time:       0.002 ms
+	Total Operation Time:   38.599 ms
+Unloading 56 unused Assets / (14.3 MB). Loaded Objects now: 1705.
+Memory consumption went from 121.4 MB to 107.1 MB.
+Total: 9.172000 ms (FindLiveObjects: 0.137400 ms CreateObjectMapping: 0.027900 ms MarkObjects: 6.118300 ms  DeleteObjects: 2.886800 ms)
+
+[SceneModifier] Opened scene: Assets/Scenes/MainMenu.unity
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:35)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 35)
+
+[SceneModifier] Found existing Canvas
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:60)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 60)
+
+[SceneModifier] StartButton already exists, updating...
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:67)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 67)
+
+[SceneModifier] Creating StartButton...
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:72)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 72)
+
+[SceneModifier] Connected StartButton to MainMenuManager.startButton
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:127)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 127)
+
+Start importing Assets/Scenes/MainMenu.unity using Guid(f8981c0df1edc184186b1678aee793cd) Importer(-1,00000000000000000000000000000000) [PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ -> (artifact id: '622d35bb71b5fc2e557b4ec9b922bb36') in 0.001941 seconds
+Refreshing native plugins compatible for Editor in 0.01 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=802c5537cb9a1fd44bd9142fac3660d4): Total: 0.014 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+[SceneModifier] Scene saved successfully!
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:140)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 140)
+
+[SceneModifier] Result written to E:/AI_Project/MS/.task/modify_result.json
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+MoShou.Editor.AutoBuild.SceneModifier:WriteResult (string,string) (at Assets/Editor/AutoBuild/SceneModifier.cs:164)
+MoShou.Editor.AutoBuild.SceneModifier:AddStartButtonToMainMenu () (at Assets/Editor/AutoBuild/SceneModifier.cs:141)
+
+(Filename: Assets/Editor/AutoBuild/SceneModifier.cs Line: 164)
+
+IsTimeToCheckForNewEditor: Update time 1770296578 current 1770358223
+Unity is running with Administrator privileges, which is not supported. Unity executes scripts and binary libraries in your project that may originate from third party sources and potentially be harmful to your computer. Unity may also execute scripts and binary libraries that are still under development and not yet fully tested. Running Unity with Administrator privileges may lead to catastrophic consequences, including but not limited to accidental data loss, change of global system settings or even bricking your device.
+<RI> Initializing input.
+<RI> Input initialized.
+[Project] Loading completed in 11.604 seconds
+	Project init time: 				6.223 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		0.351 seconds
+		Asset Database init time: 		0.291 seconds
+		Global illumination init time: 	0.004 seconds
+		Assemblies load time: 			0.558 seconds
+		Unity extensions init time: 	0.001 seconds
+		Asset Database refresh time: 	0.000 seconds
+	Scene opening time: 			1.322 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1770358223240,"processId":38792,"projectLoad":11.6035146,"projectInit":6.2230319,"templateInit":0.0,"packageManagerInit":0.3512068,"assetDatabaseInit":0.2911322,"globalIlluminationInit":0.0039969,"assembliesLoad":0.5579364,"unityExtensionsInit":0.0005211,"assetDatabaseRefresh":0.0,"sceneOpening":1.321506}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1770358223240,"processId":38792,"editorVersion":"2022.3.47f1c1 (28b00139a434)","branch":"2022.3/china_unity/release","buildType":"Release","platform":"Windows"}
+Created GICache directory at C:/Users/Administrator/AppData/LocalLow/Unity/Caches/GiCache. Took: 0.030s, timestamps: [11.642 - 11.673]
+gi::BakeBackendSwitch: switching bake backend from 3 to 1.
+[00:00:00] Builtin Sky manager started.
+[00:00:00] Finished 1 Bake Ambient Probe job (0.00s execute, 0.00s integrate, 0.07s wallclock)
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.07 seconds
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.05 seconds
+Android Extension - Scanning For ADB Devices 365 ms
+[Licensing::Client] Successfully updated the access token
+[Licensing::Module] Successfully updated access token: "sAVq2sgT"... (expires: 2027-02-06 06:10:25 GMT)
+EditorUpdateCheck: Failed The requested URL returned error: 404
+TrimDiskCacheJob: Current cache size 105mb

@@ -44,7 +44,15 @@ public class GameSceneSetup : MonoBehaviour
         {
             CreateCamera();
         }
-        
+
+        // 创建UI资源绑定器 - 自动应用美术资源到UI组件
+        if (UIResourceBinder.Instance == null)
+        {
+            var binderGO = new GameObject("UIResourceBinder");
+            binderGO.AddComponent<UIResourceBinder>();
+            Debug.Log("[GameSceneSetup] UIResourceBinder已创建");
+        }
+
         Debug.Log("[GameSceneSetup] Scene setup complete!");
     }
     

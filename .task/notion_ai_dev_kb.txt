@@ -1,0 +1,432 @@
+﻿读取方式: AI直接查询本页获取开发指令
+更新时间: 2026-02-06
+格式说明: 每个模块采用 WHEN-DO-VERIFY 指令格式
+## §1 项目常量（直接引用）
+[CODE] {
+  "PROJECT_CODE": "MS",
+  "ENGINE": "Unity 2022.3.47f1c1",
+  "RENDER_PIPELINE": "URP 14.x",
+  "SCREEN": {"width": 1080, "height": 1920, "orientation": "portrait"},
+  "UNITY_PROJECT_PATH": "E:/AI_Project/MS/MoShou/",
+  "GIT_RESOURCE_REPO": "skyofzhang/ai-game-templates",
+  "GIT_RESOURCE_PATH": "projects/moshou/"
+}
+## §2 资源加载指令（完整版 - 对照R01美术资源清单）
+### RULE-RES-001: 加载玩家模型
+[CODE] WHEN: 需要实例化玩家角色
+DO: var prefab = Resources.Load<GameObject>("Models/Player/Player_Archer");
+    var player = Instantiate(prefab, spawnPoint, Quaternion.identity);
+    player.tag = "Player";
+VERIFY: player != null && player.GetComponentInChildren<Renderer>() != null
+FALLBACK: ResourceLoader.LoadModel() 返回红色Cube
+### RULE-RES-002: 加载怪物模型
+[CODE] WHEN: 需要生成怪物
+DO: 根据monster_id查表
+
+| monster_id | Resources.Load路径 |
+|------------|--------------------|
+| MON_SLIME_001 | Models/Monsters/Slime/Monster_Slime |
+| MON_GOBLIN_001 | Models/Monsters/Goblin/Monster_Goblin |
+| MON_WOLF_001 | Models/Monsters/Wolf/Monster_Wolf |
+| MON_GOBLIN_ELITE_001 | Models/Monsters/GoblinElite/Monster_GoblinElite |
+| BOSS_GOBLIN_KING | Models/Monsters/GoblinKing/Boss_GoblinKing |
+
+VERIFY: monster.GetComponent<MonsterController>() != null
+FALLBACK: ResourceLoader.LoadModel() 返回红色Cube
+### RULE-RES-003: 加载场景模型
+[CODE] WHEN: 需要加载环境物件
+DO: 根据场景类型查表
+
+| 物件 | Resources.Load路径 |
+|------|--------------------|
+| 树木 | Models/Environment/Forest/Env_Tree_01 |
+| 小石头 | Models/Environment/Forest/Env_Rock_01 |
+| 大石块(障碍) | Models/Environment/Forest/Env_Rock_Large |
+| 石柱(BOSS房) | Models/Environment/BossRoom/Env_Pillar_01 |
+| 王座(BOSS房) | Models/Environment/BossRoom/Env_Throne |
+| 草地地面 | Models/Environment/Forest/Ground_Grass_01 |
+| 石板地面 | Models/Environment/BossRoom/Ground_Stone_01 |
+
+VERIFY: obj != null
+FALLBACK: 跳过装饰物，不阻塞
+### RULE-RES-004: 加载武器模型
+[CODE] WHEN: 需要显示玩家武器
+DO: 根据weapon_id查表
+
+| weapon_id | Resources.Load路径 |
+|-----------|--------------------|
+| WPN_BOW_BASIC | Models/Weapons/Weapon_Bow_Basic |
+| WPN_BOW_IRON | Models/Weapons/Weapon_Bow_Iron |
+
+VERIFY: weapon != null
+FALLBACK: 使用基础弓
+### RULE-RES-005: 加载HUD精灵
+[CODE] WHEN: 需要设置HUD界面图片
+DO: 完整HUD资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 血条背景 | Sprites/UI/HUD/UI_HUD_HPBar_BG |
+| 血条填充 | Sprites/UI/HUD/UI_HUD_HPBar_Fill |
+| 经验条背景 | Sprites/UI/HUD/UI_HUD_EXPBar_BG |
+| 经验条填充 | Sprites/UI/HUD/UI_HUD_EXPBar_Fill |
+| 玩家头像框 | Sprites/UI/HUD/UI_HUD_PlayerIcon_Frame |
+| 等级背景 | Sprites/UI/HUD/UI_HUD_Level_BG |
+| 金币图标 | Sprites/UI/HUD/UI_HUD_Gold_Icon |
+| 波次指示器 | Sprites/UI/HUD/UI_HUD_Wave_BG |
+
+VERIFY: sprite != null
+FALLBACK: image.color = Color.magenta
+### RULE-RES-006: 加载技能槽精灵
+[CODE] WHEN: 需要设置技能槽UI
+DO: 技能槽资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 技能槽背景 | Sprites/UI/Skills/UI_Skill_Slot_BG |
+| 技能槽锁定 | Sprites/UI/Skills/UI_Skill_Slot_Locked |
+| 冷却遮罩 | Sprites/UI/Skills/UI_Skill_Cooldown_Mask |
+| 多重箭图标 | Sprites/UI/Skills/UI_Skill_Icon_MultiShot |
+| 穿透箭图标 | Sprites/UI/Skills/UI_Skill_Icon_Pierce |
+| 战吼图标 | Sprites/UI/Skills/UI_Skill_Icon_BattleShout |
+
+VERIFY: sprite != null
+FALLBACK: 使用灰色占位
+### RULE-RES-007: 加载升级面板精灵
+[CODE] WHEN: 需要显示升级选择界面
+DO: 升级面板资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 面板背景 | Sprites/UI/LevelUp/UI_LevelUp_Panel_BG |
+| 技能卡片背景 | Sprites/UI/LevelUp/UI_LevelUp_Card_BG |
+| 卡片选中状态 | Sprites/UI/LevelUp/UI_LevelUp_Card_Selected |
+| 标题背景 | Sprites/UI/LevelUp/UI_LevelUp_Title_BG |
+| 普通品质框 | Sprites/UI/LevelUp/UI_Rarity_Common |
+| 稀有品质框 | Sprites/UI/LevelUp/UI_Rarity_Rare |
+| 史诗品质框 | Sprites/UI/LevelUp/UI_Rarity_Epic |
+
+VERIFY: sprite != null
+### RULE-RES-008: 加载结算面板精灵
+[CODE] WHEN: 需要显示战斗结算界面
+DO: 结算面板资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 胜利背景 | Sprites/UI/Result/UI_Result_Victory_BG |
+| 失败背景 | Sprites/UI/Result/UI_Result_Defeat_BG |
+| 空星星 | Sprites/UI/Result/UI_Result_Star_Empty |
+| 满星星 | Sprites/UI/Result/UI_Result_Star_Filled |
+| 奖励槽 | Sprites/UI/Result/UI_Result_Reward_Slot |
+
+VERIFY: sprite != null
+### RULE-RES-009: 加载按钮精灵
+[CODE] WHEN: 需要设置按钮图片
+DO: 按钮资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 主按钮-普通 | Sprites/UI/Buttons/UI_Btn_Primary_Normal |
+| 主按钮-按下 | Sprites/UI/Buttons/UI_Btn_Primary_Pressed |
+| 主按钮-禁用 | Sprites/UI/Buttons/UI_Btn_Primary_Disabled |
+| 次按钮-普通 | Sprites/UI/Buttons/UI_Btn_Secondary_Normal |
+| 关闭按钮 | Sprites/UI/Buttons/UI_Btn_Close |
+| 暂停按钮 | Sprites/UI/Buttons/UI_Btn_Pause |
+
+VERIFY: sprite != null
+### RULE-RES-010: 加载通用UI精灵
+[CODE] WHEN: 需要通用UI元素
+DO: 通用UI资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 提示框背景 | Sprites/UI/Common/UI_Common_Tooltip_BG |
+| 对话框背景 | Sprites/UI/Common/UI_Common_Dialog_BG |
+| 进度条背景 | Sprites/UI/Common/UI_Common_Progress_BG |
+| 进度条填充 | Sprites/UI/Common/UI_Common_Progress_Fill |
+| 伤害数字 | Sprites/UI/Common/UI_Damage_Numbers |
+| 暴击数字 | Sprites/UI/Common/UI_Damage_Crit_Numbers |
+
+VERIFY: sprite != null
+### RULE-RES-011: 加载VFX特效
+[CODE] WHEN: 需要播放特效
+DO: 完整VFX资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 箭矢拖尾 | Prefabs/VFX/VFX_Arrow_Trail |
+| 多重箭特效 | Prefabs/VFX/VFX_MultiShot |
+| 穿透箭特效 | Prefabs/VFX/VFX_PierceShot |
+| 战吼特效 | Prefabs/VFX/VFX_BattleShout |
+| 击中火花 | Prefabs/VFX/VFX_Hit_Spark |
+| 死亡消融 | Prefabs/VFX/VFX_Death_Dissolve |
+| 升级特效 | Prefabs/VFX/VFX_LevelUp |
+| 拾取金币 | Prefabs/VFX/VFX_Gold_Pickup |
+| BOSS狂暴 | Prefabs/VFX/VFX_Boss_Rage |
+
+VERIFY: vfx != null
+FALLBACK: ResourceLoader.LoadVFX() 返回空粒子系统
+### RULE-RES-012: 加载BGM音乐
+[CODE] WHEN: 需要播放背景音乐
+DO: BGM资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 主菜单BGM | Audio/BGM/BGM_MainMenu |
+| 普通战斗BGM | Audio/BGM/BGM_Battle_Normal |
+| BOSS战斗BGM | Audio/BGM/BGM_Boss_Battle |
+| 胜利BGM | Audio/BGM/BGM_Victory |
+| 失败BGM | Audio/BGM/BGM_Defeat |
+
+VERIFY: clip != null
+FALLBACK: 静默播放
+### RULE-RES-013: 加载战斗音效
+[CODE] WHEN: 需要播放战斗音效
+DO: 战斗SFX资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 箭矢发射 | Audio/SFX/SFX_Arrow_Shoot |
+| 箭矢命中 | Audio/SFX/SFX_Arrow_Hit |
+| 多重箭技能 | Audio/SFX/SFX_Skill_MultiShot |
+| 穿透箭技能 | Audio/SFX/SFX_Skill_Pierce |
+| 战吼技能 | Audio/SFX/SFX_Skill_BattleShout |
+| 怪物受击 | Audio/SFX/SFX_Monster_Hit |
+| 怪物死亡 | Audio/SFX/SFX_Monster_Death |
+| 玩家受击 | Audio/SFX/SFX_Player_Hit |
+| 玩家死亡 | Audio/SFX/SFX_Player_Death |
+| BOSS普攻 | Audio/SFX/SFX_Boss_Attack |
+| BOSS技能 | Audio/SFX/SFX_Boss_Skill |
+| BOSS狂暴 | Audio/SFX/SFX_Boss_Rage |
+
+VERIFY: clip != null
+FALLBACK: 静默
+### RULE-RES-014: 加载UI音效
+[CODE] WHEN: 需要播放UI音效
+DO: UI SFX资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 按钮点击 | Audio/SFX/SFX_UI_Button_Click |
+| 面板打开 | Audio/SFX/SFX_UI_Panel_Open |
+| 面板关闭 | Audio/SFX/SFX_UI_Panel_Close |
+| 升级音效 | Audio/SFX/SFX_UI_LevelUp |
+| 技能选择 | Audio/SFX/SFX_UI_Skill_Select |
+| 拾取金币 | Audio/SFX/SFX_UI_Gold_Pickup |
+| 波次开始 | Audio/SFX/SFX_UI_Wave_Start |
+| 波次清除 | Audio/SFX/SFX_UI_Wave_Clear |
+
+VERIFY: clip != null
+FALLBACK: 静默
+### RULE-RES-015: 加载环境音效
+[CODE] WHEN: 需要播放环境音
+DO: 环境SFX资源映射
+
+| 用途 | Resources.Load路径 |
+|------|--------------------|
+| 森林环境音 | Audio/SFX/SFX_Amb_Forest |
+| BOSS房环境音 | Audio/SFX/SFX_Amb_BossRoom |
+
+VERIFY: clip != null
+FALLBACK: 静默
+### §2 资源统计（对照R01美术资源清单）
+[CODE] 总资源数: 101
+  - 3D模型: 13 (玩家1 + 怪物5 + 场景5 + 武器2)
+  - 贴图: 14
+  - UI精灵: 38 (HUD8 + 技能6 + 升级7 + 结算5 + 按钮6 + 通用6)
+  - VFX特效: 9
+  - 音频: 27 (BGM5 + 战斗SFX12 + UI SFX8 + 环境SFX2)
+
+覆盖率: 100% (101/101)
+## §3 核心系统调用指令
+### RULE-SYS-001: 获取玩家属性
+[CODE] WHEN: 需要读取/修改玩家属性
+DO: var stats = SaveSystem.Instance.CurrentPlayerStats;
+    int hp = stats.currentHp;
+    int maxHp = stats.GetTotalMaxHp();
+    int attack = stats.GetTotalAttack();
+    stats.AddGold(amount);
+    stats.AddExp(amount);
+VERIFY: stats != null
+### RULE-SYS-002: 造成伤害
+[CODE] WHEN: 攻击命中目标
+DO: var combat = CombatSystem.Instance;
+    int damage = combat.CalculateDamage(attacker, target, skillMultiplier);
+    combat.ApplyDamage(target, damage, isCritical);
+VERIFY: target.GetComponent<IStatsProvider>() != null
+FORMULA: 
+    baseDamage = attack * skillMultiplier
+    reduction = defense / (defense + 100)
+    finalDamage = baseDamage * (1 - reduction)
+    if crit: finalDamage *= (1 + critDamage)
+    最小伤害 = 1
+### RULE-SYS-003: 生成怪物
+[CODE] WHEN: 关卡开始/波次切换
+DO: var spawner = MonsterSpawner.Instance;
+    spawner.SpawnWave(waveConfig);
+CONFIG: waveConfig包含
+    monster_ids: ["MON_SLIME_001", "MON_GOBLIN_001"]
+    counts: [3, 2]
+    spawn_delay: 0.5f
+VERIFY: FindObjectsOfType<MonsterController>().Length > 0
+### RULE-SYS-004: 显示/隐藏UI面板
+[CODE] WHEN: 需要打开/关闭UI
+DO: UIManager.Instance.ShowPanel<PanelType>();
+    UIManager.Instance.HidePanel<PanelType>();
+    UIManager.Instance.TogglePanel<PanelType>();
+可用面板:
+    GameHUD, InventoryPanel, EquipmentPanel, SkillPanel,
+    SettingsPanel, ResultPanel, StageSelectPanel, PausePanel
+VERIFY: panel.gameObject.activeInHierarchy == expectedState
+### RULE-SYS-005: 场景切换
+[CODE] WHEN: 需要切换场景
+DO: SceneManager.LoadScene(sceneName);
+场景列表:
+    "MainMenu" - 主菜单
+    "StageSelect" - 关卡选择
+    "GameScene" - 战斗场景
+VERIFY: SceneManager.GetActiveScene().name == sceneName
+## §4 数值常量（硬编码引用）
+### 玩家基础属性
+[CODE] {
+  "HP": 150, "Attack": 15, "Defense": 10,
+  "MoveSpeed": 4.0, "AttackSpeed": 1.0,
+  "CritChance": 0.10, "CritDamage": 0.50,
+  "AttackRange": 8.0,
+  "HP_per_level": 10, "Attack_per_level": 2, "Defense_per_level": 1
+}
+### 怪物属性表
+[CODE] MON_SLIME_001:     HP=30,  ATK=5,  DEF=2,  SPD=2.0, EXP=10,  GOLD=5
+MON_GOBLIN_001:    HP=50,  ATK=8,  DEF=4,  SPD=1.5, EXP=15,  GOLD=8
+MON_WOLF_001:      HP=70,  ATK=12, DEF=5,  SPD=3.0, EXP=20,  GOLD=12
+MON_GOBLIN_ELITE:  HP=150, ATK=18, DEF=10, SPD=2.0, EXP=50,  GOLD=30
+BOSS_GOBLIN_KING:  HP=800, ATK=25, DEF=15, SPD=1.8, EXP=300, GOLD=200
+### 技能数据表
+[CODE] SK001 多重箭:   CD=8s, 倍率=0.8, 箭数=5,  范围=10m, 角度=60°
+SK002 穿透箭:   CD=10s, 倍率=2.0, 穿透=true, 范围=15m
+SK003 战吼:     CD=20s, 护盾=20%HP, 攻击Buff=15%, 持续=5s/8s
+## §5 物理层配置（Unity设置）
+### 碰撞层
+[CODE] Layer 8 = Player
+Layer 9 = Enemy  
+Layer 10 = Projectile
+Layer 11 = Environment
+### 碰撞矩阵
+[CODE] Player vs Enemy = true
+Player vs Projectile = false (不被自己子弹打)
+Enemy vs Enemy = false (怪物间不碰撞)
+Projectile vs Enemy = true
+Projectile vs Environment = true
+### Rigidbody设置
+[CODE] 玩家: mass=1, drag=5, angularDrag=999, freezeRotation=[x,y,z]
+怪物: mass=1, drag=8, angularDrag=999, freezeRotation=[x,y,z]
+## §6 开发完成检查指令
+### RULE-DONE-001: 编译检查
+[CODE] WHEN: 准备报告"开发完成"
+DO: 检查Unity Console
+VERIFY: Error数量 = 0 (Warning可接受)
+BLOCKER: true
+### RULE-DONE-002: PlayMode检查
+[CODE] WHEN: 编译通过后
+DO: 点击Play进入PlayMode
+VERIFY: 不崩溃，能进入GameScene
+BLOCKER: true
+### RULE-DONE-003: 视觉检查
+[CODE] WHEN: PlayMode运行中
+DO: 运行 MoShou/Visual Self Test 菜单
+VERIFY: 所有VC-xxx检查项通过
+BLOCKER: true
+检查项:
+  VC-001: 玩家角色可见
+  VC-002: 血条UI可见
+  VC-003: 怪物可生成
+  VC-004: 技能图标正确
+  VC-005: 攻击有数字反馈
+  VC-006: 怪物死亡有动画
+  VC-007: 技能有特效
+  VC-008: 无FALLBACK对象存在
+### RULE-DONE-004: 核心循环检查
+[CODE] WHEN: 视觉检查通过后
+DO: 手动验证流程
+    1. 主菜单 → 点击开始
+    2. 关卡选择 → 进入关卡1
+    3. 战斗 → 击杀怪物
+    4. 拾取 → 获得金币/经验
+    5. 结算 → 显示奖励
+    6. 返回 → 回到关卡选择
+VERIFY: 全流程无卡死
+BLOCKER: true
+### 完成报告格式
+[CODE] [开发完成] 任务{task_id}
+- 编译: ✓ 0 Error
+- PlayMode: ✓ 可进入
+- 视觉测试: ✓ 8/8通过
+- 核心循环: ✓ 可完整体验
+- APK构建: ✓/✗ {状态}
+## §7 禁止事项
+### FORBIDDEN-001: 禁止占位符
+[CODE] 禁止:
+  - 代码中包含 "placeholder", "dummy", "temp_"
+  - 使用 CreatePrimitive() 作为正式资源
+  - 使用 Color.magenta 作为正式颜色
+  - 注释中包含 "TODO: add resource"
+例外:
+  - ResourceLoader.cs 中的降级策略（必须输出Warning）
+### FORBIDDEN-002: 禁止硬编码路径
+[CODE] 禁止:
+  - 直接写 "Assets/Resources/xxx"
+  - 直接写 "E:/AI_Project/xxx"
+正确:
+  - 使用 Resources.Load<T>("相对路径")
+  - 相对路径不含 "Assets/Resources/" 前缀
+  - 相对路径不含文件扩展名
+### FORBIDDEN-003: 禁止跳过验证
+[CODE] 禁止:
+  - 资源加载后不检查null
+  - 组件获取后不检查null  
+  - 报告"完成"前不运行VisualSelfTest
+正确:
+  - 每次Resources.Load后检查 != null
+  - 每次GetComponent后检查 != null
+  - 完成前必须运行视觉自测
+### FORBIDDEN-004: 禁止假设命名空间
+[CODE] WHEN: 创建引用其他类的代码时
+禁止:
+  - 假设类在某个命名空间中（如 MoShou.Core.GameManager）
+  - 不验证就使用完全限定名
+  - 跨会话时假设之前代码的命名空间结构
+
+正确:
+  - 先读取被引用类的实际文件，确认命名空间
+  - 如果类在全局命名空间，直接使用类名（如 GameManager）
+  - 如果不确定，优先使用全局命名空间引用
+
+验证方法:
+  DO: 读取目标.cs文件前20行
+  CHECK: 是否有 namespace XXX { 声明
+  IF 有: 使用 XXX.ClassName
+  IF 无: 直接使用 ClassName
+
+案例:
+  错误: CheckScriptExists<MoShou.Core.GameManager>() // 假设命名空间
+  正确: CheckScriptExists<GameManager>() // 实际GameManager在全局命名空间
+### FORBIDDEN-005: 禁止创建引用不存在类的代码
+[CODE] WHEN: 代码中需要引用其他类时
+禁止:
+  - 引用尚未创建的类（如 SettingsPanel）
+  - 假设某个Panel/Manager存在
+  - 不检查就使用 FindObjectOfType<T>()
+
+正确:
+  - 创建引用代码前，先确认被引用类存在
+  - 如果不存在，要么先创建，要么使用条件检查
+  - 使用 #if 或 null 检查处理可选依赖
+
+验证方法:
+  DO: Glob搜索 **/ClassName.cs
+  IF 不存在: 先创建类，再写引用代码
+  IF 存在: 读取确认类名和命名空间
+
+案例:
+  错误: var panel = FindObjectOfType<SettingsPanel>() // SettingsPanel不存在
+  正确: 先创建SettingsPanel.cs，再写引用代码
