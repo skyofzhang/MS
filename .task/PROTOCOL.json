@@ -1,15 +1,84 @@
 {
-  "version": "1.0",
-  "description": "Claude-Cursor bidirectional communication protocol",
-  "files": {
-    "current_task.json": "Claude writes task, Cursor reads and executes",
-    "task_result.json": "Cursor writes result, Claude reads and verifies",
-    "ask_claude.json": "Cursor asks question, Claude responds",
-    "claude_response.json": "Claude response to Cursor question"
+  "version": "1.3",
+  "description": "V1.3 Claude-Cursor双向通信协议",
+  "architecture": {
+    "claude_code": "策划 + 主程序 + 验收 (Core/Data/Configs)",
+    "cursor": "Unity执行者 (Gameplay/Combat/UI/Systems)",
+    "n8n": "事件监听 + 状态记录 + 消息转发",
+    "communication_channel": "Git + .task/ 目录"
   },
-  "git_tags": {
-    "NODE_COMPLETE": "Task completed, trigger verification",
-    "PROGRESS": "Progress update",
-    "ASK_CLAUDE": "Question for Claude"
-  }
+  "files": {
+    "current_task.json": {
+      "writer": "Claude",
+      "reader": "Cursor",
+      "purpose": "Claude分配任务给Cursor执行"
+    },
+    "task_result.json": {
+      "writer": "Cursor",
+      "reader": "Claude",
+      "purpose": "Cursor汇报任务完成状态"
+    },
+    "ask_claude.json": {
+      "writer": "Cursor",
+      "reader": "n8n → DeepSeek",
+      "purpose": "Cursor遇到问题时向Claude提问"
+    },
+    "claude_response.json": {
+      "writer": "n8n (via GitHub API)",
+      "reader": "Cursor",
+      "purpose": "Claude回答Cursor的问题"
+    }
+  },
+  "git_commit_tags": {
+    "[NODE_COMPLETE]": {
+      "trigger": "NWF-02 → NWF-04质检",
+      "description": "任务节点完成，触发质检流程"
+    },
+    "[PROGRESS]": {
+      "trigger": "NWF-03 状态记录",
+      "description": "进度更新，仅记录不触发流程"
+    },
+    "[ASK_CLAUDE]": {
+      "trigger": "NWF-02 → 处理问题分支",
+      "description": "Cursor有问题需要Claude回答"
+    },
+    "[FIX]": {
+      "trigger": "NWF-03 状态记录",
+      "description": "修复问题提交"
+    },
+    "[WORKFLOW_UPDATE]": {
+      "trigger": "NWF-06 工作流同步",
+      "description": "工作流变更，同步到Notion知识库"
+    }
+  },
+  "ask_claude_format": {
+    "request_id": "REQ-YYYYMMDD-NNN",
+    "type": "question | kb_lookup | issue_report | decision",
+    "context": "当前工作上下文描述",
+    "question": "具体问题内容",
+    "related_files": ["相关文件路径列表"],
+    "urgency": "normal | high",
+    "timestamp": "ISO 8601格式时间"
+  },
+  "claude_response_format": {
+    "request_id": "对应的请求ID",
+    "status": "answered | need_human | escalated",
+    "answer": "回答内容",
+    "references": ["参考的知识库文档"],
+    "next_action": "continue | wait_for_human | update_task",
+    "timestamp": "ISO 8601格式时间"
+  },
+  "nwf_workflows": {
+    "NWF-01": "Notion需求监听器 (每5分钟)",
+    "NWF-02": "Git事件分发器 (GitHub Webhook)",
+    "NWF-03": "状态记录器 (NWF-02调用)",
+    "NWF-05": "Build Error Handler (编译错误Webhook)",
+    "NWF-06": "工作流同步器 (待部署)",
+    "NWF-07": "策划质检器 (待部署)"
+  },
+  "code_boundary": {
+    "claude_writes": ["Scripts/Core/", "Scripts/Data/", "Resources/Configs/"],
+    "cursor_writes": ["Scripts/Gameplay/", "Scripts/Combat/", "Scripts/UI/", "Scripts/Systems/", "Scripts/Editor/"]
+  },
+  "updated_at": "2026-02-06T00:00:00Z"
 }
