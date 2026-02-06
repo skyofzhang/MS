@@ -1,6 +1,6 @@
-# MS Project - Cursor AI Rules V1.1.1
-# AI Game Production Pipeline
-# Created: 2026-02-05
+# MS Project - Cursor AI Rules V1.2.0
+# AI Game Production Pipeline with State Machine
+# Updated: 2026-02-06
 
 ## Project Info
 - Project: MS
@@ -9,28 +9,78 @@
 - Project Path: E:\AI_Project\MS
 - Platform: Android ARM64
 
+## State Machine Integration
+
+### 1. Startup Checklist (MUST DO)
+```
+1. Read .task/workflow_state.json
+2. Check current_phase value
+3. IF current_phase == "cursor_execute" → Execute current_task.json
+4. IF current_phase != "cursor_execute" → Wait, do nothing
+5. Read .task/PROTOCOL.json for full context
+```
+
+### 2. Phase Check Before Any Action
+- ONLY work when: current_phase == "cursor_execute"
+- If different phase → Log "Waiting for cursor_execute phase" and stop
+
+### 3. Files to Monitor
+| File | Purpose | When to Read |
+|------|---------|--------------|
+| workflow_state.json | Phase control | On startup, before any action |
+| current_task.json | Task assignment | When phase is cursor_execute |
+| PROTOCOL.json | Full protocol | On startup |
+
 ## Development Flow
 
-### 1. Read on Startup
-- .task/current_task.json
-- .task/PROTOCOL.json
-
-### 2. Task Execution
+### Task Execution
 - Follow acceptance_criteria strictly
 - One step at a time, verify before next step
+- Take screenshot after each major milestone
 
-### 3. Git Commit Tags
-- Task done: git commit -m "[NODE_COMPLETE] MS-XXX: description"
-- Progress: git commit -m "[PROGRESS] MS-XXX: description"
-- Question: write .task/ask_claude.json, git commit -m "[ASK_CLAUDE] question"
-- Always: git push origin main
+### Git Commit Tags
+| Tag | When to Use | Example |
+|-----|-------------|---------|
+| [NODE_COMPLETE] | Task fully done | [NODE_COMPLETE] MS-001: 完成背包UI |
+| [TASK_RESULT] | Submit for review | [TASK_RESULT] MS-001: 等待验收 |
+| [PROGRESS] | Partial progress | [PROGRESS] MS-001: 完成50% |
+| [ASK_CLAUDE] | Need help | [ASK_CLAUDE] 如何连接拖拽事件 |
+| [FIX] | Bug fix | [FIX] MS-001: 修复空引用 |
 
-### 4. Screenshot
-- Save to .task/screenshots/MS-XXX.png
-- Update .task/task_result.json
+### After Task Complete
+```
+1. Update .task/task_result.json with:
+   - task_id
+   - status: "completed"
+   - screenshot_path
+   - completion_time
+2. git add .task/task_result.json .task/screenshots/
+3. git commit -m "[TASK_RESULT] MS-XXX: 任务完成，等待验收"
+4. git push origin main
+```
+
+## Communication Protocol
+
+### Ask Claude (When Stuck)
+1. Write .task/ask_claude.json:
+```json
+{
+  "request_id": "REQ-YYYYMMDD-001",
+  "type": "question",
+  "context": "当前开发任务上下文",
+  "question": "具体问题",
+  "related_files": ["路径1", "路径2"],
+  "urgency": "normal",
+  "timestamp": "ISO8601"
+}
+```
+2. git commit -m "[ASK_CLAUDE] 简短问题描述"
+3. git push origin main
+4. Wait for .task/claude_response.json
+5. git pull to get response
 
 ## Terminal (PowerShell)
-- Use ; to chain commands (not and-and)
+- Use ; to chain commands (not &&)
 - Quote paths with spaces
 - Remove-Item for delete
 - Copy-Item for copy
@@ -38,19 +88,29 @@
 ## Auto Build SOP
 
 ### Step 1: Close Unity
+```powershell
 Get-Process -Name "Unity" -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 5
+```
 
 ### Step 2: Build
-and "D:\program\2022.3.47f1c1\Editor\Unity.exe" -batchmode -nographics -projectPath "E:\AI_Project\MS" -executeMethod BuildScript.BuildFromCommandLine -quit -logFile "E:\AI_Project\MS\build.log"
+```powershell
+& "D:\program\2022.3.47f1c1\Editor\Unity.exe" -batchmode -nographics -projectPath "E:\AI_Project\MS" -executeMethod BuildScript.BuildFromCommandLine -quit -logFile "E:\AI_Project\MS\build.log"
+```
 
 ### Step 3: Wait
+```powershell
 while (Get-Process -Name "Unity" -ErrorAction SilentlyContinue) { Start-Sleep -Seconds 10 }
+```
 
 ### Step 4: Check
+```powershell
 if (Test-Path "E:\AI_Project\MS\Builds\Android\MS.apk") { Write-Host "BUILD SUCCESS" } else { Get-Content "E:\AI_Project\MS\build.log" -Tail 50 }
+```
 
 ### Step 5: Reopen Unity
+```powershell
 Start-Process "D:\program\2022.3.47f1c1\Editor\Unity.exe" -ArgumentList "-projectPath","E:\AI_Project\MS"
+```
 
 ## Quality Standards
 - Zero compile errors
@@ -58,3 +118,16 @@ Start-Process "D:\program\2022.3.47f1c1\Editor\Unity.exe" -ArgumentList "-projec
 - 60fps target
 - Memory under 200MB
 - APK under 100MB
+
+## Code Boundary
+Cursor writes these directories:
+- Scripts/Gameplay/
+- Scripts/Combat/
+- Scripts/UI/
+- Scripts/Systems/
+- Scripts/Editor/
+
+Claude writes (DO NOT MODIFY):
+- Scripts/Core/
+- Scripts/Data/
+- Resources/Configs/
