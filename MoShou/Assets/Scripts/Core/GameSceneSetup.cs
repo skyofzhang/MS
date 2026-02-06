@@ -186,15 +186,50 @@ public class GameSceneSetup : MonoBehaviour
     /// </summary>
     Material CreateURPMaterial(Color color)
     {
-        // 尝试找URP Lit shader
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+        // 尝试多种Shader（按优先级）
+        string[] shaderNames = {
+            "Universal Render Pipeline/Lit",
+            "Universal Render Pipeline/Simple Lit",
+            "Universal Render Pipeline/Unlit",
+            "Sprites/Default",
+            "Standard",
+            "Unlit/Color",
+            "Legacy Shaders/Diffuse"
+        };
+
+        Shader shader = null;
+        foreach (string name in shaderNames)
+        {
+            shader = Shader.Find(name);
+            if (shader != null)
+            {
+                Debug.Log($"[GameSceneSetup] 使用Shader: {name}");
+                break;
+            }
+        }
+
         if (shader == null)
-            shader = Shader.Find("Standard");
-        if (shader == null)
-            shader = Shader.Find("Unlit/Color");
+        {
+            Debug.LogError("[GameSceneSetup] 无法找到任何可用Shader!");
+            // 最后尝试获取默认材质的shader
+            var defaultMat = new Material(Shader.Find("Hidden/InternalErrorShader"));
+            defaultMat.color = color;
+            return defaultMat;
+        }
 
         Material mat = new Material(shader);
+
+        // 根据不同shader设置颜色
+        if (mat.HasProperty("_BaseColor"))
+        {
+            mat.SetColor("_BaseColor", color); // URP使用_BaseColor
+        }
+        if (mat.HasProperty("_Color"))
+        {
+            mat.SetColor("_Color", color); // Standard使用_Color
+        }
         mat.color = color;
+
         return mat;
     }
     
