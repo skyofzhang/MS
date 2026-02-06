@@ -211,7 +211,7 @@ public class ProjectSetupTool : EditorWindow
         text.color = Color.white;
 
         // 添加StageButtonUI组件
-        buttonGO.AddComponent<MoShou.Core.StageButtonUI>();
+        buttonGO.AddComponent<MoShou.UI.StageButtonUI>();
 
         // 保存为Prefab
         PrefabUtility.SaveAsPrefabAsset(buttonGO, prefabPath);
