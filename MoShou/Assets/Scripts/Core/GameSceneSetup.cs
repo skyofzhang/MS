@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using MoShou.Utils;
+using System.Collections;
 
 /// <summary>
 /// 游戏场景初始化 - 符合知识库§2 RULE-RES-001
@@ -129,16 +130,40 @@ public class GameSceneSetup : MonoBehaviour
         // 通知GameManager场景准备完成，开始游戏！
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.OnGameSceneReady();
-            Debug.Log($"[GameSceneSetup] 游戏状态已切换为: {GameManager.Instance.CurrentState}");
+            // 强制设置为Playing状态
+            if (GameManager.Instance.CurrentState != GameManager.GameState.Playing)
+            {
+                GameManager.Instance.OnGameSceneReady();
+            }
+            Debug.Log($"[GameSceneSetup] 游戏状态: {GameManager.Instance.CurrentState}");
         }
         else
         {
-            Debug.LogError("[GameSceneSetup] GameManager.Instance为null，无法开始游戏!");
+            // 如果GameManager不存在，创建一个
+            Debug.LogWarning("[GameSceneSetup] GameManager.Instance为null，尝试创建...");
+            var gmGO = new GameObject("GameManager");
+            gmGO.AddComponent<GameManager>();
+
+            // 等待一帧后再设置状态
+            StartCoroutine(DelayedStartGame());
         }
 
         // 验证摄像机跟随设置
         VerifyCameraSetup();
+    }
+
+    /// <summary>
+    /// 延迟启动游戏（等待GameManager初始化）
+    /// </summary>
+    IEnumerator DelayedStartGame()
+    {
+        yield return null; // 等待一帧
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnGameSceneReady();
+            Debug.Log($"[GameSceneSetup] 延迟启动游戏，状态: {GameManager.Instance.CurrentState}");
+        }
     }
 
     /// <summary>

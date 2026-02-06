@@ -37,22 +37,37 @@ public class PlayerController : MonoBehaviour
     public float skill2Width = 1f;
     
     private CharacterController controller;
+    private Animator animator;
     private Vector3 moveDirection;
     private float lastAttackTime;
     private float lastSkill1Time;
     private float lastSkill2Time;
     private Transform currentTarget;
-    
+
+    // 动画参数
+    private static readonly int AnimSpeed = Animator.StringToHash("Speed");
+    private static readonly int AnimAttack = Animator.StringToHash("Attack");
+
     // 虚拟摇杆输入
     public Vector2 JoystickInput { get; set; }
-    
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
         if (controller == null)
+        {
             controller = gameObject.AddComponent<CharacterController>();
-        
+            controller.height = 1.8f;
+            controller.radius = 0.3f;
+            controller.center = new Vector3(0, 0.9f, 0);
+        }
+
+        // 获取动画控制器
+        animator = GetComponentInChildren<Animator>();
+
         currentHealth = maxHealth;
+
+        Debug.Log($"[PlayerController] 初始化完成, Animator: {(animator != null ? "有" : "无")}");
     }
     
     void Update()
@@ -95,12 +110,18 @@ public class PlayerController : MonoBehaviour
         {
             // 移动
             controller.Move(moveDirection * moveSpeed * Time.deltaTime);
-            
+
             // 旋转面向移动方向
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
-        
+
+        // 更新动画
+        if (animator != null)
+        {
+            animator.SetFloat(AnimSpeed, moveDirection.magnitude);
+        }
+
         // 应用重力
         if (!controller.isGrounded)
         {

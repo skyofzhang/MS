@@ -53,6 +53,9 @@ namespace MoShou.Core
         {
             Debug.Log("[GameInitializer] 开始初始化游戏系统...");
 
+            // 0. 初始化GameManager (最重要!)
+            InitializeSystem<GameManager>("GameManager");
+
             // 1. 初始化存档系统
             InitializeSystem<SaveSystem>("SaveSystem");
 

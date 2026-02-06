@@ -22,23 +22,54 @@ public class MonsterController : MonoBehaviour
     private float lastAttackTime;
     private bool isDead = false;
     
+    private CharacterController characterController;
+    private float groundCheckDistance = 0.5f;
+
     void Start()
     {
         currentHealth = maxHealth;
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        FindPlayer();
+
+        // 添加CharacterController用于移动
+        characterController = GetComponent<CharacterController>();
+        if (characterController == null)
+        {
+            characterController = gameObject.AddComponent<CharacterController>();
+            characterController.height = 1f;
+            characterController.radius = 0.5f;
+            characterController.center = new Vector3(0, 0.5f, 0);
+        }
+
+        Debug.Log($"[Monster] {monsterName} 初始化完成, Player: {(player != null ? player.name : "未找到")}");
     }
-    
+
+    void FindPlayer()
+    {
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+        }
+    }
+
     void Update()
     {
         if (isDead) return;
-        if (player == null) 
+
+        // 检查游戏状态
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing)
         {
-            player = GameObject.FindGameObjectWithTag("Player")?.transform;
             return;
         }
-        
+
+        if (player == null)
+        {
+            FindPlayer();
+            return;
+        }
+
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        
+
         // AI行为
         if (distanceToPlayer <= attackRange)
         {
@@ -50,20 +81,51 @@ public class MonsterController : MonoBehaviour
             // 追踪玩家
             ChasePlayer();
         }
+        else
+        {
+            // 待机/巡逻
+            Idle();
+        }
+
+        // 应用重力
+        ApplyGravity();
+    }
+
+    void Idle()
+    {
+        // 可以添加巡逻逻辑
+    }
+
+    void ApplyGravity()
+    {
+        if (characterController != null && !characterController.isGrounded)
+        {
+            characterController.Move(Vector3.down * 9.8f * Time.deltaTime);
+        }
     }
     
     void ChasePlayer()
     {
         Vector3 direction = (player.position - transform.position).normalized;
         direction.y = 0;
-        
-        // 移动
-        transform.position += direction * moveSpeed * Time.deltaTime;
-        
-        // 面向玩家
-        if (direction != Vector3.zero)
+
+        // 使用CharacterController移动
+        if (characterController != null)
         {
-            transform.rotation = Quaternion.LookRotation(direction);
+            Vector3 move = direction * moveSpeed * Time.deltaTime;
+            characterController.Move(move);
+        }
+        else
+        {
+            // 后备：直接移动
+            transform.position += direction * moveSpeed * Time.deltaTime;
+        }
+
+        // 面向玩家
+        if (direction.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
         }
     }
     
