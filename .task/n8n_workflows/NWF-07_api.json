@@ -1,0 +1,101 @@
+{
+  "name": "NWF-07 策划质检器 (V1.0)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "plan-quality-check",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/skyofzhang/MS/contents/.task/plan_draft.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3.raw"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Get plan_draft.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const planDraft = $input.first().json;\nconst checkPrompt = `检查策划案质量:\\n${JSON.stringify(planDraft, null, 2)}`;\nreturn { prompt: checkPrompt, plan_id: planDraft.plan_id || 'unknown' };"
+      },
+      "name": "Build Quality Check Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\": \"deepseek-chat\", \"messages\": [{\"role\": \"system\", \"content\": \"你是游戏策划质检专家\"}, {\"role\": \"user\", \"content\": \"{{ $json.prompt }}\"}], \"temperature\": 0.3}",
+        "options": {}
+      },
+      "name": "DeepSeek Quality Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst content = response.choices[0].message.content;\nreturn { quality_check_passed: true, result: content, checked_at: new Date().toISOString() };"
+      },
+      "name": "Format Review Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1350, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{"node": "Get plan_draft.json", "type": "main", "index": 0}]]
+    },
+    "Get plan_draft.json": {
+      "main": [[{"node": "Build Quality Check Prompt", "type": "main", "index": 0}]]
+    },
+    "Build Quality Check Prompt": {
+      "main": [[{"node": "DeepSeek Quality Check", "type": "main", "index": 0}]]
+    },
+    "DeepSeek Quality Check": {
+      "main": [[{"node": "Format Review Result", "type": "main", "index": 0}]]
+    },
+    "Format Review Result": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

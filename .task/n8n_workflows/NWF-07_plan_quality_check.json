@@ -1,0 +1,197 @@
+{
+  "name": "NWF-07 策划质检器 (V1.0)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "plan-quality-check",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/skyofzhang/MS/contents/.task/plan_draft.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3.raw"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-plan-draft",
+      "name": "Get plan_draft.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "github-token",
+          "name": "GitHub Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const planDraft = JSON.parse($input.first().json.body || $input.first().json);\n\nconst checkPrompt = `你是一个游戏策划质检专家。请检查以下策划案是否符合质量标准。\n\n检查清单：\n1. 是否有模糊词？(大概、可能、适当、一些等)\n2. 数值是否完整？(无TBD、无占位符、无\"待定\")\n3. 验收标准是否可量化？(具体数字、明确条件)\n4. 有无逻辑矛盾？\n5. Cursor能否直接执行？(是否足够具体)\n6. 美术资源清单是否完整？\n\n策划案内容：\n${JSON.stringify(planDraft, null, 2)}\n\n请返回JSON格式：\n{\n  \"passed\": true/false,\n  \"score\": 0-100,\n  \"issues\": [\"问题1\", \"问题2\"],\n  \"suggestions\": [\"建议1\", \"建议2\"]\n}`;\n\nreturn {\n  prompt: checkPrompt,\n  plan_id: planDraft.plan_id || 'unknown'\n};"
+      },
+      "id": "build-prompt",
+      "name": "Build Quality Check Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"你是一个游戏策划质检专家，严格按照检查清单检查策划案质量。只返回JSON格式结果。\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.prompt }}\"\n    }\n  ],\n  \"temperature\": 0.3\n}",
+        "options": {}
+      },
+      "id": "deepseek-check",
+      "name": "DeepSeek Quality Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "deepseek-api",
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst content = response.choices[0].message.content;\n\nlet review;\ntry {\n  // 尝试解析JSON\n  const jsonMatch = content.match(/\\{[\\s\\S]*\\}/);\n  review = JSON.parse(jsonMatch ? jsonMatch[0] : content);\n} catch (e) {\n  review = {\n    passed: false,\n    score: 0,\n    issues: ['无法解析质检结果'],\n    suggestions: ['请重新提交策划案']\n  };\n}\n\nconst result = {\n  plan_id: $('Build Quality Check Prompt').first().json.plan_id,\n  quality_check_passed: review.passed,\n  score: review.score,\n  issues: review.issues || [],\n  suggestions: review.suggestions || [],\n  checked_at: new Date().toISOString(),\n  checker: 'DeepSeek via NWF-07'\n};\n\nreturn result;"
+      },
+      "id": "format-result",
+      "name": "Format Review Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/skyofzhang/MS/contents/.task/plan_review.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"[NWF-07] Quality check result\",\n  \"content\": \"{{ Buffer.from(JSON.stringify($json, null, 2)).toString('base64') }}\"\n}",
+        "options": {}
+      },
+      "id": "write-review",
+      "name": "Write plan_review.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1350, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "github-token",
+          "name": "GitHub Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1570, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get plan_draft.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get plan_draft.json": {
+      "main": [
+        [
+          {
+            "node": "Build Quality Check Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Quality Check Prompt": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek Quality Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Quality Check": {
+      "main": [
+        [
+          {
+            "node": "Format Review Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Review Result": {
+      "main": [
+        [
+          {
+            "node": "Write plan_review.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write plan_review.json": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-02-06T04:30:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,115 @@
+{
+  "name": "NWF-08 状态机监听器 (V1.0)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "state-change",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json.body || $input.first().json;\nconst commit = payload.head_commit || {};\nconst message = commit.message || '';\nconst isStateChange = message.includes('[STATE]');\nreturn {\n  is_state_change: isStateChange,\n  commit_message: message,\n  commit_id: commit.id || 'unknown',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "name": "Parse Commit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.is_state_change }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "IF State Change",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/skyofzhang/MS/contents/.task/workflow_state.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3.raw"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Get workflow_state.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const stateData = $input.first().json;\nconst currentPhase = stateData.current_phase || 'unknown';\nreturn {\n  current_phase: currentPhase,\n  project: stateData.project,\n  logged_at: new Date().toISOString()\n};"
+      },
+      "name": "Analyze State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1350, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\": \"skipped\", \"reason\": \"not_state_change\"}"
+      },
+      "name": "Respond Skip",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [910, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{"node": "Parse Commit", "type": "main", "index": 0}]]
+    },
+    "Parse Commit": {
+      "main": [[{"node": "IF State Change", "type": "main", "index": 0}]]
+    },
+    "IF State Change": {
+      "main": [
+        [{"node": "Get workflow_state.json", "type": "main", "index": 0}],
+        [{"node": "Respond Skip", "type": "main", "index": 0}]
+      ]
+    },
+    "Get workflow_state.json": {
+      "main": [[{"node": "Analyze State", "type": "main", "index": 0}]]
+    },
+    "Analyze State": {
+      "main": [[{"node": "Respond Success", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
