@@ -65,7 +65,33 @@ namespace MoShou.Core
         /// </summary>
         private void GenerateStageButtons()
         {
-            if (stageButtonsParent == null || stageButtonPrefab == null) return;
+            // 自动创建父容器（如果没有配置）
+            if (stageButtonsParent == null)
+            {
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas == null)
+                {
+                    var canvasGO = new GameObject("Canvas");
+                    canvas = canvasGO.AddComponent<Canvas>();
+                    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    canvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
+                    canvasGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+                }
+
+                var parentGO = new GameObject("StageButtonsParent");
+                parentGO.transform.SetParent(canvas.transform, false);
+                var vlg = parentGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+                vlg.spacing = 10;
+                vlg.childAlignment = TextAnchor.MiddleCenter;
+                vlg.childControlWidth = false;
+                vlg.childControlHeight = false;
+
+                var rt = parentGO.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0, 0);
+
+                stageButtonsParent = parentGO.transform;
+                Debug.Log("[StageSelect] 自动创建StageButtonsParent");
+            }
 
             // Clear existing buttons
             foreach (Transform child in stageButtonsParent)
@@ -79,6 +105,18 @@ namespace MoShou.Core
             if (SaveSystem.Instance != null)
             {
                 unlockedStage = SaveSystem.Instance.GetHighestUnlockedStage();
+            }
+
+            // 自动加载stageButtonPrefab（如果没有配置）
+            if (stageButtonPrefab == null)
+            {
+                stageButtonPrefab = Resources.Load<GameObject>("Prefabs/UI/StageButton");
+                if (stageButtonPrefab == null)
+                {
+                    Debug.LogError("[StageSelect] StageButton prefab未找到！请运行 MoShou/快速修复/3. 创建UI预制体");
+                    return;
+                }
+                Debug.Log("[StageSelect] 自动加载StageButton prefab");
             }
 
             // Create buttons for each stage
