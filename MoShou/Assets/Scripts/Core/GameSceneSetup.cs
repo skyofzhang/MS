@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.Events;
 using MoShou.Utils;
+using MoShou.UI;
 using System.Collections;
 
 /// <summary>
@@ -85,6 +88,17 @@ public class GameSceneSetup : MonoBehaviour
             Debug.Log("[GameSceneSetup] GameManager已创建");
         }
 
+        // 确保有AudioManager
+        if (MoShou.Systems.AudioManager.Instance == null)
+        {
+            var audioGO = new GameObject("AudioManager");
+            audioGO.AddComponent<MoShou.Systems.AudioManager>();
+            Debug.Log("[GameSceneSetup] AudioManager已创建");
+        }
+
+        // 播放战斗BGM
+        StartCoroutine(PlayBGMDelayed());
+
         // 创建地面（先创建地面，让玩家有地方站）
         if (GameObject.Find("Ground") == null)
         {
@@ -125,7 +139,19 @@ public class GameSceneSetup : MonoBehaviour
             Debug.Log("[GameSceneSetup] UIResourceBinder已创建");
         }
 
+        // 创建游戏UI
+        if (UIManager.Instance == null)
+        {
+            CreateGameUI();
+        }
+
         Debug.Log("[GameSceneSetup] Scene setup complete!");
+
+        // 预加载常用音效
+        if (MoShou.Systems.AudioManager.Instance != null)
+        {
+            MoShou.Systems.AudioManager.Instance.PreloadCommonSFX();
+        }
 
         // 通知GameManager场景准备完成，开始游戏！
         if (GameManager.Instance != null)
@@ -163,6 +189,20 @@ public class GameSceneSetup : MonoBehaviour
         {
             GameManager.Instance.OnGameSceneReady();
             Debug.Log($"[GameSceneSetup] 延迟启动游戏，状态: {GameManager.Instance.CurrentState}");
+        }
+    }
+
+    /// <summary>
+    /// 延迟播放BGM
+    /// </summary>
+    IEnumerator PlayBGMDelayed()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        if (MoShou.Systems.AudioManager.Instance != null)
+        {
+            MoShou.Systems.AudioManager.Instance.PlayBGM(MoShou.Systems.AudioManager.BGM.BattleNormal);
+            Debug.Log("[GameSceneSetup] 战斗BGM开始播放");
         }
     }
 
@@ -565,14 +605,1537 @@ public class GameSceneSetup : MonoBehaviour
         light.shadows = LightShadows.Soft;
         lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
     }
-    
+
+    /// <summary>
+    /// 获取默认字体（兼容不同Unity版本）
+    /// </summary>
+    Font GetDefaultFont()
+    {
+        // 尝试多种字体名称
+        string[] fontNames = { "LegacyRuntime.ttf", "Arial.ttf", "Liberation Sans" };
+        foreach (string fontName in fontNames)
+        {
+            Font font = Resources.GetBuiltinResource<Font>(fontName);
+            if (font != null) return font;
+        }
+        // 最后尝试Font.CreateDynamicFontFromOSFont
+        return Font.CreateDynamicFontFromOSFont("Arial", 14);
+    }
+
+    /// <summary>
+    /// 创建游戏UI (HUD、胜利/失败面板)
+    /// 依据策划案: 竖屏 1080x1920
+    /// </summary>
+    void CreateGameUI()
+    {
+        // 确保有EventSystem（UI点击必需）
+        if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+        {
+            GameObject eventSystemGO = new GameObject("EventSystem");
+            eventSystemGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            eventSystemGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            Debug.Log("[GameSceneSetup] EventSystem已创建");
+        }
+
+        // 创建Canvas
+        GameObject canvasGO = new GameObject("GameCanvas");
+        Canvas canvas = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 100;
+
+        // 配置CanvasScaler用于移动端适配 - 策划案要求竖屏1080x1920
+        var scaler = canvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1080, 1920); // 竖屏分辨率
+        scaler.matchWidthOrHeight = 0.5f;
+
+        canvasGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+        // 添加UIManager
+        UIManager uiManager = canvasGO.AddComponent<UIManager>();
+
+        // 创建HUD (顶部信息栏)
+        CreateHUD(canvasGO.transform, uiManager);
+
+        // 创建虚拟摇杆（左下角）
+        CreateVirtualJoystick(canvasGO.transform);
+
+        // 创建技能按钮（右下角）
+        CreateSkillButtons(canvasGO.transform);
+
+        // 创建功能按钮（背包、设置等）
+        CreateFunctionButtons(canvasGO.transform);
+
+        // 创建背包面板（初始隐藏）
+        CreateInventoryPanel(canvasGO.transform);
+
+        // 创建装备面板（初始隐藏）
+        CreateEquipmentPanel(canvasGO.transform);
+
+        // 创建商店面板（初始隐藏）
+        CreateShopPanel(canvasGO.transform);
+
+        // 创建技能升级面板（初始隐藏）
+        CreateSkillUpgradePanel(canvasGO.transform);
+
+        // 创建胜利面板
+        uiManager.victoryPanel = CreateResultPanel(canvasGO.transform, "VictoryPanel", "胜利!", new Color(0.2f, 0.8f, 0.3f));
+
+        // 创建失败面板
+        uiManager.defeatPanel = CreateResultPanel(canvasGO.transform, "DefeatPanel", "失败!", new Color(0.8f, 0.2f, 0.2f));
+
+        // 创建暂停面板（特殊处理，有继续按钮）
+        uiManager.pausePanel = CreatePausePanel(canvasGO.transform);
+
+        Debug.Log("[GameSceneSetup] 游戏UI已创建");
+    }
+
+    void CreateHUD(Transform parent, UIManager uiManager)
+    {
+        // 加载HUD美术资源
+        Sprite hpBarBg = Resources.Load<Sprite>("Sprites/UI/HUD/UI_HUD_HPBar_BG");
+        Sprite hpBarFill = Resources.Load<Sprite>("Sprites/UI/HUD/UI_HUD_HPBar_Fill");
+        Sprite goldIcon = Resources.Load<Sprite>("Sprites/UI/HUD/UI_HUD_Gold_Icon");
+        Sprite waveBg = Resources.Load<Sprite>("Sprites/UI/HUD/UI_HUD_Wave_BG");
+        Sprite playerIconFrame = Resources.Load<Sprite>("Sprites/UI/HUD/UI_HUD_PlayerIcon_Frame");
+
+        // HUD容器 - 策划案: 顶部状态栏
+        GameObject hudGO = new GameObject("HUD");
+        hudGO.transform.SetParent(parent, false);
+        RectTransform hudRect = hudGO.AddComponent<RectTransform>();
+        hudRect.anchorMin = new Vector2(0, 1);
+        hudRect.anchorMax = new Vector2(1, 1);
+        hudRect.pivot = new Vector2(0.5f, 1);
+        hudRect.anchoredPosition = Vector2.zero;
+        hudRect.sizeDelta = new Vector2(0, 120);
+
+        // 添加半透明背景
+        UnityEngine.UI.Image hudBg = hudGO.AddComponent<UnityEngine.UI.Image>();
+        hudBg.color = new Color(0, 0, 0, 0.4f);
+
+        // 玩家头像框（左上角）
+        GameObject playerIconGO = new GameObject("PlayerIconFrame");
+        playerIconGO.transform.SetParent(hudGO.transform, false);
+        RectTransform iconFrameRect = playerIconGO.AddComponent<RectTransform>();
+        iconFrameRect.anchorMin = new Vector2(0, 0.5f);
+        iconFrameRect.anchorMax = new Vector2(0, 0.5f);
+        iconFrameRect.anchoredPosition = new Vector2(50, 0);
+        iconFrameRect.sizeDelta = new Vector2(70, 70);
+        UnityEngine.UI.Image iconFrameImg = playerIconGO.AddComponent<UnityEngine.UI.Image>();
+        if (playerIconFrame != null)
+            iconFrameImg.sprite = playerIconFrame;
+        else
+            iconFrameImg.color = new Color(0.4f, 0.4f, 0.4f);
+
+        // 血条背景
+        GameObject healthBgGO = new GameObject("HealthBarBG");
+        healthBgGO.transform.SetParent(hudGO.transform, false);
+        RectTransform hbRect = healthBgGO.AddComponent<RectTransform>();
+        hbRect.anchorMin = new Vector2(0, 0.5f);
+        hbRect.anchorMax = new Vector2(0, 0.5f);
+        hbRect.anchoredPosition = new Vector2(230, 15);
+        hbRect.sizeDelta = new Vector2(250, 30);
+        UnityEngine.UI.Image hbImage = healthBgGO.AddComponent<UnityEngine.UI.Image>();
+        if (hpBarBg != null)
+        {
+            hbImage.sprite = hpBarBg;
+            hbImage.type = UnityEngine.UI.Image.Type.Sliced;
+        }
+        else
+            hbImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+
+        // 血条填充
+        GameObject healthFillGO = new GameObject("HealthFill");
+        healthFillGO.transform.SetParent(healthBgGO.transform, false);
+        RectTransform healthFillRect = healthFillGO.AddComponent<RectTransform>();
+        healthFillRect.anchorMin = new Vector2(0, 0);
+        healthFillRect.anchorMax = new Vector2(1, 1);
+        healthFillRect.offsetMin = new Vector2(4, 4);
+        healthFillRect.offsetMax = new Vector2(-4, -4);
+        UnityEngine.UI.Image healthFillImage = healthFillGO.AddComponent<UnityEngine.UI.Image>();
+        healthFillImage.type = UnityEngine.UI.Image.Type.Filled;
+        healthFillImage.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+        if (hpBarFill != null)
+            healthFillImage.sprite = hpBarFill;
+        else
+            healthFillImage.color = new Color(0.3f, 0.8f, 0.3f);
+
+        // 创建自定义血条控制器
+        var healthBar = healthBgGO.AddComponent<SimpleHealthBar>();
+        healthBar.fillImage = healthFillImage;
+        uiManager.simpleHealthBar = healthBar;
+
+        // 波次信息背景
+        GameObject waveBgGO = new GameObject("WaveBG");
+        waveBgGO.transform.SetParent(hudGO.transform, false);
+        RectTransform waveBgRect = waveBgGO.AddComponent<RectTransform>();
+        waveBgRect.anchorMin = new Vector2(0.5f, 0.5f);
+        waveBgRect.anchorMax = new Vector2(0.5f, 0.5f);
+        waveBgRect.anchoredPosition = new Vector2(0, 0);
+        waveBgRect.sizeDelta = new Vector2(200, 50);
+        UnityEngine.UI.Image waveBgImage = waveBgGO.AddComponent<UnityEngine.UI.Image>();
+        if (waveBg != null)
+        {
+            waveBgImage.sprite = waveBg;
+            waveBgImage.type = UnityEngine.UI.Image.Type.Sliced;
+        }
+        else
+            waveBgImage.color = new Color(0.15f, 0.15f, 0.2f, 0.8f);
+
+        // 波次文字
+        GameObject waveTextGO = new GameObject("WaveText");
+        waveTextGO.transform.SetParent(waveBgGO.transform, false);
+        RectTransform waveRect = waveTextGO.AddComponent<RectTransform>();
+        waveRect.anchorMin = Vector2.zero;
+        waveRect.anchorMax = Vector2.one;
+        waveRect.offsetMin = Vector2.zero;
+        waveRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text waveText = waveTextGO.AddComponent<UnityEngine.UI.Text>();
+        waveText.text = "波次 1/3";
+        waveText.fontSize = 24;
+        waveText.alignment = TextAnchor.MiddleCenter;
+        waveText.color = Color.white;
+        waveText.font = GetDefaultFont();
+        uiManager.levelText = waveText;
+
+        // 金币图标
+        GameObject goldIconGO = new GameObject("GoldIcon");
+        goldIconGO.transform.SetParent(hudGO.transform, false);
+        RectTransform goldIconRect = goldIconGO.AddComponent<RectTransform>();
+        goldIconRect.anchorMin = new Vector2(1, 0.5f);
+        goldIconRect.anchorMax = new Vector2(1, 0.5f);
+        goldIconRect.anchoredPosition = new Vector2(-170, 0);
+        goldIconRect.sizeDelta = new Vector2(36, 36);
+        UnityEngine.UI.Image goldIconImg = goldIconGO.AddComponent<UnityEngine.UI.Image>();
+        if (goldIcon != null)
+            goldIconImg.sprite = goldIcon;
+        else
+            goldIconImg.color = new Color(1f, 0.85f, 0.2f);
+
+        // 金币数量文字
+        GameObject goldTextGO = new GameObject("GoldText");
+        goldTextGO.transform.SetParent(hudGO.transform, false);
+        RectTransform goldRect = goldTextGO.AddComponent<RectTransform>();
+        goldRect.anchorMin = new Vector2(1, 0.5f);
+        goldRect.anchorMax = new Vector2(1, 0.5f);
+        goldRect.anchoredPosition = new Vector2(-80, 0);
+        goldRect.sizeDelta = new Vector2(120, 40);
+        UnityEngine.UI.Text goldText = goldTextGO.AddComponent<UnityEngine.UI.Text>();
+        goldText.text = "0";
+        goldText.fontSize = 28;
+        goldText.fontStyle = FontStyle.Bold;
+        goldText.alignment = TextAnchor.MiddleLeft;
+        goldText.color = new Color(1f, 0.85f, 0.2f);
+        goldText.font = GetDefaultFont();
+        uiManager.goldText = goldText;
+
+        Debug.Log($"[GameSceneSetup] HUD创建完成 (资源加载: HPBar={hpBarBg != null}, GoldIcon={goldIcon != null})");
+    }
+
+    GameObject CreateResultPanel(Transform parent, string name, string title, Color bgColor)
+    {
+        // 加载结算面板资源
+        bool isVictory = name.Contains("Victory");
+        Sprite panelBgSprite = isVictory
+            ? Resources.Load<Sprite>("Sprites/UI/Result/UI_Result_Victory_BG")
+            : Resources.Load<Sprite>("Sprites/UI/Result/UI_Result_Defeat_BG");
+        Sprite starFilled = Resources.Load<Sprite>("Sprites/UI/Result/UI_Result_Star_Filled");
+        Sprite starEmpty = Resources.Load<Sprite>("Sprites/UI/Result/UI_Result_Star_Empty");
+        Sprite primaryBtn = Resources.Load<Sprite>("Sprites/UI/Buttons/UI_Btn_Primary_Normal");
+
+        // 面板背景（全屏遮罩）
+        GameObject panelGO = new GameObject(name);
+        panelGO.transform.SetParent(parent, false);
+        RectTransform panelRect = panelGO.AddComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
+        bgImage.color = new Color(0, 0, 0, 0.7f);
+
+        // 中心内容框 - 策划案尺寸 anchorMin:[0.05,0.2], anchorMax:[0.95,0.85]
+        GameObject contentGO = new GameObject("Content");
+        contentGO.transform.SetParent(panelGO.transform, false);
+        RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0.1f, 0.25f);
+        contentRect.anchorMax = new Vector2(0.9f, 0.75f);
+        contentRect.offsetMin = Vector2.zero;
+        contentRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
+        if (panelBgSprite != null)
+        {
+            contentBg.sprite = panelBgSprite;
+            contentBg.type = UnityEngine.UI.Image.Type.Sliced;
+            contentBg.color = Color.white;
+        }
+        else
+        {
+            contentBg.color = new Color(bgColor.r * 0.3f, bgColor.g * 0.3f, bgColor.b * 0.3f, 0.95f);
+        }
+
+        // 标题 - 策划案: 48px Bold
+        GameObject titleGO = new GameObject("Title");
+        titleGO.transform.SetParent(contentGO.transform, false);
+        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0.1f, 0.8f);
+        titleRect.anchorMax = new Vector2(0.9f, 0.95f);
+        titleRect.offsetMin = Vector2.zero;
+        titleRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
+        titleText.text = title;
+        titleText.fontSize = 48;
+        titleText.fontStyle = FontStyle.Bold;
+        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.color = isVictory ? new Color(1f, 0.85f, 0.2f) : new Color(1f, 0.3f, 0.3f);
+        titleText.font = GetDefaultFont();
+
+        // 星级显示（仅胜利面板）
+        if (isVictory)
+        {
+            GameObject starsGO = new GameObject("Stars");
+            starsGO.transform.SetParent(contentGO.transform, false);
+            RectTransform starsRect = starsGO.AddComponent<RectTransform>();
+            starsRect.anchorMin = new Vector2(0.2f, 0.65f);
+            starsRect.anchorMax = new Vector2(0.8f, 0.8f);
+            starsRect.offsetMin = Vector2.zero;
+            starsRect.offsetMax = Vector2.zero;
+            var starsLayout = starsGO.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+            starsLayout.childAlignment = TextAnchor.MiddleCenter;
+            starsLayout.spacing = 20;
+            starsLayout.childForceExpandWidth = false;
+            starsLayout.childForceExpandHeight = false;
+
+            for (int i = 0; i < 3; i++)
+            {
+                GameObject starGO = new GameObject($"Star_{i}");
+                starGO.transform.SetParent(starsGO.transform, false);
+                var starLayout = starGO.AddComponent<UnityEngine.UI.LayoutElement>();
+                starLayout.preferredWidth = 50;
+                starLayout.preferredHeight = 50;
+                UnityEngine.UI.Image starImg = starGO.AddComponent<UnityEngine.UI.Image>();
+                if (starFilled != null)
+                    starImg.sprite = starFilled;
+                else
+                    starImg.color = new Color(1f, 0.85f, 0.2f);
+            }
+        }
+
+        // 奖励显示区域
+        GameObject rewardsGO = new GameObject("Rewards");
+        rewardsGO.transform.SetParent(contentGO.transform, false);
+        RectTransform rewardsRect = rewardsGO.AddComponent<RectTransform>();
+        rewardsRect.anchorMin = new Vector2(0.1f, 0.35f);
+        rewardsRect.anchorMax = new Vector2(0.9f, 0.6f);
+        rewardsRect.offsetMin = Vector2.zero;
+        rewardsRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text rewardsText = rewardsGO.AddComponent<UnityEngine.UI.Text>();
+        rewardsText.text = "经验: +50\n金币: +100";
+        rewardsText.fontSize = 24;
+        rewardsText.alignment = TextAnchor.MiddleCenter;
+        rewardsText.color = Color.white;
+        rewardsText.font = GetDefaultFont();
+
+        // 按钮区域
+        GameObject buttonsGO = new GameObject("Buttons");
+        buttonsGO.transform.SetParent(contentGO.transform, false);
+        RectTransform buttonsRect = buttonsGO.AddComponent<RectTransform>();
+        buttonsRect.anchorMin = new Vector2(0.1f, 0.05f);
+        buttonsRect.anchorMax = new Vector2(0.9f, 0.3f);
+        buttonsRect.offsetMin = Vector2.zero;
+        buttonsRect.offsetMax = Vector2.zero;
+        var buttonsLayout = buttonsGO.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+        buttonsLayout.childAlignment = TextAnchor.MiddleCenter;
+        buttonsLayout.spacing = 30;
+        buttonsLayout.childForceExpandWidth = false;
+        buttonsLayout.childForceExpandHeight = false;
+
+        // 主按钮（下一关/重试）
+        CreateResultButton(buttonsGO.transform, isVictory ? "下一关" : "重试",
+            isVictory ? new Color(0.3f, 0.7f, 0.3f) : new Color(0.8f, 0.3f, 0.3f),
+            primaryBtn, () => {
+                if (UIManager.Instance != null) UIManager.Instance.OnRetryClick();
+            });
+
+        // 次按钮（返回主城）
+        CreateResultButton(buttonsGO.transform, "返回主城",
+            new Color(0.4f, 0.4f, 0.5f), null, () => {
+                if (UIManager.Instance != null) UIManager.Instance.OnMainMenuClick();
+            });
+
+        panelGO.SetActive(false);
+        return panelGO;
+    }
+
+    /// <summary>
+    /// 创建结算面板按钮
+    /// </summary>
+    void CreateResultButton(Transform parent, string text, Color color, Sprite bgSprite, UnityAction onClick)
+    {
+        GameObject btnGO = new GameObject($"Btn_{text}");
+        btnGO.transform.SetParent(parent, false);
+        var layout = btnGO.AddComponent<UnityEngine.UI.LayoutElement>();
+        layout.preferredWidth = 160;
+        layout.preferredHeight = 55;
+
+        UnityEngine.UI.Image btnImg = btnGO.AddComponent<UnityEngine.UI.Image>();
+        if (bgSprite != null)
+        {
+            btnImg.sprite = bgSprite;
+            btnImg.type = UnityEngine.UI.Image.Type.Sliced;
+            btnImg.color = color;
+        }
+        else
+        {
+            btnImg.color = color;
+        }
+
+        UnityEngine.UI.Button btn = btnGO.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = btnImg;
+        btn.onClick.AddListener(onClick);
+
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(btnGO.transform, false);
+        RectTransform textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text btnText = textGO.AddComponent<UnityEngine.UI.Text>();
+        btnText.text = text;
+        btnText.fontSize = 22;
+        btnText.fontStyle = FontStyle.Bold;
+        btnText.alignment = TextAnchor.MiddleCenter;
+        btnText.color = Color.white;
+        btnText.font = GetDefaultFont();
+    }
+
+    /// <summary>
+    /// 创建虚拟摇杆（左下角）
+    /// </summary>
+    void CreateVirtualJoystick(Transform parent)
+    {
+        // 摇杆容器
+        GameObject joystickGO = new GameObject("VirtualJoystick");
+        joystickGO.transform.SetParent(parent, false);
+        RectTransform joyRect = joystickGO.AddComponent<RectTransform>();
+        joyRect.anchorMin = new Vector2(0, 0);
+        joyRect.anchorMax = new Vector2(0, 0);
+        joyRect.pivot = new Vector2(0, 0);
+        joyRect.anchoredPosition = new Vector2(50, 50);
+        joyRect.sizeDelta = new Vector2(200, 200);
+
+        // 添加VirtualJoystick组件
+        VirtualJoystick joystick = joystickGO.AddComponent<VirtualJoystick>();
+
+        // 摇杆背景
+        GameObject bgGO = new GameObject("Background");
+        bgGO.transform.SetParent(joystickGO.transform, false);
+        RectTransform bgRect = bgGO.AddComponent<RectTransform>();
+        bgRect.anchorMin = new Vector2(0.5f, 0.5f);
+        bgRect.anchorMax = new Vector2(0.5f, 0.5f);
+        bgRect.anchoredPosition = Vector2.zero;
+        bgRect.sizeDelta = new Vector2(180, 180);
+        UnityEngine.UI.Image bgImage = bgGO.AddComponent<UnityEngine.UI.Image>();
+        bgImage.color = new Color(1, 1, 1, 0.3f);
+        // 尝试使圆形
+        bgImage.sprite = CreateCircleSprite();
+        joystick.background = bgRect;
+
+        // 摇杆手柄
+        GameObject handleGO = new GameObject("Handle");
+        handleGO.transform.SetParent(bgGO.transform, false);
+        RectTransform handleRect = handleGO.AddComponent<RectTransform>();
+        handleRect.anchorMin = new Vector2(0.5f, 0.5f);
+        handleRect.anchorMax = new Vector2(0.5f, 0.5f);
+        handleRect.anchoredPosition = Vector2.zero;
+        handleRect.sizeDelta = new Vector2(80, 80);
+        UnityEngine.UI.Image handleImage = handleGO.AddComponent<UnityEngine.UI.Image>();
+        handleImage.color = new Color(1, 1, 1, 0.7f);
+        handleImage.sprite = CreateCircleSprite();
+        joystick.handle = handleRect;
+        joystick.handleRange = 60f;
+
+        Debug.Log("[GameSceneSetup] 虚拟摇杆已创建");
+    }
+
+    /// <summary>
+    /// 创建技能按钮（右下角）
+    /// 依据策划案 T05 UI原型图: 技能按钮120x120，位于右下角
+    /// </summary>
+    void CreateSkillButtons(Transform parent)
+    {
+        // 技能容器 - 右下角
+        GameObject skillsGO = new GameObject("SkillButtons");
+        skillsGO.transform.SetParent(parent, false);
+        RectTransform skillsRect = skillsGO.AddComponent<RectTransform>();
+        skillsRect.anchorMin = new Vector2(1, 0);
+        skillsRect.anchorMax = new Vector2(1, 0);
+        skillsRect.pivot = new Vector2(1, 0);
+        skillsRect.anchoredPosition = new Vector2(-30, 50);
+        skillsRect.sizeDelta = new Vector2(400, 300);
+
+        // 加载技能图标资源
+        Sprite skillSlotBg = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Slot_BG");
+        Sprite multiShotIcon = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Icon_MultiShot");
+        Sprite pierceIcon = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Icon_Pierce");
+        Sprite battleShoutIcon = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Icon_BattleShout");
+
+        // 普通攻击按钮 (右下角最大)
+        CreateSkillButtonWithIcon(skillsGO.transform, "AttackBtn", null, skillSlotBg,
+            new Vector2(-70, 70), new Vector2(130, 130), new Color(0.8f, 0.2f, 0.2f, 0.9f),
+            () => { /* 普通攻击由PlayerController自动处理 */ }, "攻击");
+
+        // 技能1: 多重箭 (SK001) - 策划案位置 (380, -600)相对于右下角
+        CreateSkillButtonWithIcon(skillsGO.transform, "Skill1", multiShotIcon, skillSlotBg,
+            new Vector2(-70, 210), new Vector2(100, 100), new Color(0.8f, 0.4f, 0.2f, 0.9f),
+            () => {
+                var player = FindObjectOfType<PlayerController>();
+                if (player != null) player.UseSkill1();
+            }, multiShotIcon == null ? "多重箭" : null);
+
+        // 技能2: 穿透箭 (SK002)
+        CreateSkillButtonWithIcon(skillsGO.transform, "Skill2", pierceIcon, skillSlotBg,
+            new Vector2(-190, 130), new Vector2(100, 100), new Color(0.2f, 0.6f, 0.8f, 0.9f),
+            () => {
+                var player = FindObjectOfType<PlayerController>();
+                if (player != null) player.UseSkill2();
+            }, pierceIcon == null ? "穿透箭" : null);
+
+        // 技能3: 战吼 (SK003)
+        CreateSkillButtonWithIcon(skillsGO.transform, "Skill3", battleShoutIcon, skillSlotBg,
+            new Vector2(-310, 130), new Vector2(100, 100), new Color(0.8f, 0.7f, 0.2f, 0.9f),
+            () => {
+                var player = FindObjectOfType<PlayerController>();
+                if (player != null) player.UseSkill3();
+            }, battleShoutIcon == null ? "战吼" : null);
+
+        Debug.Log($"[GameSceneSetup] 技能按钮已创建 (图标加载: MultiShot={multiShotIcon != null}, Pierce={pierceIcon != null}, BattleShout={battleShoutIcon != null})");
+    }
+
+    /// <summary>
+    /// 创建带图标的技能按钮
+    /// </summary>
+    void CreateSkillButtonWithIcon(Transform parent, string name, Sprite icon, Sprite bgSprite,
+        Vector2 pos, Vector2 size, Color fallbackColor, UnityAction onClick, string fallbackText)
+    {
+        GameObject btnGO = new GameObject(name);
+        btnGO.transform.SetParent(parent, false);
+        RectTransform btnRect = btnGO.AddComponent<RectTransform>();
+        btnRect.anchorMin = new Vector2(1, 0);
+        btnRect.anchorMax = new Vector2(1, 0);
+        btnRect.anchoredPosition = pos;
+        btnRect.sizeDelta = size;
+
+        // 背景图
+        UnityEngine.UI.Image btnImage = btnGO.AddComponent<UnityEngine.UI.Image>();
+        if (bgSprite != null)
+        {
+            btnImage.sprite = bgSprite;
+            btnImage.color = Color.white;
+        }
+        else
+        {
+            btnImage.sprite = CreateCircleSprite();
+            btnImage.color = fallbackColor;
+        }
+
+        UnityEngine.UI.Button btn = btnGO.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = btnImage;
+        btn.onClick.AddListener(onClick);
+
+        // 技能图标（子对象）
+        if (icon != null)
+        {
+            GameObject iconGO = new GameObject("Icon");
+            iconGO.transform.SetParent(btnGO.transform, false);
+            RectTransform iconRect = iconGO.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.1f, 0.1f);
+            iconRect.anchorMax = new Vector2(0.9f, 0.9f);
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+            UnityEngine.UI.Image iconImg = iconGO.AddComponent<UnityEngine.UI.Image>();
+            iconImg.sprite = icon;
+            iconImg.preserveAspect = true;
+        }
+        else if (!string.IsNullOrEmpty(fallbackText))
+        {
+            // 没有图标时显示文字
+            GameObject textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            RectTransform textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+            UnityEngine.UI.Text btnText = textGO.AddComponent<UnityEngine.UI.Text>();
+            btnText.text = fallbackText;
+            btnText.fontSize = size.x > 100 ? 24 : 16;
+            btnText.alignment = TextAnchor.MiddleCenter;
+            btnText.color = Color.white;
+            btnText.font = GetDefaultFont();
+        }
+    }
+
+    /// <summary>
+    /// 创建功能按钮（暂停、背包等）
+    /// 依据策划案: 暂停按钮右上角 80x80
+    /// </summary>
+    void CreateFunctionButtons(Transform parent)
+    {
+        // 加载按钮资源
+        Sprite pauseSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/UI_Btn_Pause");
+        Sprite primaryBtnSprite = Resources.Load<Sprite>("Sprites/UI/Buttons/UI_Btn_Primary_Normal");
+
+        // 暂停按钮（右上角，HUD下方）
+        GameObject pauseBtnGO = new GameObject("PauseButton");
+        pauseBtnGO.transform.SetParent(parent, false);
+        RectTransform pauseRect = pauseBtnGO.AddComponent<RectTransform>();
+        pauseRect.anchorMin = new Vector2(1, 1);
+        pauseRect.anchorMax = new Vector2(1, 1);
+        pauseRect.pivot = new Vector2(1, 1);
+        pauseRect.anchoredPosition = new Vector2(-20, -130); // HUD下方
+        pauseRect.sizeDelta = new Vector2(60, 60);
+        UnityEngine.UI.Image pauseImg = pauseBtnGO.AddComponent<UnityEngine.UI.Image>();
+        if (pauseSprite != null)
+        {
+            pauseImg.sprite = pauseSprite;
+            pauseImg.color = Color.white;
+        }
+        else
+        {
+            pauseImg.color = new Color(0.3f, 0.3f, 0.3f, 0.8f);
+            // 添加暂停图标文字
+            GameObject pauseTextGO = new GameObject("Text");
+            pauseTextGO.transform.SetParent(pauseBtnGO.transform, false);
+            RectTransform ptRect = pauseTextGO.AddComponent<RectTransform>();
+            ptRect.anchorMin = Vector2.zero;
+            ptRect.anchorMax = Vector2.one;
+            ptRect.offsetMin = Vector2.zero;
+            ptRect.offsetMax = Vector2.zero;
+            UnityEngine.UI.Text pauseText = pauseTextGO.AddComponent<UnityEngine.UI.Text>();
+            pauseText.text = "II";
+            pauseText.fontSize = 28;
+            pauseText.alignment = TextAnchor.MiddleCenter;
+            pauseText.color = Color.white;
+            pauseText.font = GetDefaultFont();
+        }
+        UnityEngine.UI.Button pauseBtn = pauseBtnGO.AddComponent<UnityEngine.UI.Button>();
+        pauseBtn.targetGraphic = pauseImg;
+        pauseBtn.onClick.AddListener(() => {
+            if (GameManager.Instance != null)
+                GameManager.Instance.TogglePause();
+        });
+
+        // 背包按钮（左侧中部）
+        GameObject bagBtnGO = new GameObject("BagButton");
+        bagBtnGO.transform.SetParent(parent, false);
+        RectTransform bagRect = bagBtnGO.AddComponent<RectTransform>();
+        bagRect.anchorMin = new Vector2(0, 0.5f);
+        bagRect.anchorMax = new Vector2(0, 0.5f);
+        bagRect.pivot = new Vector2(0, 0.5f);
+        bagRect.anchoredPosition = new Vector2(20, 0);
+        bagRect.sizeDelta = new Vector2(70, 70);
+        UnityEngine.UI.Image bagImg = bagBtnGO.AddComponent<UnityEngine.UI.Image>();
+        if (primaryBtnSprite != null)
+        {
+            bagImg.sprite = primaryBtnSprite;
+            bagImg.type = UnityEngine.UI.Image.Type.Sliced;
+            bagImg.color = new Color(0.6f, 0.5f, 0.4f);
+        }
+        else
+        {
+            bagImg.color = new Color(0.4f, 0.3f, 0.2f, 0.9f);
+        }
+        UnityEngine.UI.Button bagBtn = bagBtnGO.AddComponent<UnityEngine.UI.Button>();
+        bagBtn.targetGraphic = bagImg;
+        bagBtn.onClick.AddListener(() => {
+            Debug.Log("[GameSceneSetup] 背包按钮被点击");
+            // 打开背包面板 - 使用静态实例（因为FindObjectOfType找不到禁用的对象）
+            if (SimpleInventoryPanel.Instance != null)
+            {
+                Debug.Log("[GameSceneSetup] 找到SimpleInventoryPanel.Instance，调用Toggle");
+                SimpleInventoryPanel.Instance.Toggle();
+                return;
+            }
+            Debug.LogWarning("[GameSceneSetup] SimpleInventoryPanel.Instance为null");
+        });
+
+        // 背包按钮文字
+        GameObject bagTextGO = new GameObject("Text");
+        bagTextGO.transform.SetParent(bagBtnGO.transform, false);
+        RectTransform btRect = bagTextGO.AddComponent<RectTransform>();
+        btRect.anchorMin = Vector2.zero;
+        btRect.anchorMax = Vector2.one;
+        btRect.offsetMin = Vector2.zero;
+        btRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text bagText = bagTextGO.AddComponent<UnityEngine.UI.Text>();
+        bagText.text = "背包";
+        bagText.fontSize = 18;
+        bagText.fontStyle = FontStyle.Bold;
+        bagText.alignment = TextAnchor.MiddleCenter;
+        bagText.color = Color.white;
+        bagText.font = GetDefaultFont();
+
+        // 商店按钮（左侧，背包上方）
+        CreateSideFunctionButton(parent, "ShopButton", "商店",
+            new Vector2(20, 80), new Color(0.7f, 0.6f, 0.2f, 0.9f), primaryBtnSprite,
+            () => {
+                Debug.Log("[GameSceneSetup] 商店按钮被点击");
+                if (MoShou.UI.ShopPanel.Instance != null)
+                    MoShou.UI.ShopPanel.Instance.Toggle();
+            });
+
+        // 技能按钮（左侧，背包下方）
+        CreateSideFunctionButton(parent, "SkillUpgradeButton", "技能",
+            new Vector2(20, -80), new Color(0.3f, 0.6f, 0.8f, 0.9f), primaryBtnSprite,
+            () => {
+                Debug.Log("[GameSceneSetup] 技能升级按钮被点击");
+                if (MoShou.UI.SkillUpgradePanel.Instance != null)
+                    MoShou.UI.SkillUpgradePanel.Instance.Toggle();
+            });
+
+        // 装备按钮（左侧，技能下方）
+        CreateSideFunctionButton(parent, "EquipmentButton", "装备",
+            new Vector2(20, -160), new Color(0.5f, 0.4f, 0.6f, 0.9f), primaryBtnSprite,
+            () => {
+                Debug.Log("[GameSceneSetup] 装备按钮被点击");
+                // 查找装备面板
+                var equipPanel = GameObject.Find("EquipmentPanel");
+                if (equipPanel != null)
+                    equipPanel.SetActive(!equipPanel.activeSelf);
+            });
+
+        Debug.Log($"[GameSceneSetup] 功能按钮已创建 (资源加载: Pause={pauseSprite != null}, Primary={primaryBtnSprite != null})");
+    }
+
+    /// <summary>
+    /// 创建侧边功能按钮的辅助方法
+    /// </summary>
+    void CreateSideFunctionButton(Transform parent, string name, string text, Vector2 position,
+        Color color, Sprite bgSprite, UnityEngine.Events.UnityAction onClick)
+    {
+        GameObject btnGO = new GameObject(name);
+        btnGO.transform.SetParent(parent, false);
+        RectTransform btnRect = btnGO.AddComponent<RectTransform>();
+        btnRect.anchorMin = new Vector2(0, 0.5f);
+        btnRect.anchorMax = new Vector2(0, 0.5f);
+        btnRect.pivot = new Vector2(0, 0.5f);
+        btnRect.anchoredPosition = position;
+        btnRect.sizeDelta = new Vector2(70, 70);
+
+        UnityEngine.UI.Image btnImg = btnGO.AddComponent<UnityEngine.UI.Image>();
+        if (bgSprite != null)
+        {
+            btnImg.sprite = bgSprite;
+            btnImg.type = UnityEngine.UI.Image.Type.Sliced;
+            btnImg.color = color;
+        }
+        else
+        {
+            btnImg.color = color;
+        }
+
+        UnityEngine.UI.Button btn = btnGO.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = btnImg;
+        btn.onClick.AddListener(onClick);
+
+        // 按钮文字
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(btnGO.transform, false);
+        RectTransform textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text btnText = textGO.AddComponent<UnityEngine.UI.Text>();
+        btnText.text = text;
+        btnText.fontSize = 18;
+        btnText.fontStyle = FontStyle.Bold;
+        btnText.alignment = TextAnchor.MiddleCenter;
+        btnText.color = Color.white;
+        btnText.font = GetDefaultFont();
+    }
+
+
+    /// <summary>
+    /// 创建圆形Sprite（用于摇杆和技能按钮）
+    /// </summary>
+    Sprite CreateCircleSprite()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size);
+        float center = size / 2f;
+        float radius = center - 1;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - center;
+                float dy = y - center;
+                float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                if (dist <= radius)
+                    tex.SetPixel(x, y, Color.white);
+                else
+                    tex.SetPixel(x, y, Color.clear);
+            }
+        }
+        tex.Apply();
+
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+    }
+
+    /// <summary>
+    /// 创建暂停面板
+    /// </summary>
+    GameObject CreatePausePanel(Transform parent)
+    {
+        GameObject panelGO = new GameObject("PausePanel");
+        panelGO.transform.SetParent(parent, false);
+        RectTransform panelRect = panelGO.AddComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
+        bgImage.color = new Color(0, 0, 0, 0.7f);
+
+        // 中心内容框
+        GameObject contentGO = new GameObject("Content");
+        contentGO.transform.SetParent(panelGO.transform, false);
+        RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+        contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+        contentRect.sizeDelta = new Vector2(400, 350);
+        UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
+        contentBg.color = new Color(0.3f, 0.3f, 0.5f);
+
+        // 标题
+        GameObject titleGO = new GameObject("Title");
+        titleGO.transform.SetParent(contentGO.transform, false);
+        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0.5f, 1);
+        titleRect.anchorMax = new Vector2(0.5f, 1);
+        titleRect.anchoredPosition = new Vector2(0, -60);
+        titleRect.sizeDelta = new Vector2(350, 80);
+        UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
+        titleText.text = "暂停";
+        titleText.fontSize = 48;
+        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.color = Color.white;
+        titleText.font = GetDefaultFont();
+
+        // 继续按钮
+        CreateButton(contentGO.transform, "ResumeButton", "继续游戏", new Vector2(0, -20), () => {
+            if (UIManager.Instance != null) UIManager.Instance.OnResumeClick();
+        });
+
+        // 重试按钮
+        CreateButton(contentGO.transform, "RetryButton", "重试", new Vector2(0, -90), () => {
+            if (UIManager.Instance != null) UIManager.Instance.OnRetryClick();
+        });
+
+        // 返回主菜单按钮
+        CreateButton(contentGO.transform, "MenuButton", "主菜单", new Vector2(0, -160), () => {
+            if (UIManager.Instance != null) UIManager.Instance.OnMainMenuClick();
+        });
+
+        panelGO.SetActive(false);
+        return panelGO;
+    }
+
+    void CreateButton(Transform parent, string name, string text, Vector2 pos, UnityEngine.Events.UnityAction onClick)
+    {
+        GameObject btnGO = new GameObject(name);
+        btnGO.transform.SetParent(parent, false);
+        RectTransform btnRect = btnGO.AddComponent<RectTransform>();
+        btnRect.anchorMin = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = pos;
+        btnRect.sizeDelta = new Vector2(200, 50);
+
+        UnityEngine.UI.Image btnImage = btnGO.AddComponent<UnityEngine.UI.Image>();
+        btnImage.color = new Color(0.3f, 0.3f, 0.3f);
+
+        UnityEngine.UI.Button btn = btnGO.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = btnImage;
+        btn.onClick.AddListener(onClick);
+
+        // 按钮文字
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(btnGO.transform, false);
+        RectTransform textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text btnText = textGO.AddComponent<UnityEngine.UI.Text>();
+        btnText.text = text;
+        btnText.fontSize = 28;
+        btnText.alignment = TextAnchor.MiddleCenter;
+        btnText.color = Color.white;
+        btnText.font = GetDefaultFont();
+    }
+
+    /// <summary>
+    /// 创建背包面板
+    /// 注意：由于InventoryPanel使用SerializeField引用，运行时动态创建需要使用简化版
+    /// </summary>
+    void CreateInventoryPanel(Transform parent)
+    {
+        // 背包面板背景
+        GameObject panelGO = new GameObject("InventoryPanel");
+        panelGO.transform.SetParent(parent, false);
+        RectTransform panelRect = panelGO.AddComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
+        bgImage.color = new Color(0, 0, 0, 0.7f);
+
+        // 添加简化版背包组件（不依赖SerializeField）
+        SimpleInventoryPanel invPanel = panelGO.AddComponent<SimpleInventoryPanel>();
+        // 确保静态实例被设置（Awake可能因为执行顺序问题未被调用）
+        SimpleInventoryPanel.Instance = invPanel;
+        Debug.Log("[GameSceneSetup] SimpleInventoryPanel.Instance 已手动设置");
+
+        // 内容框
+        GameObject contentGO = new GameObject("Content");
+        contentGO.transform.SetParent(panelGO.transform, false);
+        RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+        contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+        contentRect.sizeDelta = new Vector2(600, 500);
+        UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
+        contentBg.color = new Color(0.2f, 0.2f, 0.25f);
+
+        // 标题
+        GameObject titleGO = new GameObject("Title");
+        titleGO.transform.SetParent(contentGO.transform, false);
+        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0.5f, 1);
+        titleRect.anchorMax = new Vector2(0.5f, 1);
+        titleRect.anchoredPosition = new Vector2(0, -30);
+        titleRect.sizeDelta = new Vector2(200, 50);
+        UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
+        titleText.text = "背包";
+        titleText.fontSize = 32;
+        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.color = Color.white;
+        titleText.font = GetDefaultFont();
+
+        // 关闭按钮
+        GameObject closeBtnGO = new GameObject("CloseButton");
+        closeBtnGO.transform.SetParent(contentGO.transform, false);
+        RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(1, 1);
+        closeRect.anchorMax = new Vector2(1, 1);
+        closeRect.anchoredPosition = new Vector2(-30, -30);
+        closeRect.sizeDelta = new Vector2(50, 50);
+        UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
+        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
+        closeBtn.onClick.AddListener(() => invPanel.Hide());
+
+        // 关闭按钮文字
+        GameObject closeTextGO = new GameObject("Text");
+        closeTextGO.transform.SetParent(closeBtnGO.transform, false);
+        RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
+        ctRect.anchorMin = Vector2.zero;
+        ctRect.anchorMax = Vector2.one;
+        ctRect.offsetMin = Vector2.zero;
+        ctRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+        closeText.text = "X";
+        closeText.fontSize = 28;
+        closeText.alignment = TextAnchor.MiddleCenter;
+        closeText.color = Color.white;
+        closeText.font = GetDefaultFont();
+
+        // 物品格子容器
+        GameObject slotsGO = new GameObject("SlotsContainer");
+        slotsGO.transform.SetParent(contentGO.transform, false);
+        RectTransform slotsRect = slotsGO.AddComponent<RectTransform>();
+        slotsRect.anchorMin = new Vector2(0.5f, 0.5f);
+        slotsRect.anchorMax = new Vector2(0.5f, 0.5f);
+        slotsRect.anchoredPosition = new Vector2(0, -20);
+        slotsRect.sizeDelta = new Vector2(540, 360);
+
+        // 添加GridLayoutGroup
+        var grid = slotsGO.AddComponent<UnityEngine.UI.GridLayoutGroup>();
+        grid.cellSize = new Vector2(80, 80);
+        grid.spacing = new Vector2(10, 10);
+        grid.startCorner = UnityEngine.UI.GridLayoutGroup.Corner.UpperLeft;
+        grid.startAxis = UnityEngine.UI.GridLayoutGroup.Axis.Horizontal;
+        grid.childAlignment = TextAnchor.UpperLeft;
+        grid.constraint = UnityEngine.UI.GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 6;
+
+        // 设置简化版背包组件的引用
+        invPanel.slotsContainer = slotsGO.transform;
+
+        // 创建30个格子
+        for (int i = 0; i < 30; i++)
+        {
+            CreateInventorySlot(slotsGO.transform, i);
+        }
+
+        // 金币显示
+        GameObject goldGO = new GameObject("GoldDisplay");
+        goldGO.transform.SetParent(contentGO.transform, false);
+        RectTransform goldRect = goldGO.AddComponent<RectTransform>();
+        goldRect.anchorMin = new Vector2(0, 0);
+        goldRect.anchorMax = new Vector2(0, 0);
+        goldRect.anchoredPosition = new Vector2(100, 30);
+        goldRect.sizeDelta = new Vector2(200, 40);
+        UnityEngine.UI.Text goldText = goldGO.AddComponent<UnityEngine.UI.Text>();
+        goldText.text = "金币: 0";
+        goldText.fontSize = 24;
+        goldText.alignment = TextAnchor.MiddleLeft;
+        goldText.color = new Color(1f, 0.85f, 0.2f);
+        goldText.font = GetDefaultFont();
+        invPanel.goldText = goldText;
+
+        // 容量显示
+        GameObject capacityGO = new GameObject("CapacityDisplay");
+        capacityGO.transform.SetParent(contentGO.transform, false);
+        RectTransform capRect = capacityGO.AddComponent<RectTransform>();
+        capRect.anchorMin = new Vector2(1, 0);
+        capRect.anchorMax = new Vector2(1, 0);
+        capRect.anchoredPosition = new Vector2(-100, 30);
+        capRect.sizeDelta = new Vector2(150, 40);
+        UnityEngine.UI.Text capText = capacityGO.AddComponent<UnityEngine.UI.Text>();
+        capText.text = "0/30";
+        capText.fontSize = 24;
+        capText.alignment = TextAnchor.MiddleRight;
+        capText.color = Color.white;
+        capText.font = GetDefaultFont();
+        invPanel.capacityText = capText;
+
+        // 初始隐藏 - 注意：SetActive(false)后Awake仍会被调用，但Start不会
+        panelGO.SetActive(false);
+
+        Debug.Log($"[GameSceneSetup] 背包面板已创建, Instance={SimpleInventoryPanel.Instance != null}");
+    }
+
+    /// <summary>
+    /// 创建背包格子
+    /// </summary>
+    void CreateInventorySlot(Transform parent, int index)
+    {
+        GameObject slotGO = new GameObject($"Slot_{index}");
+        slotGO.transform.SetParent(parent, false);
+
+        UnityEngine.UI.Image slotBg = slotGO.AddComponent<UnityEngine.UI.Image>();
+        slotBg.color = new Color(0.3f, 0.3f, 0.35f);
+
+        UnityEngine.UI.Button slotBtn = slotGO.AddComponent<UnityEngine.UI.Button>();
+        slotBtn.targetGraphic = slotBg;
+
+        // 物品图标（子对象）
+        GameObject iconGO = new GameObject("Icon");
+        iconGO.transform.SetParent(slotGO.transform, false);
+        RectTransform iconRect = iconGO.AddComponent<RectTransform>();
+        iconRect.anchorMin = Vector2.zero;
+        iconRect.anchorMax = Vector2.one;
+        iconRect.offsetMin = new Vector2(5, 5);
+        iconRect.offsetMax = new Vector2(-5, -5);
+        UnityEngine.UI.Image iconImg = iconGO.AddComponent<UnityEngine.UI.Image>();
+        iconImg.color = new Color(1, 1, 1, 0); // 初始透明
+
+        // 数量文字
+        GameObject countGO = new GameObject("Count");
+        countGO.transform.SetParent(slotGO.transform, false);
+        RectTransform countRect = countGO.AddComponent<RectTransform>();
+        countRect.anchorMin = new Vector2(1, 0);
+        countRect.anchorMax = new Vector2(1, 0);
+        countRect.anchoredPosition = new Vector2(-5, 5);
+        countRect.sizeDelta = new Vector2(30, 20);
+        UnityEngine.UI.Text countText = countGO.AddComponent<UnityEngine.UI.Text>();
+        countText.text = "";
+        countText.fontSize = 14;
+        countText.alignment = TextAnchor.LowerRight;
+        countText.color = Color.white;
+        countText.font = GetDefaultFont();
+    }
+
+    /// <summary>
+    /// 创建装备面板
+    /// </summary>
+    void CreateEquipmentPanel(Transform parent)
+    {
+        // 装备面板背景
+        GameObject panelGO = new GameObject("EquipmentPanel");
+        panelGO.transform.SetParent(parent, false);
+        RectTransform panelRect = panelGO.AddComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
+        bgImage.color = new Color(0, 0, 0, 0.7f);
+
+        // 内容框
+        GameObject contentGO = new GameObject("Content");
+        contentGO.transform.SetParent(panelGO.transform, false);
+        RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+        contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+        contentRect.sizeDelta = new Vector2(400, 500);
+        UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
+        contentBg.color = new Color(0.2f, 0.2f, 0.25f);
+
+        // 标题
+        GameObject titleGO = new GameObject("Title");
+        titleGO.transform.SetParent(contentGO.transform, false);
+        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0.5f, 1);
+        titleRect.anchorMax = new Vector2(0.5f, 1);
+        titleRect.anchoredPosition = new Vector2(0, -30);
+        titleRect.sizeDelta = new Vector2(200, 50);
+        UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
+        titleText.text = "装备";
+        titleText.fontSize = 32;
+        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.color = Color.white;
+        titleText.font = GetDefaultFont();
+
+        // 关闭按钮
+        GameObject closeBtnGO = new GameObject("CloseButton");
+        closeBtnGO.transform.SetParent(contentGO.transform, false);
+        RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(1, 1);
+        closeRect.anchorMax = new Vector2(1, 1);
+        closeRect.anchoredPosition = new Vector2(-30, -30);
+        closeRect.sizeDelta = new Vector2(50, 50);
+        UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
+        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
+        closeBtn.onClick.AddListener(() => panelGO.SetActive(false));
+
+        // 关闭按钮文字
+        GameObject closeTextGO = new GameObject("Text");
+        closeTextGO.transform.SetParent(closeBtnGO.transform, false);
+        RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
+        ctRect.anchorMin = Vector2.zero;
+        ctRect.anchorMax = Vector2.one;
+        ctRect.offsetMin = Vector2.zero;
+        ctRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+        closeText.text = "X";
+        closeText.fontSize = 28;
+        closeText.alignment = TextAnchor.MiddleCenter;
+        closeText.color = Color.white;
+        closeText.font = GetDefaultFont();
+
+        // 装备槽位
+        string[] slotNames = { "武器", "护甲", "头盔", "护腿", "戒指", "项链" };
+        for (int i = 0; i < slotNames.Length; i++)
+        {
+            CreateEquipmentSlot(contentGO.transform, slotNames[i], i);
+        }
+
+        // 属性显示
+        GameObject statsGO = new GameObject("Stats");
+        statsGO.transform.SetParent(contentGO.transform, false);
+        RectTransform statsRect = statsGO.AddComponent<RectTransform>();
+        statsRect.anchorMin = new Vector2(0, 0);
+        statsRect.anchorMax = new Vector2(1, 0);
+        statsRect.anchoredPosition = new Vector2(0, 60);
+        statsRect.sizeDelta = new Vector2(0, 100);
+        UnityEngine.UI.Text statsText = statsGO.AddComponent<UnityEngine.UI.Text>();
+        statsText.text = "攻击: +0\n防御: +0\n生命: +0";
+        statsText.fontSize = 20;
+        statsText.alignment = TextAnchor.MiddleCenter;
+        statsText.color = Color.white;
+        statsText.font = GetDefaultFont();
+
+        // 初始隐藏
+        panelGO.SetActive(false);
+
+        Debug.Log("[GameSceneSetup] 装备面板已创建");
+    }
+
+    /// <summary>
+    /// 创建装备槽位
+    /// </summary>
+    void CreateEquipmentSlot(Transform parent, string slotName, int index)
+    {
+        int row = index / 2;
+        int col = index % 2;
+
+        GameObject slotGO = new GameObject($"EquipSlot_{slotName}");
+        slotGO.transform.SetParent(parent, false);
+        RectTransform slotRect = slotGO.AddComponent<RectTransform>();
+        slotRect.anchorMin = new Vector2(0.5f, 1);
+        slotRect.anchorMax = new Vector2(0.5f, 1);
+        slotRect.anchoredPosition = new Vector2(-80 + col * 160, -100 - row * 100);
+        slotRect.sizeDelta = new Vector2(140, 80);
+
+        UnityEngine.UI.Image slotBg = slotGO.AddComponent<UnityEngine.UI.Image>();
+        slotBg.color = new Color(0.3f, 0.3f, 0.35f);
+
+        // 槽位名称
+        GameObject nameGO = new GameObject("Name");
+        nameGO.transform.SetParent(slotGO.transform, false);
+        RectTransform nameRect = nameGO.AddComponent<RectTransform>();
+        nameRect.anchorMin = new Vector2(0, 1);
+        nameRect.anchorMax = new Vector2(1, 1);
+        nameRect.anchoredPosition = new Vector2(0, -15);
+        nameRect.sizeDelta = new Vector2(0, 25);
+        UnityEngine.UI.Text nameText = nameGO.AddComponent<UnityEngine.UI.Text>();
+        nameText.text = slotName;
+        nameText.fontSize = 16;
+        nameText.alignment = TextAnchor.MiddleCenter;
+        nameText.color = Color.gray;
+        nameText.font = GetDefaultFont();
+
+        // 装备图标
+        GameObject iconGO = new GameObject("Icon");
+        iconGO.transform.SetParent(slotGO.transform, false);
+        RectTransform iconRect = iconGO.AddComponent<RectTransform>();
+        iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        iconRect.anchoredPosition = new Vector2(0, -5);
+        iconRect.sizeDelta = new Vector2(50, 50);
+        UnityEngine.UI.Image iconImg = iconGO.AddComponent<UnityEngine.UI.Image>();
+        iconImg.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+    }
+
+    /// <summary>
+    /// 创建商店面板
+    /// </summary>
+    void CreateShopPanel(Transform parent)
+    {
+        // 商店面板背景
+        GameObject panelGO = new GameObject("ShopPanel");
+        panelGO.transform.SetParent(parent, false);
+        RectTransform panelRect = panelGO.AddComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
+        bgImage.color = new Color(0, 0, 0, 0.8f);
+
+        // 添加ShopPanel组件
+        MoShou.UI.ShopPanel shopPanel = panelGO.AddComponent<MoShou.UI.ShopPanel>();
+        MoShou.UI.ShopPanel.Instance = shopPanel;
+
+        // 内容框
+        GameObject contentGO = new GameObject("Content");
+        contentGO.transform.SetParent(panelGO.transform, false);
+        RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0.05f, 0.1f);
+        contentRect.anchorMax = new Vector2(0.95f, 0.9f);
+        contentRect.offsetMin = Vector2.zero;
+        contentRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
+        contentBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+
+        // 标题
+        GameObject titleGO = new GameObject("Title");
+        titleGO.transform.SetParent(contentGO.transform, false);
+        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0.5f, 1);
+        titleRect.anchorMax = new Vector2(0.5f, 1);
+        titleRect.anchoredPosition = new Vector2(0, -35);
+        titleRect.sizeDelta = new Vector2(200, 50);
+        UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
+        titleText.text = "商店";
+        titleText.fontSize = 36;
+        titleText.fontStyle = FontStyle.Bold;
+        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.color = new Color(1f, 0.85f, 0.2f);
+        titleText.font = GetDefaultFont();
+        shopPanel.titleText = titleText;
+
+        // 关闭按钮
+        GameObject closeBtnGO = new GameObject("CloseButton");
+        closeBtnGO.transform.SetParent(contentGO.transform, false);
+        RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(1, 1);
+        closeRect.anchorMax = new Vector2(1, 1);
+        closeRect.anchoredPosition = new Vector2(-30, -30);
+        closeRect.sizeDelta = new Vector2(50, 50);
+        UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
+        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
+        closeBtn.onClick.AddListener(() => shopPanel.Hide());
+        shopPanel.closeButton = closeBtn;
+
+        // 关闭按钮文字
+        GameObject closeTextGO = new GameObject("Text");
+        closeTextGO.transform.SetParent(closeBtnGO.transform, false);
+        RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
+        ctRect.anchorMin = Vector2.zero;
+        ctRect.anchorMax = Vector2.one;
+        ctRect.offsetMin = Vector2.zero;
+        ctRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+        closeText.text = "X";
+        closeText.fontSize = 28;
+        closeText.alignment = TextAnchor.MiddleCenter;
+        closeText.color = Color.white;
+        closeText.font = GetDefaultFont();
+
+        // 金币显示
+        GameObject goldGO = new GameObject("GoldDisplay");
+        goldGO.transform.SetParent(contentGO.transform, false);
+        RectTransform goldRect = goldGO.AddComponent<RectTransform>();
+        goldRect.anchorMin = new Vector2(0, 1);
+        goldRect.anchorMax = new Vector2(0, 1);
+        goldRect.anchoredPosition = new Vector2(100, -35);
+        goldRect.sizeDelta = new Vector2(200, 40);
+        UnityEngine.UI.Text goldText = goldGO.AddComponent<UnityEngine.UI.Text>();
+        goldText.text = "金币: 0";
+        goldText.fontSize = 22;
+        goldText.alignment = TextAnchor.MiddleLeft;
+        goldText.color = new Color(1f, 0.85f, 0.2f);
+        goldText.font = GetDefaultFont();
+        shopPanel.goldText = goldText;
+
+        // 分类标签容器
+        GameObject tabsGO = new GameObject("Tabs");
+        tabsGO.transform.SetParent(contentGO.transform, false);
+        RectTransform tabsRect = tabsGO.AddComponent<RectTransform>();
+        tabsRect.anchorMin = new Vector2(0, 1);
+        tabsRect.anchorMax = new Vector2(1, 1);
+        tabsRect.anchoredPosition = new Vector2(0, -85);
+        tabsRect.sizeDelta = new Vector2(0, 45);
+        var tabsLayout = tabsGO.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+        tabsLayout.childAlignment = TextAnchor.MiddleCenter;
+        tabsLayout.spacing = 10;
+        tabsLayout.childForceExpandWidth = false;
+
+        // 创建分类按钮
+        shopPanel.weaponTab = CreateShopTabButton(tabsGO.transform, "武器");
+        shopPanel.armorTab = CreateShopTabButton(tabsGO.transform, "护甲");
+        shopPanel.consumableTab = CreateShopTabButton(tabsGO.transform, "消耗品");
+
+        // 商品列表容器
+        GameObject itemsGO = new GameObject("ItemsContainer");
+        itemsGO.transform.SetParent(contentGO.transform, false);
+        RectTransform itemsRect = itemsGO.AddComponent<RectTransform>();
+        itemsRect.anchorMin = new Vector2(0.02f, 0.05f);
+        itemsRect.anchorMax = new Vector2(0.98f, 0.82f);
+        itemsRect.offsetMin = Vector2.zero;
+        itemsRect.offsetMax = Vector2.zero;
+
+        // 添加滚动视图
+        var scrollRect = itemsGO.AddComponent<UnityEngine.UI.ScrollRect>();
+        scrollRect.vertical = true;
+        scrollRect.horizontal = false;
+
+        // 内容容器
+        GameObject scrollContentGO = new GameObject("Content");
+        scrollContentGO.transform.SetParent(itemsGO.transform, false);
+        RectTransform scrollContentRect = scrollContentGO.AddComponent<RectTransform>();
+        scrollContentRect.anchorMin = new Vector2(0, 1);
+        scrollContentRect.anchorMax = new Vector2(1, 1);
+        scrollContentRect.pivot = new Vector2(0.5f, 1);
+        scrollContentRect.anchoredPosition = Vector2.zero;
+        scrollContentRect.sizeDelta = new Vector2(0, 600);
+
+        var verticalLayout = scrollContentGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+        verticalLayout.childAlignment = TextAnchor.UpperCenter;
+        verticalLayout.spacing = 10;
+        verticalLayout.childControlWidth = true;
+        verticalLayout.childForceExpandWidth = true;
+        verticalLayout.childForceExpandHeight = false;
+        verticalLayout.padding = new RectOffset(10, 10, 10, 10);
+
+        var contentSizeFitter = scrollContentGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+        contentSizeFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+
+        scrollRect.content = scrollContentRect;
+        shopPanel.itemsContainer = scrollContentGO.transform;
+
+        // 初始隐藏
+        panelGO.SetActive(false);
+        Debug.Log("[GameSceneSetup] 商店面板已创建");
+    }
+
+    /// <summary>
+    /// 创建商店分类标签按钮
+    /// </summary>
+    UnityEngine.UI.Button CreateShopTabButton(Transform parent, string text)
+    {
+        GameObject btnGO = new GameObject($"Tab_{text}");
+        btnGO.transform.SetParent(parent, false);
+        var layout = btnGO.AddComponent<UnityEngine.UI.LayoutElement>();
+        layout.preferredWidth = 100;
+        layout.preferredHeight = 40;
+
+        UnityEngine.UI.Image btnImg = btnGO.AddComponent<UnityEngine.UI.Image>();
+        btnImg.color = new Color(0.3f, 0.3f, 0.35f);
+
+        UnityEngine.UI.Button btn = btnGO.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = btnImg;
+
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(btnGO.transform, false);
+        RectTransform textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text btnText = textGO.AddComponent<UnityEngine.UI.Text>();
+        btnText.text = text;
+        btnText.fontSize = 18;
+        btnText.alignment = TextAnchor.MiddleCenter;
+        btnText.color = Color.white;
+        btnText.font = GetDefaultFont();
+
+        return btn;
+    }
+
+    /// <summary>
+    /// 创建技能升级面板
+    /// </summary>
+    void CreateSkillUpgradePanel(Transform parent)
+    {
+        // 技能面板背景
+        GameObject panelGO = new GameObject("SkillUpgradePanel");
+        panelGO.transform.SetParent(parent, false);
+        RectTransform panelRect = panelGO.AddComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
+        bgImage.color = new Color(0, 0, 0, 0.8f);
+
+        // 添加SkillUpgradePanel组件
+        MoShou.UI.SkillUpgradePanel skillPanel = panelGO.AddComponent<MoShou.UI.SkillUpgradePanel>();
+        MoShou.UI.SkillUpgradePanel.Instance = skillPanel;
+
+        // 内容框（左侧技能列表）
+        GameObject contentGO = new GameObject("Content");
+        contentGO.transform.SetParent(panelGO.transform, false);
+        RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0.03f, 0.1f);
+        contentRect.anchorMax = new Vector2(0.52f, 0.9f);
+        contentRect.offsetMin = Vector2.zero;
+        contentRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
+        contentBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+
+        // 标题
+        GameObject titleGO = new GameObject("Title");
+        titleGO.transform.SetParent(contentGO.transform, false);
+        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0.5f, 1);
+        titleRect.anchorMax = new Vector2(0.5f, 1);
+        titleRect.anchoredPosition = new Vector2(0, -35);
+        titleRect.sizeDelta = new Vector2(200, 50);
+        UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
+        titleText.text = "技能升级";
+        titleText.fontSize = 32;
+        titleText.fontStyle = FontStyle.Bold;
+        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.color = new Color(0.4f, 0.7f, 1f);
+        titleText.font = GetDefaultFont();
+        skillPanel.titleText = titleText;
+
+        // 关闭按钮
+        GameObject closeBtnGO = new GameObject("CloseButton");
+        closeBtnGO.transform.SetParent(panelGO.transform, false);
+        RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(1, 1);
+        closeRect.anchorMax = new Vector2(1, 1);
+        closeRect.anchoredPosition = new Vector2(-30, -30);
+        closeRect.sizeDelta = new Vector2(50, 50);
+        UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
+        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
+        closeBtn.onClick.AddListener(() => skillPanel.Hide());
+        skillPanel.closeButton = closeBtn;
+
+        // 关闭按钮文字
+        GameObject closeTextGO = new GameObject("Text");
+        closeTextGO.transform.SetParent(closeBtnGO.transform, false);
+        RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
+        ctRect.anchorMin = Vector2.zero;
+        ctRect.anchorMax = Vector2.one;
+        ctRect.offsetMin = Vector2.zero;
+        ctRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+        closeText.text = "X";
+        closeText.fontSize = 28;
+        closeText.alignment = TextAnchor.MiddleCenter;
+        closeText.color = Color.white;
+        closeText.font = GetDefaultFont();
+
+        // 金币显示
+        GameObject goldGO = new GameObject("GoldDisplay");
+        goldGO.transform.SetParent(contentGO.transform, false);
+        RectTransform goldRect = goldGO.AddComponent<RectTransform>();
+        goldRect.anchorMin = new Vector2(0, 1);
+        goldRect.anchorMax = new Vector2(0, 1);
+        goldRect.anchoredPosition = new Vector2(20, -35);
+        goldRect.sizeDelta = new Vector2(150, 40);
+        UnityEngine.UI.Text goldText = goldGO.AddComponent<UnityEngine.UI.Text>();
+        goldText.text = "金币: 0";
+        goldText.fontSize = 20;
+        goldText.alignment = TextAnchor.MiddleLeft;
+        goldText.color = new Color(1f, 0.85f, 0.2f);
+        goldText.font = GetDefaultFont();
+        skillPanel.goldText = goldText;
+
+        // 技能列表容器（带滚动）
+        GameObject skillsGO = new GameObject("SkillsContainer");
+        skillsGO.transform.SetParent(contentGO.transform, false);
+        RectTransform skillsRect = skillsGO.AddComponent<RectTransform>();
+        skillsRect.anchorMin = new Vector2(0.02f, 0.02f);
+        skillsRect.anchorMax = new Vector2(0.98f, 0.85f);
+        skillsRect.offsetMin = Vector2.zero;
+        skillsRect.offsetMax = Vector2.zero;
+
+        // 添加滚动视图
+        var scrollRect = skillsGO.AddComponent<UnityEngine.UI.ScrollRect>();
+        scrollRect.vertical = true;
+        scrollRect.horizontal = false;
+
+        // 内容容器
+        GameObject scrollContentGO = new GameObject("Content");
+        scrollContentGO.transform.SetParent(skillsGO.transform, false);
+        RectTransform scrollContentRect = scrollContentGO.AddComponent<RectTransform>();
+        scrollContentRect.anchorMin = new Vector2(0, 1);
+        scrollContentRect.anchorMax = new Vector2(1, 1);
+        scrollContentRect.pivot = new Vector2(0.5f, 1);
+        scrollContentRect.anchoredPosition = Vector2.zero;
+        scrollContentRect.sizeDelta = new Vector2(0, 800);
+
+        var verticalLayout = scrollContentGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+        verticalLayout.childAlignment = TextAnchor.UpperCenter;
+        verticalLayout.spacing = 5;
+        verticalLayout.childControlWidth = true;
+        verticalLayout.childForceExpandWidth = true;
+        verticalLayout.childForceExpandHeight = false;
+        verticalLayout.padding = new RectOffset(5, 5, 5, 5);
+
+        var contentSizeFitter = scrollContentGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+        contentSizeFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+
+        scrollRect.content = scrollContentRect;
+        skillPanel.skillsContainer = scrollContentGO.transform;
+
+        // 初始隐藏
+        panelGO.SetActive(false);
+        Debug.Log("[GameSceneSetup] 技能升级面板已创建");
+    }
+
     void CreateCamera()
     {
         var camGO = new GameObject("Main Camera");
         camGO.tag = "MainCamera";
         var cam = camGO.AddComponent<Camera>();
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.4f, 0.6f, 0.8f); // 天蓝色背景
+        cam.backgroundColor = new Color(0.5f, 0.7f, 0.9f); // 天蓝色背景
+        cam.fieldOfView = 50f; // 稍微窄一点的视野
 
         // 添加AudioListener
         if (FindObjectOfType<AudioListener>() == null)
@@ -580,9 +2143,9 @@ public class GameSceneSetup : MonoBehaviour
             camGO.AddComponent<AudioListener>();
         }
 
-        // 设置初始第三人称视角
-        camGO.transform.position = new Vector3(0, 12, -8);
-        camGO.transform.rotation = Quaternion.Euler(45, 0, 0);
+        // 设置初始第三人称视角 - 更低更近
+        camGO.transform.position = new Vector3(0, 6, -8);
+        camGO.transform.rotation = Quaternion.Euler(30, 0, 0);
 
         // 添加跟随脚本
         var follow = camGO.AddComponent<CameraFollow>();
@@ -593,7 +2156,7 @@ public class GameSceneSetup : MonoBehaviour
         {
             follow.target = player.transform;
             camGO.transform.position = player.transform.position + follow.offset;
-            camGO.transform.LookAt(player.transform.position + Vector3.up * 1.5f);
+            camGO.transform.LookAt(player.transform.position + Vector3.up * 1.2f);
             Debug.Log("[GameSceneSetup] 新摄像机已创建并跟随玩家");
         }
     }
@@ -605,9 +2168,9 @@ public class GameSceneSetup : MonoBehaviour
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
-    public Vector3 offset = new Vector3(0, 12, -8);  // 第三人称偏移
-    public float smoothSpeed = 8f;
-    public float lookAtHeight = 1.5f;  // 看向玩家的高度偏移
+    public Vector3 offset = new Vector3(0, 6, -8);  // 更低的第三人称视角
+    public float smoothSpeed = 10f;
+    public float lookAtHeight = 1.2f;  // 看向玩家的高度偏移
 
     private bool initialized = false;
 

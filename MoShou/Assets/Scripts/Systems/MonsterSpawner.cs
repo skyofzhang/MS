@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using MoShou.Utils;
+using MoShou.UI;
 
 /// <summary>
 /// 怪物生成器 - 符合AI开发知识库§2 RULE-RES-002, §4怪物属性表
@@ -103,20 +104,23 @@ public class MonsterSpawner : MonoBehaviour
             activeMonsters.RemoveAll(m => m == null);
             yield return new WaitForSeconds(0.5f);
         }
-        
-        // 进入下一波
-        currentWave++;
-        
-        if (currentWave > wavesPerLevel)
+
+        Debug.Log($"[Spawner] 波次 {currentWave} 全部击杀完成!");
+
+        // 检查是否最后一波
+        if (currentWave >= wavesPerLevel)
         {
-            // 关卡完成
-            Debug.Log("[Spawner] Level Complete!");
+            // 关卡完成 - 通过GameManager处理
+            Debug.Log("[Spawner] 所有波次完成!");
             if (GameManager.Instance != null)
-                GameManager.Instance.ChangeState(GameManager.GameState.Victory);
+            {
+                GameManager.Instance.OnWaveCleared();
+            }
         }
         else
         {
-            // 下一波
+            // 进入下一波
+            currentWave++;
             yield return new WaitForSeconds(2f);
             StartCoroutine(SpawnWave());
         }
@@ -156,6 +160,15 @@ public class MonsterSpawner : MonoBehaviour
 
         // 配置怪物属性
         SetupMonsterById(mc, monsterId);
+
+        // 添加血条显示
+        if (MonsterStats.TryGetValue(monsterId, out MonsterData statData))
+        {
+            float waveMultiplier = 1f + (currentWave - 1) * 0.15f;
+            float maxHP = statData.hp * waveMultiplier;
+            EnemyHealthBar.CreateForEnemy(monster, maxHP);
+            Debug.Log($"[Spawner] 为 {monster.name} 添加血条, HP: {maxHP}");
+        }
 
         activeMonsters.Add(monster);
     }
@@ -253,26 +266,14 @@ public class MonsterSpawner : MonoBehaviour
     public void OnMonsterKilled()
     {
         monstersKilledThisWave++;
-        Debug.Log($"[Spawner] 怪物被击杀! 本波已击杀: {monstersKilledThisWave}");
 
         // 清理空引用
         activeMonsters.RemoveAll(m => m == null);
 
-        // 如果所有怪物都死了且没有正在生成
-        if (activeMonsters.Count == 0 && !isSpawning)
-        {
-            Debug.Log($"[Spawner] 波次 {currentWave} 完成!");
+        Debug.Log($"[Spawner] 怪物被击杀! 本波已击杀: {monstersKilledThisWave}, 剩余: {activeMonsters.Count}");
 
-            // 检查是否通关
-            if (currentWave >= wavesPerLevel)
-            {
-                Debug.Log("[Spawner] 关卡通关!");
-                if (GameManager.Instance != null)
-                {
-                    GameManager.Instance.OnWaveCleared();
-                }
-            }
-        }
+        // 注意: 波次完成的逻辑在SpawnWave协程中处理
+        // OnMonsterKilled只负责更新计数和清理引用
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
 using UnityEngine;
+using MoShou.UI;
+using MoShou.Systems;
 
 public class MonsterController : MonoBehaviour
 {
@@ -12,18 +14,28 @@ public class MonsterController : MonoBehaviour
     public float moveSpeed = 2f;
     public int expReward = 10;
     public int goldReward = 5;
-    
+
     [Header("AI")]
     public float detectRange = 10f;
     public float attackRange = 1.5f;
     public float attackCooldown = 2f;
-    
+
     private Transform player;
     private float lastAttackTime;
     private bool isDead = false;
-    
+
     private CharacterController characterController;
     private float groundCheckDistance = 0.5f;
+
+    // 简单动画
+    private Transform modelTransform;
+    private Vector3 originalScale;
+    private float bobTime = 0f;
+    private bool isAttacking = false;
+    private float attackAnimTime = 0f;
+
+    // 血条组件
+    private EnemyHealthBar healthBar;
 
     void Start()
     {
@@ -40,6 +52,10 @@ public class MonsterController : MonoBehaviour
             characterController.center = new Vector3(0, 0.5f, 0);
         }
 
+        // 获取模型Transform
+        modelTransform = transform.childCount > 0 ? transform.GetChild(0) : transform;
+        originalScale = modelTransform.localScale;
+
         Debug.Log($"[Monster] {monsterName} 初始化完成, Player: {(player != null ? player.name : "未找到")}");
     }
 
@@ -55,6 +71,12 @@ public class MonsterController : MonoBehaviour
     void Update()
     {
         if (isDead) return;
+
+        // 更新攻击动画（始终更新，不受游戏状态影响）
+        if (isAttacking)
+        {
+            UpdateAttackAnimation();
+        }
 
         // 检查游戏状态
         if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing)
@@ -93,7 +115,8 @@ public class MonsterController : MonoBehaviour
 
     void Idle()
     {
-        // 可以添加巡逻逻辑
+        // 待机动画 - 轻微呼吸效果
+        UpdateIdleAnimation();
     }
 
     void ApplyGravity()
@@ -103,7 +126,41 @@ public class MonsterController : MonoBehaviour
             characterController.Move(Vector3.down * 9.8f * Time.deltaTime);
         }
     }
-    
+
+    void UpdateIdleAnimation()
+    {
+        if (modelTransform == null || isAttacking) return;
+
+        bobTime += Time.deltaTime * 2f;
+        float breathe = 1f + Mathf.Sin(bobTime) * 0.02f;
+        modelTransform.localScale = originalScale * breathe;
+    }
+
+    void UpdateMoveAnimation()
+    {
+        if (modelTransform == null || isAttacking) return;
+
+        bobTime += Time.deltaTime * 8f;
+        float bob = Mathf.Sin(bobTime) * 0.05f;
+        modelTransform.localPosition = new Vector3(0, Mathf.Abs(bob), 0);
+    }
+
+    void UpdateAttackAnimation()
+    {
+        if (modelTransform == null || !isAttacking) return;
+
+        attackAnimTime += Time.deltaTime * 6f;
+        float scale = 1f + Mathf.Sin(attackAnimTime * Mathf.PI) * 0.2f;
+        modelTransform.localScale = originalScale * scale;
+
+        if (attackAnimTime >= 1f)
+        {
+            isAttacking = false;
+            attackAnimTime = 0f;
+            modelTransform.localScale = originalScale;
+        }
+    }
+
     void ChasePlayer()
     {
         Vector3 direction = (player.position - transform.position).normalized;
@@ -120,6 +177,9 @@ public class MonsterController : MonoBehaviour
             // 后备：直接移动
             transform.position += direction * moveSpeed * Time.deltaTime;
         }
+
+        // 移动动画
+        UpdateMoveAnimation();
 
         // 面向玩家
         if (direction.sqrMagnitude > 0.01f)
@@ -143,6 +203,10 @@ public class MonsterController : MonoBehaviour
         {
             transform.rotation = Quaternion.LookRotation(dir);
         }
+
+        // 触发攻击动画
+        isAttacking = true;
+        attackAnimTime = 0f;
 
         // 创建攻击特效
         CreateAttackVFX();
@@ -176,13 +240,37 @@ public class MonsterController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         if (isDead) return;
-        
+
         // 应用防御减伤
         float actualDamage = CombatSystem.CalculateDamage(damage, defense);
         currentHealth -= actualDamage;
-        
+
+        // 更新血条
+        if (healthBar == null)
+        {
+            healthBar = GetComponent<EnemyHealthBar>();
+        }
+        if (healthBar != null)
+        {
+            healthBar.SetHealth(currentHealth, maxHealth);
+        }
+
+        // 播放受击音效
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFXAtPosition(AudioManager.SFX.EnemyHit, transform.position);
+        }
+
+        // 显示伤害飘字
+        bool isCrit = damage > actualDamage * 1.4f; // 简单判断是否暴击
+        DamagePopup.CreateWorldSpace(
+            transform.position + Vector3.up * 1.5f,
+            Mathf.RoundToInt(actualDamage),
+            isCrit ? DamageType.Critical : DamageType.Normal
+        );
+
         Debug.Log($"[{monsterName}] Took {actualDamage} damage. Health: {currentHealth}/{maxHealth}");
-        
+
         if (currentHealth <= 0)
         {
             Die();
@@ -193,6 +281,12 @@ public class MonsterController : MonoBehaviour
     {
         isDead = true;
         Debug.Log($"[{monsterName}] Died! Dropping {expReward} EXP, {goldReward} Gold");
+
+        // 播放死亡音效
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFXAtPosition(AudioManager.SFX.EnemyDeath, transform.position);
+        }
 
         // 给玩家奖励
         if (GameManager.Instance != null)

@@ -1,0 +1,86 @@
+{
+  "task_type": "art_generation",
+  "task_id": "ART_GEN_001",
+  "created_at": "2026-02-07",
+  "status": "pending",
+  "api_config": {
+    "platform": "LiblibAI",
+    "base_url": "https://openapi.liblibai.cloud",
+    "access_key": "r0LTLSLDq4e3a-PFdmrBpA",
+    "secret_key": "4lH_K_Ya66ENhg-h_C64YnpnZdUoU6iJ",
+    "endpoints": {
+      "text2img": "/api/generate/webui/text2img",
+      "status": "/api/generate/webui/status"
+    }
+  },
+  "output_directory": "E:\\AI_Project\\MS\\MoShou\\Assets\\Resources\\Sprites\\Generated",
+  "generation_requests": [
+    {
+      "id": "terrain_grass",
+      "filename": "Ground_Grass_01.png",
+      "prompt": "seamless grass texture, top-down view, game asset, green grass field, high detail, tileable pattern, 2D game texture, clean edges, no objects",
+      "negative_prompt": "blurry, low quality, objects, characters, 3D, realistic photo",
+      "width": 512,
+      "height": 512,
+      "status": "pending"
+    },
+    {
+      "id": "terrain_dirt",
+      "filename": "Ground_Dirt_01.png",
+      "prompt": "seamless dirt texture, top-down view, game asset, brown earth soil, high detail, tileable pattern, 2D game texture, clean edges",
+      "negative_prompt": "blurry, low quality, grass, objects",
+      "width": 512,
+      "height": 512,
+      "status": "pending"
+    },
+    {
+      "id": "terrain_stone",
+      "filename": "Ground_Stone_01.png",
+      "prompt": "seamless stone floor texture, top-down view, game asset, grey cobblestone, medieval fantasy style, tileable pattern, 2D game texture",
+      "negative_prompt": "blurry, low quality, modern, realistic",
+      "width": 512,
+      "height": 512,
+      "status": "pending"
+    },
+    {
+      "id": "vfx_arrow_trail",
+      "filename": "VFX_Arrow_Trail.png",
+      "prompt": "arrow trail effect sprite, glowing yellow orange light streak, transparent background PNG, game VFX asset, soft glow, horizontal motion blur, 2D sprite",
+      "negative_prompt": "3D, realistic, complex background",
+      "width": 256,
+      "height": 64,
+      "status": "pending"
+    },
+    {
+      "id": "vfx_hit_spark",
+      "filename": "VFX_Hit_Spark.png",
+      "prompt": "hit spark effect sprite, impact flash, white yellow sparks explosion, transparent background PNG, game VFX, action game effect, 2D sprite",
+      "negative_prompt": "3D, realistic, dark",
+      "width": 128,
+      "height": 128,
+      "status": "pending"
+    },
+    {
+      "id": "ui_joystick_base",
+      "filename": "UI_Joystick_Base.png",
+      "prompt": "virtual joystick base, circular dark grey disc with subtle gradient, soft inner glow, mobile game UI element, clean modern design, transparent background PNG",
+      "negative_prompt": "3D, realistic, complex, text",
+      "width": 200,
+      "height": 200,
+      "status": "pending"
+    },
+    {
+      "id": "ui_joystick_knob",
+      "filename": "UI_Joystick_Knob.png",
+      "prompt": "virtual joystick knob, small white circular button with soft shadow, mobile game UI control element, clean minimal design, transparent background PNG",
+      "negative_prompt": "3D, realistic, complex",
+      "width": 100,
+      "height": 100,
+      "status": "pending"
+    }
+  ],
+  "n8n_webhook": {
+    "note": "N8N workflow should read this file, call LiblibAI API for each pending request, download results, and update status",
+    "on_complete": "Move generated files to output_directory, update status to 'completed'"
+  }
+}

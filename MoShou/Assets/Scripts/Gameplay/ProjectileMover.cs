@@ -1,4 +1,5 @@
 using UnityEngine;
+using MoShou.Combat;
 
 /// <summary>
 /// 简单的投射物移动组件
@@ -8,14 +9,28 @@ public class ProjectileMover : MonoBehaviour
     public Vector3 target;
     public float speed = 10f;
     public float destroyDelay = 1f;
+    public bool enableTrail = true;
 
     private float startTime;
     private Vector3 startPos;
+    private ProjectileTrail trail;
 
     void Start()
     {
         startTime = Time.time;
         startPos = transform.position;
+
+        // 添加拖尾效果
+        if (enableTrail)
+        {
+            trail = ProjectileTrail.AddToProjectile(gameObject, ProjectileTrail.TrailPreset.Arrow);
+        }
+
+        // 播放射击音效
+        if (MoShou.Systems.AudioManager.Instance != null)
+        {
+            MoShou.Systems.AudioManager.Instance.PlaySFX(MoShou.Systems.AudioManager.SFX.ArrowShoot);
+        }
     }
 
     void Update()
@@ -40,6 +55,15 @@ public class ProjectileMover : MonoBehaviour
 
     void CreateHitEffect()
     {
+        // 播放命中音效
+        if (MoShou.Systems.AudioManager.Instance != null)
+        {
+            MoShou.Systems.AudioManager.Instance.PlaySFXAtPosition(
+                MoShou.Systems.AudioManager.SFX.ArrowHit,
+                target
+            );
+        }
+
         // 简单的命中闪光
         GameObject hit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         hit.name = "HitEffect";
