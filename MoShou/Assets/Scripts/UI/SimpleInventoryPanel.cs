@@ -623,6 +623,7 @@ public class SimpleInventoryPanel : MonoBehaviour
 
         string itemName = GetItemDisplayName(item);
         InventoryManager.Instance.RemoveFromSlot(selectedSlotIndex, 1);
+        InventoryManager.Instance.SortInventory(); // 自动排序，消除空隙
         Debug.Log($"[背包] 丢弃物品: {itemName}");
 
         HideActionMenu();
@@ -671,6 +672,7 @@ public class SimpleInventoryPanel : MonoBehaviour
 
         // 移除物品
         InventoryManager.Instance.RemoveFromSlot(selectedSlotIndex, 1);
+        InventoryManager.Instance.SortInventory(); // 自动排序，消除空隙
         Debug.Log($"[背包] 售卖物品: {itemName} 获得 {sellPrice} 金币");
 
         HideActionMenu();
