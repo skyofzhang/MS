@@ -129,6 +129,126 @@ namespace MoShou.Systems
                 critRateBonus = 0,
                 description = "普通的布制护甲"
             };
+
+            // ===== 掉落表引用的装备（补全） =====
+
+            // 武器
+            equipmentDatabase["WPN_002"] = new Equipment
+            {
+                id = "WPN_002",
+                name = "铁剑",
+                slot = EquipmentSlot.Weapon,
+                quality = EquipmentQuality.Green,
+                level = 5,
+                attackBonus = 12,
+                defenseBonus = 0,
+                hpBonus = 0,
+                critRateBonus = 0.03f,
+                description = "锻造精良的铁剑"
+            };
+
+            equipmentDatabase["WPN_003"] = new Equipment
+            {
+                id = "WPN_003",
+                name = "精钢长弓",
+                slot = EquipmentSlot.Weapon,
+                quality = EquipmentQuality.Blue,
+                level = 10,
+                attackBonus = 20,
+                defenseBonus = 0,
+                hpBonus = 0,
+                critRateBonus = 0.05f,
+                description = "精钢打造的长弓，威力惊人"
+            };
+
+            equipmentDatabase["WPN_004"] = new Equipment
+            {
+                id = "WPN_004",
+                name = "暗影之刃",
+                slot = EquipmentSlot.Weapon,
+                quality = EquipmentQuality.Purple,
+                level = 15,
+                attackBonus = 35,
+                defenseBonus = 0,
+                hpBonus = 20,
+                critRateBonus = 0.08f,
+                description = "蕴含暗影力量的神秘武器"
+            };
+
+            // 护甲
+            equipmentDatabase["ARM_002"] = new Equipment
+            {
+                id = "ARM_002",
+                name = "锁子甲",
+                slot = EquipmentSlot.Armor,
+                quality = EquipmentQuality.Green,
+                level = 5,
+                attackBonus = 0,
+                defenseBonus = 8,
+                hpBonus = 30,
+                critRateBonus = 0,
+                description = "环环相扣的铁链甲"
+            };
+
+            equipmentDatabase["ARM_003"] = new Equipment
+            {
+                id = "ARM_003",
+                name = "龙鳞铠甲",
+                slot = EquipmentSlot.Armor,
+                quality = EquipmentQuality.Blue,
+                level = 10,
+                attackBonus = 5,
+                defenseBonus = 15,
+                hpBonus = 60,
+                critRateBonus = 0,
+                description = "用龙鳞锻造的坚固铠甲"
+            };
+
+            // 头盔
+            equipmentDatabase["HLM_001"] = new Equipment
+            {
+                id = "HLM_001",
+                name = "皮帽",
+                slot = EquipmentSlot.Helmet,
+                quality = EquipmentQuality.White,
+                level = 1,
+                attackBonus = 0,
+                defenseBonus = 2,
+                hpBonus = 5,
+                critRateBonus = 0,
+                description = "简单的皮制帽子"
+            };
+
+            equipmentDatabase["HLM_002"] = new Equipment
+            {
+                id = "HLM_002",
+                name = "铁盔",
+                slot = EquipmentSlot.Helmet,
+                quality = EquipmentQuality.Green,
+                level = 5,
+                attackBonus = 0,
+                defenseBonus = 5,
+                hpBonus = 15,
+                critRateBonus = 0.02f,
+                description = "坚固的铁制头盔"
+            };
+
+            // 商店追加装备
+            equipmentDatabase["ARM_004"] = new Equipment
+            {
+                id = "ARM_004",
+                name = "板甲",
+                slot = EquipmentSlot.Armor,
+                quality = EquipmentQuality.Purple,
+                level = 15,
+                attackBonus = 0,
+                defenseBonus = 25,
+                hpBonus = 80,
+                critRateBonus = 0,
+                description = "重型板甲，防御力极高"
+            };
+
+            Debug.Log($"[EquipmentManager] 已创建 {equipmentDatabase.Count} 个默认装备配置");
         }
 
         /// <summary>

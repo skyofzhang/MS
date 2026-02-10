@@ -28,6 +28,9 @@ namespace MoShou.Systems
         public int highestUnlockedStage = 1;
         public List<int> clearedStages = new List<int>();
         public int totalPlayTime = 0;
+
+        // 关卡星级（stageId -> stars）
+        public SerializableDictionary<int, int> stageStars = new SerializableDictionary<int, int>();
     }
 
     /// <summary>
@@ -400,6 +403,99 @@ namespace MoShou.Systems
         {
             Debug.Log("[SaveSystem] Resetting progress...");
             DeleteSave();
+        }
+
+        /// <summary>
+        /// 获取关卡星级
+        /// </summary>
+        /// <param name="stageId">关卡ID</param>
+        /// <returns>星级数（0=未通关，1-3=已通关星级）</returns>
+        public int GetStageStars(int stageId)
+        {
+            if (PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                try
+                {
+                    SaveData data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                    if (data?.stageStars != null)
+                    {
+                        var dict = data.stageStars.ToDictionary();
+                        if (dict.TryGetValue(stageId, out int stars))
+                        {
+                            return stars;
+                        }
+                    }
+                }
+                catch { }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// 保存关卡星级（只保存最高记录）
+        /// </summary>
+        /// <param name="stageId">关卡ID</param>
+        /// <param name="stars">获得的星级（1-3）</param>
+        public void SetStageStars(int stageId, int stars)
+        {
+            if (stars < 1 || stars > 3) return;
+
+            int currentStars = GetStageStars(stageId);
+            if (stars > currentStars)
+            {
+                // 读取当前存档
+                SaveData currentData = null;
+                if (PlayerPrefs.HasKey(SAVE_KEY))
+                {
+                    try
+                    {
+                        currentData = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                    }
+                    catch { }
+                }
+
+                if (currentData == null)
+                {
+                    currentData = new SaveData();
+                }
+
+                if (currentData.stageStars == null)
+                {
+                    currentData.stageStars = new SerializableDictionary<int, int>();
+                }
+
+                // 更新或添加星级
+                var dict = currentData.stageStars.ToDictionary();
+                dict[stageId] = stars;
+                currentData.stageStars = SerializableDictionary<int, int>.FromDictionary(dict);
+
+                // 保存
+                string json = JsonUtility.ToJson(currentData, true);
+                PlayerPrefs.SetString(SAVE_KEY, json);
+                PlayerPrefs.Save();
+
+                Debug.Log($"[SaveSystem] Stage {stageId} stars updated: {currentStars} -> {stars}");
+            }
+        }
+
+        /// <summary>
+        /// 获取所有关卡星级
+        /// </summary>
+        public Dictionary<int, int> GetAllStageStars()
+        {
+            if (PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                try
+                {
+                    SaveData data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                    if (data?.stageStars != null)
+                    {
+                        return data.stageStars.ToDictionary();
+                    }
+                }
+                catch { }
+            }
+            return new Dictionary<int, int>();
         }
     }
 }

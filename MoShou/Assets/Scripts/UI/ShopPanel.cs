@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using MoShou.Systems;
 using MoShou.Data;
@@ -12,13 +13,19 @@ namespace MoShou.UI
     /// </summary>
     public class ShopPanel : MonoBehaviour
     {
-        public static ShopPanel Instance { get; private set; }
+        public static ShopPanel Instance { get; set; }
 
         [Header("UI引用")]
         public Transform itemsContainer;    // 商品列表容器
         public Text goldText;               // 玩家金币显示
         public Text titleText;              // 标题
         public Button closeButton;          // 关闭按钮
+
+        [Header("Toast提示")]
+        private GameObject toastContainer;  // Toast容器
+        private Text toastText;             // Toast文本
+        private Image toastBg;              // Toast背景
+        private Coroutine toastCoroutine;
 
         [Header("商品预制件")]
         public GameObject shopItemPrefab;   // 商品项预制件（运行时创建）
@@ -38,6 +45,7 @@ namespace MoShou.UI
         void Awake()
         {
             Instance = this;
+            CreateToastUI();
         }
 
         void Start()
@@ -183,7 +191,7 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 购买商品回调
+        /// 购买商品回调 - 显示确认对话框
         /// </summary>
         void OnItemPurchased(ShopItemData item)
         {
@@ -192,14 +200,40 @@ namespace MoShou.UI
             if (playerGold < item.price)
             {
                 Debug.Log($"[ShopPanel] 金币不足! 需要 {item.price}, 拥有 {playerGold}");
-                ShowMessage("金币不足!");
+                ShowMessage("金币不足!", false);
+
+                // 播放失败音效
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(AudioManager.SFX.ButtonClick);
+                }
                 return;
             }
 
+            // 显示购买确认对话框
+            if (ConfirmDialog.Instance != null)
+            {
+                ConfirmDialog.Instance.ShowBuyConfirm(item.name, item.price, () =>
+                {
+                    ExecutePurchase(item);
+                });
+            }
+            else
+            {
+                // 如果没有ConfirmDialog，直接购买
+                ExecutePurchase(item);
+            }
+        }
+
+        /// <summary>
+        /// 执行购买逻辑
+        /// </summary>
+        void ExecutePurchase(ShopItemData item)
+        {
             // 扣除金币
             if (!SpendGold(item.price))
             {
-                ShowMessage("购买失败!");
+                ShowMessage("购买失败!", false);
                 return;
             }
 
@@ -208,19 +242,25 @@ namespace MoShou.UI
             {
                 InventoryManager.Instance.AddItem(item.id, 1);
                 Debug.Log($"[ShopPanel] 购买成功: {item.name}");
-                ShowMessage($"购买成功: {item.name}");
+                ShowMessage($"购买成功: {item.name}", true);
 
                 // 播放购买音效
                 if (AudioManager.Instance != null)
                 {
-                    AudioManager.Instance.PlaySFX("SFX_UI_Buy");
+                    AudioManager.Instance.PlaySFX(AudioManager.SFX.CoinPickup);
                 }
             }
             else
             {
                 // 如果没有InventoryManager，尝试通过GameManager添加
                 Debug.Log($"[ShopPanel] 购买成功: {item.name} (InventoryManager不存在)");
-                ShowMessage($"购买成功: {item.name}");
+                ShowMessage($"购买成功: {item.name}", true);
+
+                // 播放购买音效
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(AudioManager.SFX.CoinPickup);
+                }
             }
 
             // 刷新金币显示
@@ -250,18 +290,11 @@ namespace MoShou.UI
         {
             if (GameManager.Instance != null)
             {
-                // GameManager中的SessionGold没有减少方法，需要添加
-                // 暂时直接减少
-                return true;
+                return GameManager.Instance.SpendGold(amount);
             }
             if (SaveSystem.Instance != null && SaveSystem.Instance.CurrentPlayerStats != null)
             {
-                var stats = SaveSystem.Instance.CurrentPlayerStats;
-                if (stats.gold >= amount)
-                {
-                    stats.gold -= amount;
-                    return true;
-                }
+                return SaveSystem.Instance.CurrentPlayerStats.SpendGold(amount);
             }
             return false;
         }
@@ -294,12 +327,133 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 显示消息
+        /// 创建Toast UI
         /// </summary>
-        void ShowMessage(string message)
+        void CreateToastUI()
+        {
+            // Toast容器
+            toastContainer = new GameObject("ToastContainer");
+            toastContainer.transform.SetParent(transform, false);
+            RectTransform toastRect = toastContainer.AddComponent<RectTransform>();
+            toastRect.anchorMin = new Vector2(0.5f, 0.7f);
+            toastRect.anchorMax = new Vector2(0.5f, 0.7f);
+            toastRect.sizeDelta = new Vector2(400, 60);
+
+            // 背景
+            toastBg = toastContainer.AddComponent<Image>();
+            toastBg.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+
+            // 文本
+            GameObject textGO = new GameObject("ToastText");
+            textGO.transform.SetParent(toastContainer.transform, false);
+            RectTransform textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(15, 5);
+            textRect.offsetMax = new Vector2(-15, -5);
+
+            toastText = textGO.AddComponent<Text>();
+            toastText.fontSize = 24;
+            toastText.alignment = TextAnchor.MiddleCenter;
+            toastText.color = Color.white;
+            toastText.font = GetDefaultFont();
+
+            // 描边效果
+            Outline outline = textGO.AddComponent<Outline>();
+            outline.effectColor = new Color(0, 0, 0, 0.5f);
+            outline.effectDistance = new Vector2(1, -1);
+
+            // 默认隐藏
+            toastContainer.SetActive(false);
+        }
+
+        /// <summary>
+        /// 显示消息（Toast提示）
+        /// </summary>
+        void ShowMessage(string message, bool isSuccess = true)
         {
             Debug.Log($"[Shop] {message}");
-            // TODO: 添加飘字或Toast提示
+
+            if (toastContainer == null || toastText == null || toastBg == null)
+            {
+                CreateToastUI();
+            }
+
+            // 设置颜色
+            if (isSuccess)
+            {
+                toastBg.color = new Color(0.15f, 0.4f, 0.15f, 0.95f); // 绿色背景
+                toastText.color = new Color(0.8f, 1f, 0.8f);
+            }
+            else
+            {
+                toastBg.color = new Color(0.5f, 0.15f, 0.15f, 0.95f); // 红色背景
+                toastText.color = new Color(1f, 0.8f, 0.8f);
+            }
+
+            toastText.text = message;
+
+            // 停止之前的协程
+            if (toastCoroutine != null)
+            {
+                StopCoroutine(toastCoroutine);
+            }
+
+            // 显示并自动隐藏
+            toastCoroutine = StartCoroutine(ShowToastCoroutine());
+        }
+
+        IEnumerator ShowToastCoroutine()
+        {
+            toastContainer.SetActive(true);
+
+            // 淡入
+            CanvasGroup cg = toastContainer.GetComponent<CanvasGroup>();
+            if (cg == null)
+            {
+                cg = toastContainer.AddComponent<CanvasGroup>();
+            }
+
+            // 淡入动画
+            float fadeInDuration = 0.2f;
+            float elapsed = 0f;
+            cg.alpha = 0f;
+
+            while (elapsed < fadeInDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                cg.alpha = Mathf.Lerp(0f, 1f, elapsed / fadeInDuration);
+                yield return null;
+            }
+            cg.alpha = 1f;
+
+            // 显示时间
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            // 淡出动画
+            float fadeOutDuration = 0.3f;
+            elapsed = 0f;
+
+            while (elapsed < fadeOutDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                cg.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeOutDuration);
+                yield return null;
+            }
+
+            toastContainer.SetActive(false);
+            toastCoroutine = null;
+        }
+
+        Font GetDefaultFont()
+        {
+            string[] fontNames = { "LegacyRuntime.ttf", "Arial.ttf", "Liberation Sans" };
+            foreach (string fontName in fontNames)
+            {
+                Font font = Resources.GetBuiltinResource<Font>(fontName);
+                if (font != null) return font;
+            }
+            return Font.CreateDynamicFontFromOSFont("Arial", 14);
         }
 
         /// <summary>

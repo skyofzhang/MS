@@ -124,8 +124,9 @@ namespace MoShou.Gameplay
                 renderer = gameObject.AddComponent<MeshRenderer>();
             }
 
-            // 根据类型设置颜色
-            Material mat = new Material(Shader.Find("Standard"));
+            // 根据类型设置颜色 - 使用URP兼容Shader
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            Material mat = new Material(shader);
             switch (pickupType)
             {
                 case DropPickupType.Gold:
@@ -139,6 +140,10 @@ namespace MoShou.Gameplay
                 case DropPickupType.Item:
                     mat.color = new Color(0.8f, 0.4f, 1f); // 紫色
                     transform.localScale = Vector3.one * 0.4f;
+                    break;
+                case DropPickupType.Equipment:
+                    mat.color = new Color(1f, 0.5f, 0f); // 橙色 - 装备
+                    transform.localScale = Vector3.one * 0.5f;
                     break;
             }
             renderer.material = mat;

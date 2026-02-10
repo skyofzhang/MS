@@ -28,6 +28,20 @@ namespace MoShou.UI
         private bool isInitialized = false;
 
         /// <summary>
+        /// 获取默认字体
+        /// </summary>
+        private Font GetDefaultFont()
+        {
+            string[] fontNames = { "LegacyRuntime.ttf", "Arial.ttf", "Liberation Sans" };
+            foreach (string fontName in fontNames)
+            {
+                Font font = Resources.GetBuiltinResource<Font>(fontName);
+                if (font != null) return font;
+            }
+            return Font.CreateDynamicFontFromOSFont("Arial", 14);
+        }
+
+        /// <summary>
         /// 初始化飘字
         /// </summary>
         public void Initialize(int damage, DamageType type = DamageType.Normal)
@@ -39,7 +53,7 @@ namespace MoShou.UI
                 {
                     // 创建Text组件
                     damageText = gameObject.AddComponent<Text>();
-                    damageText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    damageText.font = GetDefaultFont();
                     damageText.alignment = TextAnchor.MiddleCenter;
                     damageText.fontSize = 24;
                 }
@@ -90,10 +104,10 @@ namespace MoShou.UI
             // 上浮
             transform.position += Vector3.up * floatSpeed * Time.deltaTime;
 
-            // 淡出
+            // 淡出（使用fadeSpeed控制速度）
             if (damageText != null)
             {
-                float alpha = Mathf.Lerp(1f, 0f, timer / lifetime);
+                float alpha = Mathf.Clamp01(1f - (timer * fadeSpeed / lifetime));
                 damageText.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
             }
 
@@ -142,7 +156,7 @@ namespace MoShou.UI
         /// <summary>
         /// 静态方法 - 在世界空间创建伤害飘字（跟随3D位置）
         /// </summary>
-        public static DamagePopup CreateWorldSpace(Vector3 worldPosition, int damage, DamageType type = DamageType.Normal)
+        public static DamagePopup CreateWorldSpace(Vector3 worldPosition, int damage, DamageType type = DamageType.Normal, string customText = null)
         {
             GameObject popupObj = new GameObject("DamagePopup_World");
             popupObj.transform.position = worldPosition + Vector3.up * 1.5f;
@@ -156,26 +170,50 @@ namespace MoShou.UI
 
             DamagePopup popup = popupObj.AddComponent<DamagePopup>();
 
-            // 设置文本
-            switch (type)
+            // 设置文本（支持自定义文本）
+            if (!string.IsNullOrEmpty(customText))
             {
-                case DamageType.Normal:
-                    textMesh.text = damage.ToString();
-                    textMesh.color = popup.normalColor;
-                    break;
-                case DamageType.Critical:
-                    textMesh.text = $"{damage}!";
-                    textMesh.color = popup.critColor;
-                    popupObj.transform.localScale = Vector3.one * 1.5f;
-                    break;
-                case DamageType.Heal:
-                    textMesh.text = $"+{damage}";
-                    textMesh.color = popup.healColor;
-                    break;
-                case DamageType.Miss:
-                    textMesh.text = "Miss";
-                    textMesh.color = popup.missColor;
-                    break;
+                textMesh.text = customText;
+                // 根据类型设置颜色
+                switch (type)
+                {
+                    case DamageType.Critical:
+                        textMesh.color = popup.critColor;
+                        popupObj.transform.localScale = Vector3.one * 1.3f;
+                        break;
+                    case DamageType.Heal:
+                        textMesh.color = popup.healColor;
+                        break;
+                    case DamageType.Miss:
+                        textMesh.color = popup.missColor;
+                        break;
+                    default:
+                        textMesh.color = popup.normalColor;
+                        break;
+                }
+            }
+            else
+            {
+                switch (type)
+                {
+                    case DamageType.Normal:
+                        textMesh.text = damage.ToString();
+                        textMesh.color = popup.normalColor;
+                        break;
+                    case DamageType.Critical:
+                        textMesh.text = $"{damage}!";
+                        textMesh.color = popup.critColor;
+                        popupObj.transform.localScale = Vector3.one * 1.5f;
+                        break;
+                    case DamageType.Heal:
+                        textMesh.text = $"+{damage}";
+                        textMesh.color = popup.healColor;
+                        break;
+                    case DamageType.Miss:
+                        textMesh.text = "Miss";
+                        textMesh.color = popup.missColor;
+                        break;
+                }
             }
 
             popup.isInitialized = true;

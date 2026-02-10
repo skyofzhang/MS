@@ -14,7 +14,7 @@ namespace MoShou.Systems
         public static InventoryManager Instance { get; private set; }
 
         [Header("背包设置")]
-        [SerializeField] private int maxSlots = 30;     // 最大格子数
+        [SerializeField] private int maxSlots = 100;    // 最大格子数（扩容，避免战斗中频繁满包）
 
         // 背包数据
         private List<InventoryItem> items = new List<InventoryItem>();

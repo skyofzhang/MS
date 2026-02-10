@@ -31,9 +31,12 @@ namespace MoShou.Combat
             trailRenderer.numCapVertices = 5;
             trailRenderer.numCornerVertices = 5;
 
-            // 创建材质
-            Material trailMat = new Material(Shader.Find("Sprites/Default"));
-            trailMat.SetFloat("_Mode", 2); // Fade mode
+            // 创建材质 - 使用URP兼容Shader
+            Shader trailShader = Shader.Find("Universal Render Pipeline/Unlit")
+                              ?? Shader.Find("Universal Render Pipeline/Lit")
+                              ?? Shader.Find("Sprites/Default")
+                              ?? Shader.Find("Standard");
+            Material trailMat = new Material(trailShader);
             trailRenderer.material = trailMat;
 
             // 设置渐变色

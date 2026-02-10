@@ -77,7 +77,15 @@ namespace MoShou.Core
                 SaveSystem.Instance.LoadGame();
             }
 
-            // 7. 添加测试物品（调试用）
+            // 7. 同步存档金币到GameManager的SessionGold
+            if (GameManager.Instance != null && SaveSystem.Instance != null)
+            {
+                GameManager.Instance.SessionGold = SaveSystem.Instance.CurrentPlayerStats.gold;
+                GameManager.Instance.SessionExp = SaveSystem.Instance.CurrentPlayerStats.experience;
+                Debug.Log($"[GameInitializer] 同步存档金币: {GameManager.Instance.SessionGold}, 经验: {GameManager.Instance.SessionExp}");
+            }
+
+            // 8. 添加测试物品（调试用）
             if (addTestItems)
             {
                 AddTestItems();
@@ -116,14 +124,25 @@ namespace MoShou.Core
             InventoryManager.Instance.AddItem("ARM_001", 1);
             InventoryManager.Instance.AddItem("HLM_001", 1);
 
-            // 添加金币和经验
-            if (SaveSystem.Instance != null)
+            // 添加金币和经验（通过GameManager同步两边）
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddGold(100);
+                GameManager.Instance.AddExp(50);
+            }
+            else if (SaveSystem.Instance != null)
             {
                 SaveSystem.Instance.CurrentPlayerStats.AddGold(100);
                 SaveSystem.Instance.CurrentPlayerStats.AddExperience(50);
             }
 
-            Debug.Log("[GameInitializer] 添加测试物品完成");
+            // 立即保存，防止重启丢失
+            if (SaveSystem.Instance != null)
+            {
+                SaveSystem.Instance.SaveGame();
+            }
+
+            Debug.Log("[GameInitializer] 添加测试物品完成并已保存");
         }
 
         /// <summary>

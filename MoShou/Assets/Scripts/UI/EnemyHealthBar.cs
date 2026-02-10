@@ -6,19 +6,23 @@ namespace MoShou.UI
     /// <summary>
     /// 怪物头顶血条组件
     /// 使用World Space Canvas显示在怪物头顶
+    /// 显示血条和血量数字
     /// </summary>
     public class EnemyHealthBar : MonoBehaviour
     {
         [Header("设置")]
-        public float heightOffset = 2.0f;
-        public Vector2 barSize = new Vector2(1.0f, 0.12f);
+        public float heightOffset = 2.0f;   // 头顶偏移高度
+        public float barWidth = 1.2f;       // 世界空间中的宽度
+        public float barHeight = 0.15f;     // 世界空间中的高度
         public bool hideWhenFull = false;
         public float hideDelay = 2f;
+        public bool showHealthText = true;  // 是否显示血量数字
 
         private Canvas canvas;
         private RectTransform canvasRect;
         private Image bgImage;
         private Image fillImage;
+        private Text healthText;            // 血量数字
         private Transform target;
         private Camera mainCamera;
         private float maxHealth;
@@ -35,10 +39,57 @@ namespace MoShou.UI
             currentHealth = maxHP;
             mainCamera = Camera.main;
 
+            // 自动根据目标尺寸调整血条参数
+            AutoAdjustToTarget();
+
             CreateHealthBarUI();
             UpdateFill();
 
-            Debug.Log($"[EnemyHealthBar] 初始化完成 - 最大血量: {maxHP}");
+            Debug.Log($"[EnemyHealthBar] 初始化完成 - 最大血量: {maxHP}, 血条宽度: {barWidth:F2}m");
+        }
+
+        /// <summary>
+        /// 根据目标尺寸自动调整血条参数
+        /// </summary>
+        private void AutoAdjustToTarget()
+        {
+            if (target == null) return;
+
+            // 尝试获取Renderer来估算目标尺寸
+            Renderer rend = target.GetComponentInChildren<Renderer>();
+            float targetHeight = 1f; // 默认1米
+
+            if (rend != null)
+            {
+                targetHeight = rend.bounds.size.y;
+            }
+            else
+            {
+                // 尝试从Collider估算
+                Collider col = target.GetComponentInChildren<Collider>();
+                if (col != null)
+                {
+                    targetHeight = col.bounds.size.y;
+                }
+                else
+                {
+                    Collider2D col2d = target.GetComponentInChildren<Collider2D>();
+                    if (col2d != null)
+                    {
+                        targetHeight = col2d.bounds.size.y;
+                    }
+                }
+            }
+
+            // 根据目标高度调整血条参数（适配1倍模型大小）
+            // 血条宽度约为目标高度的120%，确保清晰可见
+            barWidth = Mathf.Clamp(targetHeight * 1.2f, 0.8f, 2.5f);
+            // 血条高度约为宽度的12%
+            barHeight = barWidth * 0.12f;
+            // 头顶偏移：高于目标顶部0.3米
+            heightOffset = targetHeight + 0.3f;
+
+            Debug.Log($"[EnemyHealthBar] AutoAdjust: targetHeight={targetHeight:F2}, barWidth={barWidth:F2}, barHeight={barHeight:F2}, heightOffset={heightOffset:F2}");
         }
 
         void CreateHealthBarUI()
@@ -51,10 +102,12 @@ namespace MoShou.UI
             canvas.worldCamera = mainCamera;
 
             canvasRect = canvas.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = barSize;
-            canvasRect.localScale = Vector3.one;
+            // 设置Canvas像素大小（用于UI布局）
+            canvasRect.sizeDelta = new Vector2(100, 10);  // 100x10像素的内部尺寸
+            // 缩放到世界空间大小（关键！）
+            canvasRect.localScale = new Vector3(barWidth / 100f, barHeight / 10f, 1f);
 
-            // 添加CanvasScaler（可选）
+            // 添加CanvasScaler
             var scaler = canvasGO.AddComponent<CanvasScaler>();
             scaler.dynamicPixelsPerUnit = 100;
 
@@ -90,11 +143,36 @@ namespace MoShou.UI
             RectTransform borderRect = borderGO.AddComponent<RectTransform>();
             borderRect.anchorMin = Vector2.zero;
             borderRect.anchorMax = Vector2.one;
-            borderRect.offsetMin = new Vector2(-0.02f, -0.02f);
-            borderRect.offsetMax = new Vector2(0.02f, 0.02f);
+            borderRect.offsetMin = new Vector2(-1f, -1f);  // 更小边框
+            borderRect.offsetMax = new Vector2(1f, 1f);
             var borderImage = borderGO.AddComponent<Image>();
             borderImage.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
             borderGO.transform.SetAsFirstSibling(); // 放到最底层
+
+            // 血量数字
+            if (showHealthText)
+            {
+                GameObject textGO = new GameObject("HealthText");
+                textGO.transform.SetParent(canvasGO.transform, false);
+                RectTransform textRect = textGO.AddComponent<RectTransform>();
+                textRect.anchorMin = new Vector2(0.5f, 1f);
+                textRect.anchorMax = new Vector2(0.5f, 1f);
+                textRect.pivot = new Vector2(0.5f, 0f);
+                textRect.anchoredPosition = new Vector2(0, 2f);  // 血条上方
+                textRect.sizeDelta = new Vector2(100, 12);
+
+                healthText = textGO.AddComponent<Text>();
+                healthText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                healthText.fontSize = 10;
+                healthText.alignment = TextAnchor.MiddleCenter;
+                healthText.color = Color.white;
+                healthText.text = $"{Mathf.CeilToInt(currentHealth)}/{Mathf.CeilToInt(maxHealth)}";
+
+                // 添加描边
+                var outline = textGO.AddComponent<Outline>();
+                outline.effectColor = Color.black;
+                outline.effectDistance = new Vector2(0.5f, -0.5f);
+            }
         }
 
         void LateUpdate()
@@ -157,6 +235,12 @@ namespace MoShou.UI
                 fillImage.color = Color.Lerp(Color.yellow, Color.green, (ratio - 0.5f) * 2);
             else
                 fillImage.color = Color.Lerp(Color.red, Color.yellow, ratio * 2);
+
+            // 更新血量数字
+            if (healthText != null)
+            {
+                healthText.text = $"{Mathf.CeilToInt(currentHealth)}/{Mathf.CeilToInt(maxHealth)}";
+            }
         }
 
         /// <summary>

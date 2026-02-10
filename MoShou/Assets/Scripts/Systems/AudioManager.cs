@@ -19,25 +19,44 @@ namespace MoShou.Systems
         private AudioSource sfxSource;
         private Dictionary<string, AudioClip> audioCache = new Dictionary<string, AudioClip>();
 
-        // 音效路径常量
+        // 音效路径常量 (与实际文件名匹配)
         public static class SFX
         {
+            // 战斗音效
             public const string ArrowShoot = "SFX_Arrow_Shoot";
             public const string ArrowHit = "SFX_Arrow_Hit";
             public const string PlayerHit = "SFX_Player_Hit";
             public const string PlayerDeath = "SFX_Player_Death";
-            public const string EnemyHit = "SFX_Enemy_Hit";
-            public const string EnemyDeath = "SFX_Enemy_Death";
+            public const string EnemyHit = "SFX_Monster_Hit";      // 修正: Monster 而非 Enemy
+            public const string EnemyDeath = "SFX_Monster_Death";  // 修正: Monster 而非 Enemy
+
+            // 技能音效
             public const string SkillMultiShot = "SFX_Skill_MultiShot";
             public const string SkillPierce = "SFX_Skill_Pierce";
             public const string SkillBattleShout = "SFX_Skill_BattleShout";
-            public const string ButtonClick = "SFX_UI_Click";
-            public const string CoinPickup = "SFX_Coin_Pickup";
-            public const string LevelUp = "SFX_LevelUp";
-            public const string Victory = "SFX_Victory";
-            public const string Defeat = "SFX_Defeat";
+
+            // UI音效
+            public const string ButtonClick = "SFX_UI_Button_Click";    // 修正: Button_Click 而非 Click
+            public const string CoinPickup = "SFX_UI_Gold_Pickup";      // 修正: UI_Gold_Pickup 而非 Coin_Pickup
+            public const string LevelUp = "SFX_UI_LevelUp";             // 修正: UI_LevelUp 而非 LevelUp
+            public const string PanelOpen = "SFX_UI_Panel_Open";
+            public const string PanelClose = "SFX_UI_Panel_Close";
+            public const string SkillSelect = "SFX_UI_Skill_Select";
+            public const string WaveStart = "SFX_UI_Wave_Start";
+            public const string WaveClear = "SFX_UI_Wave_Clear";
+
+            // Boss音效
             public const string BossAttack = "SFX_Boss_Attack";
-            public const string BossRoar = "SFX_Boss_Roar";
+            public const string BossRoar = "SFX_Boss_Rage";             // 修正: Rage 而非 Roar
+            public const string BossSkill = "SFX_Boss_Skill";
+
+            // 环境音效
+            public const string AmbientForest = "SFX_Amb_Forest";
+            public const string AmbientBossRoom = "SFX_Amb_BossRoom";
+
+            // 结算音效（使用BGM路径）
+            public const string Victory = "BGM_Victory";      // 使用BGM作为胜利音效
+            public const string Defeat = "BGM_Defeat";        // 使用BGM作为失败音效
         }
 
         public static class BGM

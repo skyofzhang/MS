@@ -14,6 +14,7 @@ namespace MoShou.Data
         public int level = 1;
         public int experience = 0;
         public int gold = 0;
+        public int gems = 0;  // 宝石货币
 
         // 战斗属性（基础值）
         public int baseMaxHp = 100;
@@ -165,6 +166,7 @@ namespace MoShou.Data
                 level = this.level,
                 experience = this.experience,
                 gold = this.gold,
+                gems = this.gems,
                 baseMaxHp = this.baseMaxHp,
                 baseAttack = this.baseAttack,
                 baseDefense = this.baseDefense,

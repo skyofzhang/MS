@@ -114,6 +114,36 @@ namespace MoShou.UI
         }
 
         /// <summary>
+        /// 设置过滤高亮状态（匹配的物品正常显示，不匹配的变暗）
+        /// </summary>
+        public void SetFilterHighlight(bool matchesFilter)
+        {
+            if (currentItem == null) return;
+
+            // 如果有图标，根据是否匹配设置透明度
+            if (iconImage != null)
+            {
+                Color c = iconImage.color;
+                c.a = matchesFilter ? 1f : 0.3f;
+                iconImage.color = c;
+            }
+
+            // 如果有品质框，也调整透明度
+            if (qualityFrame != null && qualityFrame.gameObject.activeSelf)
+            {
+                Color c = qualityFrame.color;
+                c.a = matchesFilter ? 1f : 0.3f;
+                qualityFrame.color = c;
+            }
+
+            // 按钮交互性
+            if (slotButton != null)
+            {
+                slotButton.interactable = matchesFilter;
+            }
+        }
+
+        /// <summary>
         /// 点击回调
         /// </summary>
         private void OnClick()

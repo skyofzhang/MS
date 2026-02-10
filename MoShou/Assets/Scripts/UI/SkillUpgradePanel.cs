@@ -12,7 +12,7 @@ namespace MoShou.UI
     /// </summary>
     public class SkillUpgradePanel : MonoBehaviour
     {
-        public static SkillUpgradePanel Instance { get; private set; }
+        public static SkillUpgradePanel Instance { get; set; }
 
         [Header("UI引用")]
         public Transform skillsContainer;    // 技能列表容器
@@ -585,14 +585,14 @@ namespace MoShou.UI
         /// </summary>
         bool SpendGold(int amount)
         {
+            // 优先通过GameManager扣金币（同步SessionGold和SaveSystem）
+            if (GameManager.Instance != null)
+            {
+                return GameManager.Instance.SpendGold(amount);
+            }
             if (SaveSystem.Instance != null && SaveSystem.Instance.CurrentPlayerStats != null)
             {
-                var stats = SaveSystem.Instance.CurrentPlayerStats;
-                if (stats.gold >= amount)
-                {
-                    stats.gold -= amount;
-                    return true;
-                }
+                return SaveSystem.Instance.CurrentPlayerStats.SpendGold(amount);
             }
             return false;
         }

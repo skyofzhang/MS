@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using MoShou.Systems;
 using MoShou.Data;
 using MoShou.Core;
+using MoShou.UI;
 
 /// <summary>
 /// Game Manager - Central game state and flow control
@@ -35,6 +36,9 @@ public class GameManager : MonoBehaviour
         [Header("Session Rewards")]
         public int SessionGold = 0;
         public int SessionExp = 0;
+
+        [Header("Session Tracking")]
+        private float sessionStartTime;
 
         // Events
         public event System.Action<GameState> OnStateChanged;
@@ -148,8 +152,41 @@ public class GameManager : MonoBehaviour
         /// </summary>
         public void OnGameSceneReady()
         {
+            sessionStartTime = Time.time;
             ChangeState(GameState.Playing);
             StartWave(CurrentWave);
+        }
+
+        /// <summary>
+        /// 获取本次游戏存活时间
+        /// </summary>
+        public float GetSurvivalTime()
+        {
+            return Time.time - sessionStartTime;
+        }
+
+        /// <summary>
+        /// 计算星级评价 (根据击杀效率和血量)
+        /// </summary>
+        private int CalculateStars()
+        {
+            // 基础评价：完成即1星
+            int stars = 1;
+
+            // 全部波次完成 +1星
+            if (CurrentWave >= TotalWaves)
+            {
+                stars++;
+            }
+
+            // 击杀效率高（击杀数 >= 波次*5） +1星
+            int expectedKills = TotalWaves * 5;
+            if (KillCount >= expectedKills)
+            {
+                stars++;
+            }
+
+            return Mathf.Clamp(stars, 1, 3);
         }
 
         /// <summary>
@@ -232,12 +269,14 @@ public class GameManager : MonoBehaviour
             int totalGold = baseGold + SessionGold;
             int totalExp = baseExp + SessionExp;
 
-            // Apply rewards to player
+            // Apply rewards to player (ResultScreen will also save, but we do it here for safety)
+            int starsEarned = CalculateStars();
             if (SaveSystem.Instance != null)
             {
                 SaveSystem.Instance.CurrentPlayerStats.AddGold(totalGold);
                 bool leveledUp = SaveSystem.Instance.CurrentPlayerStats.AddExperience(totalExp);
                 SaveSystem.Instance.MarkStageCleared(CurrentLevel);
+                SaveSystem.Instance.SetStageStars(CurrentLevel, starsEarned); // 保存星级
                 SaveSystem.Instance.SaveGame();
 
                 if (leveledUp)
@@ -246,13 +285,65 @@ public class GameManager : MonoBehaviour
                 }
             }
 
+            Debug.Log($"[GameManager] Stars earned: {starsEarned}");
+
             Debug.Log($"[GameManager] Rewards: {totalGold} Gold, {totalExp} EXP");
 
-            // Show victory UI through UIManager
-            if (UIManager.Instance != null)
+            // 播放胜利音效
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayBGM(AudioManager.BGM.Victory, false);
+            }
+
+            // 尝试使用新的 ResultScreen
+            if (ResultScreen.Instance != null)
+            {
+                ResultData resultData = new ResultData
+                {
+                    stageId = CurrentLevel,
+                    stageName = stageData?.stageName ?? $"关卡 {CurrentLevel}",
+                    goldReward = totalGold,
+                    expReward = totalExp,
+                    killCount = KillCount,
+                    wavesCompleted = CurrentWave,
+                    totalWaves = TotalWaves,
+                    starsEarned = CalculateStars()
+                };
+                ResultScreen.Instance.Show(resultData);
+                Debug.Log("[GameManager] 显示胜利结算界面");
+            }
+            // 回退到旧版 UIManager
+            else if (UIManager.Instance != null)
             {
                 UIManager.Instance.ShowVictoryPanel();
             }
+            else
+            {
+                // 如果都不存在，创建一个简单的 ResultScreen
+                CreateResultScreen(totalGold, totalExp);
+            }
+        }
+
+        /// <summary>
+        /// 动态创建 ResultScreen
+        /// </summary>
+        private void CreateResultScreen(int gold, int exp)
+        {
+            GameObject resultObj = new GameObject("ResultScreen");
+            ResultScreen resultScreen = resultObj.AddComponent<ResultScreen>();
+
+            ResultData resultData = new ResultData
+            {
+                stageId = CurrentLevel,
+                stageName = $"关卡 {CurrentLevel}",
+                goldReward = gold,
+                expReward = exp,
+                killCount = KillCount,
+                wavesCompleted = CurrentWave,
+                totalWaves = TotalWaves,
+                starsEarned = CalculateStars()
+            };
+            resultScreen.Show(resultData);
         }
 
         /// <summary>
@@ -266,20 +357,66 @@ public class GameManager : MonoBehaviour
             int partialGold = SessionGold / 2;
             int partialExp = SessionExp / 2;
 
-            if (SaveSystem.Instance != null)
-            {
-                SaveSystem.Instance.CurrentPlayerStats.AddGold(partialGold);
-                SaveSystem.Instance.CurrentPlayerStats.AddExperience(partialExp);
-                SaveSystem.Instance.SaveGame();
-            }
-
+            // DefeatScreen 会保存奖励，这里不重复保存
             Debug.Log($"[GameManager] Partial rewards: {partialGold} Gold, {partialExp} EXP");
 
-            // Show defeat UI
-            if (UIManager.Instance != null)
+            // 播放失败音效
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayBGM(AudioManager.BGM.Defeat, false);
+            }
+
+            // 尝试使用新的 DefeatScreen
+            if (DefeatScreen.Instance != null)
+            {
+                StageData stageData = StageDataHolder.CurrentStage;
+                DefeatData defeatData = new DefeatData
+                {
+                    stageId = CurrentLevel,
+                    stageName = stageData?.stageName ?? $"关卡 {CurrentLevel}",
+                    waveReached = CurrentWave,
+                    totalWaves = TotalWaves,
+                    killCount = KillCount,
+                    survivalTime = GetSurvivalTime(),
+                    partialGold = partialGold,
+                    partialExp = partialExp
+                };
+                DefeatScreen.Instance.Show(defeatData);
+                Debug.Log("[GameManager] 显示失败结算界面");
+            }
+            // 回退到旧版 UIManager
+            else if (UIManager.Instance != null)
             {
                 UIManager.Instance.ShowDefeatPanel();
             }
+            else
+            {
+                // 如果都不存在，创建一个简单的 DefeatScreen
+                CreateDefeatScreen(partialGold, partialExp);
+            }
+        }
+
+        /// <summary>
+        /// 动态创建 DefeatScreen
+        /// </summary>
+        private void CreateDefeatScreen(int gold, int exp)
+        {
+            GameObject defeatObj = new GameObject("DefeatScreen");
+            DefeatScreen defeatScreen = defeatObj.AddComponent<DefeatScreen>();
+
+            StageData stageData = StageDataHolder.CurrentStage;
+            DefeatData defeatData = new DefeatData
+            {
+                stageId = CurrentLevel,
+                stageName = stageData?.stageName ?? $"关卡 {CurrentLevel}",
+                waveReached = CurrentWave,
+                totalWaves = TotalWaves,
+                killCount = KillCount,
+                survivalTime = GetSurvivalTime(),
+                partialGold = gold,
+                partialExp = exp
+            };
+            defeatScreen.Show(defeatData);
         }
         #endregion
 
@@ -295,6 +432,17 @@ public class GameManager : MonoBehaviour
                 if (UIManager.Instance != null)
                     UIManager.Instance.ShowPausePanel();
             }
+        }
+
+        /// <summary>
+        /// Toggle pause state
+        /// </summary>
+        public void TogglePause()
+        {
+            if (CurrentState == GameState.Playing)
+                PauseGame();
+            else if (CurrentState == GameState.Paused)
+                ResumeGame();
         }
 
         /// <summary>
@@ -364,6 +512,23 @@ public class GameManager : MonoBehaviour
             {
                 SaveSystem.Instance.CurrentPlayerStats.AddGold(amount);
             }
+        }
+
+        /// <summary>
+        /// Spend gold (for purchases)
+        /// </summary>
+        public bool SpendGold(int amount)
+        {
+            if (SessionGold >= amount)
+            {
+                SessionGold -= amount;
+                if (SaveSystem.Instance != null)
+                {
+                    SaveSystem.Instance.CurrentPlayerStats.SpendGold(amount);
+                }
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

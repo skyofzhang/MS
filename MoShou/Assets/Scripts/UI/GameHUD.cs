@@ -2,11 +2,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using MoShou.Data;
 using MoShou.Systems;
+using MoShou.Effects;
 
 namespace MoShou.UI
 {
     /// <summary>
     /// 游戏主界面HUD - 显示玩家状态和快捷操作
+    /// 集成策划案第8章UI反馈系统
     /// </summary>
     public class GameHUD : MonoBehaviour
     {
@@ -17,6 +19,11 @@ namespace MoShou.UI
         [SerializeField] private Slider healthSlider;
         [SerializeField] private Text healthText;
         [SerializeField] private Text goldText;
+
+        [Header("血条Image (用于UIFeedbackSystem)")]
+        [SerializeField] private Image healthFillImage;
+        [SerializeField] private Image expFillImage;
+        [SerializeField] private Image goldIcon;
 
         [Header("快捷按钮")]
         [SerializeField] private Button inventoryButton;
@@ -34,6 +41,12 @@ namespace MoShou.UI
         private PlayerStats playerStats;
         private int killCount = 0;
         private int currentWave = 1;
+
+        // 缓存上次的值，用于动画效果
+        private int lastGold = 0;
+        private int lastExp = 0;
+        private int lastLevel = 0;
+        private float lastHealthRatio = 1f;
 
         private void Start()
         {
@@ -154,17 +167,30 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 更新当前生命值
+        /// 更新当前生命值 (带动画效果，策划案8.2)
         /// </summary>
         public void UpdateHealth(int current, int max)
         {
-            if (healthSlider != null)
+            float targetRatio = (float)current / max;
+
+            // 使用UIFeedbackSystem的动画效果
+            if (healthFillImage != null && UIFeedbackSystem.Instance != null)
             {
-                healthSlider.maxValue = max;
-                healthSlider.value = current;
+                UIFeedbackSystem.Instance.AnimateHealthBar(healthFillImage, targetRatio, healthText);
             }
-            if (healthText != null)
-                healthText.text = $"{current}/{max}";
+            else
+            {
+                // 回退到普通更新
+                if (healthSlider != null)
+                {
+                    healthSlider.maxValue = max;
+                    healthSlider.value = current;
+                }
+                if (healthText != null)
+                    healthText.text = $"{current}/{max}";
+            }
+
+            lastHealthRatio = targetRatio;
         }
 
         /// <summary>
@@ -186,30 +212,81 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 金币拾取回调
+        /// 金币拾取回调 (带动画效果，策划案8.3)
         /// </summary>
         private void OnGoldPickup(int amount)
         {
-            RefreshPlayerStats();
-            // 可以添加金币飘字效果
+            if (playerStats == null) return;
+
+            int oldGold = lastGold;
+            int newGold = playerStats.gold;
+
+            // 使用UIFeedbackSystem的金币动画
+            if (goldText != null && UIFeedbackSystem.Instance != null)
+            {
+                UIFeedbackSystem.Instance.AnimateGoldChange(goldText, goldIcon, oldGold, newGold);
+            }
+            else
+            {
+                RefreshPlayerStats();
+            }
+
+            lastGold = newGold;
         }
 
         /// <summary>
-        /// 经验拾取回调
+        /// 经验拾取回调 (带动画效果，策划案8.4)
         /// </summary>
         private void OnExpPickup(int amount)
         {
-            RefreshPlayerStats();
+            if (playerStats == null) return;
+
+            int oldExp = lastExp;
+            int newExp = playerStats.experience;
+            int expToNext = playerStats.GetExpToNextLevel();
+            float targetRatio = (float)newExp / expToNext;
+
+            // 使用UIFeedbackSystem的经验条动画
+            if (expFillImage != null && UIFeedbackSystem.Instance != null)
+            {
+                UIFeedbackSystem.Instance.AnimateExpBar(expFillImage, targetRatio, expText, oldExp, newExp);
+            }
+            else
+            {
+                RefreshPlayerStats();
+            }
+
+            // 检查是否升级
+            if (playerStats.level > lastLevel)
+            {
+                OnLevelUp(playerStats.level);
+            }
+
+            lastExp = newExp;
         }
 
         /// <summary>
-        /// 升级回调
+        /// 升级回调 (带特效，策划案8.4)
         /// </summary>
         private void OnLevelUp(int newLevel)
         {
-            RefreshPlayerStats();
             Debug.Log($"[GameHUD] 玩家升级到 Lv.{newLevel}!");
-            // 可以添加升级特效
+
+            // 使用UIFeedbackSystem的升级特效
+            if (levelText != null && UIFeedbackSystem.Instance != null)
+            {
+                UIFeedbackSystem.Instance.PlayLevelUpEffect(levelText);
+            }
+
+            // 触发游戏反馈系统的升级效果
+            var player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null && GameFeedback.Instance != null)
+            {
+                GameFeedback.Instance.TriggerLevelUpFeedback(player.transform.position);
+            }
+
+            lastLevel = newLevel;
+            RefreshPlayerStats();
         }
 
         /// <summary>

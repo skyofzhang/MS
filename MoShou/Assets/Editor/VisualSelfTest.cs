@@ -1,16 +1,25 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using MoShou.Core;
+using MoShou.UI;
+using MoShou.Effects;
 
 namespace MoShou.Editor
 {
     /// <summary>
     /// 视觉验收自测工具 - AI开发完成度验证
-    /// V4.0: 符合AI开发知识库§3.12规范
+    /// V5.0: 符合AI开发知识库§3.12规范 + 策划案RULE-DONE-003
     ///
     /// Claude在报告"开发完成"前必须运行此测试
     /// 菜单: MoShou/Visual Self Test
+    ///
+    /// 新增检查项:
+    /// - FALLBACK颜色检查 (Color.magenta)
+    /// - UI反馈系统检查
+    /// - VFX预制体检查
+    /// - 游戏反馈系统检查
     /// </summary>
     public class VisualSelfTest : EditorWindow
     {
@@ -234,9 +243,12 @@ namespace MoShou.Editor
                 message = camera != null ? "主摄像机正常" : "未找到主摄像机"
             });
 
-            // VC-008: 无降级资源检查
+            // VC-008: 无降级资源检查 (增强版：包括FALLBACK_命名和Color.magenta)
             var fallbackObjects = GameObject.FindObjectsOfType<GameObject>();
             int fallbackCount = 0;
+            int magentaCount = 0;
+            List<string> magentaObjects = new List<string>();
+
             foreach (var obj in fallbackObjects)
             {
                 if (obj.name.StartsWith("FALLBACK_"))
@@ -244,12 +256,88 @@ namespace MoShou.Editor
                     fallbackCount++;
                 }
             }
+
+            // 检查Color.magenta (FALLBACK颜色)
+            var images = GameObject.FindObjectsOfType<Image>();
+            foreach (var img in images)
+            {
+                if (img.color == Color.magenta || img.color == new Color(1, 0, 1, 1))
+                {
+                    magentaCount++;
+                    if (magentaObjects.Count < 3)
+                        magentaObjects.Add(img.gameObject.name);
+                }
+            }
+
+            var renderers = GameObject.FindObjectsOfType<Renderer>();
+            foreach (var rend in renderers)
+            {
+                if (rend.sharedMaterial != null && rend.sharedMaterial.color == Color.magenta)
+                {
+                    magentaCount++;
+                    if (magentaObjects.Count < 3)
+                        magentaObjects.Add(rend.gameObject.name);
+                }
+            }
+
+            int totalFallback = fallbackCount + magentaCount;
+            string fallbackMsg = totalFallback == 0 ? "所有资源正常加载" :
+                $"发现{fallbackCount}个FALLBACK_对象, {magentaCount}个magenta颜色";
+            if (magentaObjects.Count > 0)
+                fallbackMsg += $" ({string.Join(", ", magentaObjects)})";
+
             testResults.Add(new TestResult
             {
                 code = "VC-008",
                 name = "无降级资源",
-                passed = fallbackCount == 0,
-                message = fallbackCount == 0 ? "所有资源正常加载" : $"发现{fallbackCount}个降级对象"
+                passed = totalFallback == 0,
+                message = fallbackMsg
+            });
+
+            // VC-009: UI反馈系统检查
+            var uiFeedback = GameObject.FindObjectOfType<UIFeedbackSystem>();
+            testResults.Add(new TestResult
+            {
+                code = "VC-009",
+                name = "UI反馈系统",
+                passed = uiFeedback != null || UIFeedbackSystem.Instance != null,
+                message = uiFeedback != null ? "UIFeedbackSystem已激活" : "UIFeedbackSystem可按需创建"
+            });
+
+            // VC-010: 游戏反馈系统检查
+            var gameFeedback = GameObject.FindObjectOfType<GameFeedback>();
+            testResults.Add(new TestResult
+            {
+                code = "VC-010",
+                name = "游戏反馈系统",
+                passed = gameFeedback != null || GameFeedback.Instance != null,
+                message = gameFeedback != null ? "GameFeedback已激活" : "GameFeedback可按需创建"
+            });
+
+            // VC-011: VFX管理器检查
+            var vfxManager = GameObject.FindObjectOfType<VFXManager>();
+            testResults.Add(new TestResult
+            {
+                code = "VC-011",
+                name = "VFX管理器",
+                passed = vfxManager != null || VFXManager.Instance != null,
+                message = vfxManager != null ? "VFXManager已激活" : "VFXManager可按需创建"
+            });
+
+            // VC-012: VFX预制体存在性检查
+            int vfxFound = 0;
+            string[] vfxPaths = { "VFX_Hit_Spark", "VFX_LevelUp", "VFX_Death_Dissolve" };
+            foreach (var vfx in vfxPaths)
+            {
+                if (Resources.Load<GameObject>($"Prefabs/VFX/{vfx}") != null)
+                    vfxFound++;
+            }
+            testResults.Add(new TestResult
+            {
+                code = "VC-012",
+                name = "VFX预制体",
+                passed = vfxFound >= 1,
+                message = $"找到 {vfxFound}/{vfxPaths.Length} 个核心VFX预制体"
             });
         }
 

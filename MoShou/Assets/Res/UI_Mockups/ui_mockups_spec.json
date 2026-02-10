@@ -1,0 +1,132 @@
+{
+  "style_prefix": "Cartoon fantasy game UI mockup, World of Warcraft inspired, chibi cute style, vibrant bright colors, ornate golden metal frames with gems, dark fantasy background with magical glow, mobile game vertical portrait layout, clean professional design, no text labels, no watermark, high quality",
+  "output_root": "E:/AI_Project/MS/MoShou/Assets/Res/UI_Mockups",
+  "items": [
+    {
+      "category": "Screens",
+      "filename": "UI_MainMenu.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "main menu screen with large glowing play button center, settings gear icon top right, cute character preview left side, fantasy game logo banner at top, semi-transparent glass panel container, magical particle effects"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_StageSelect.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "stage selection map screen with chapter tabs at top, level nodes on fantasy world map path, locked stages with chains, unlocked stages with golden stars, 3-star rating display, scroll parchment style"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_BattleHUD.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "battle HUD overlay, health bar with ornate frame top left, mana bar below health, skill buttons with cooldown rings bottom right arranged in arc, minimap circle top right with player dot, virtual joystick bottom left, wave counter top center, combo counter"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_Inventory.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "inventory bag screen with 5x6 item slot grid, equipment paper doll silhouette left side with 6 equipment slots around it, gold coin counter top right, sort and filter buttons, item rarity glow effects purple gold green"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_Result.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "victory result screen with large 3 animated stars at top, VICTORY banner with golden glow, loot reward icons in wooden chest, experience bar with level up effect, shiny continue button at bottom, confetti particles"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_CharacterInfo.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "character stats panel with cute chibi hero avatar center, 6 equipment slots arranged around avatar (weapon shield helmet armor gloves boots), stat numbers (ATK DEF HP) on right panel, upgrade button with plus icon, level progress bar"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_Skill.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "skill tree screen with hexagonal skill icons connected by glowing lines, skill branch paths, locked skills grayed out, active skills with golden glow, skill detail tooltip panel at bottom, skill points counter"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_Shop.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "fantasy shop screen with category tabs at top (weapons armor items), item cards in grid with price tags, featured item banner with discount badge, currency display gems and gold at top right, buy button on each card"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_Settings.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "settings menu with volume sliders for music and sfx with speaker icons, toggle switches for notifications and vibration, language selector dropdown, account button, logout button, close X button top right, wooden frame panel"
+    },
+    {
+      "category": "Popups",
+      "filename": "UI_StageConfirm.png",
+      "width": 800,
+      "height": 600,
+      "prompt": "stage start popup modal with stage preview image, difficulty skull icons, reward preview icons (gold exp items), stamina cost display, large START button green glow, cancel X button, ornate frame border"
+    },
+    {
+      "category": "Popups",
+      "filename": "UI_ItemDetail.png",
+      "width": 800,
+      "height": 900,
+      "prompt": "item detail popup with large item icon with rarity glow, item name and rarity stars, stat bonuses list with green arrows, flavor description text area, EQUIP button blue, SELL button red, close button"
+    },
+    {
+      "category": "Popups",
+      "filename": "UI_SellConfirm.png",
+      "width": 700,
+      "height": 500,
+      "prompt": "sell confirmation dialog with item icon center, gold coin price display, are you sure message, CONFIRM button green, CANCEL button gray, simple ornate frame"
+    },
+    {
+      "category": "Popups",
+      "filename": "UI_EquipDetail.png",
+      "width": 800,
+      "height": 1000,
+      "prompt": "equipment comparison popup with current item left side, new item right side, stat comparison arrows green up red down, EQUIP button at bottom, item icons with glow effects, divider line between items"
+    },
+    {
+      "category": "Popups",
+      "filename": "UI_SkillUpgrade.png",
+      "width": 800,
+      "height": 700,
+      "prompt": "skill upgrade popup with skill icon at top with level display, before and after stats comparison, skill point cost display, UPGRADE button with golden glow, material requirements if any, cancel button"
+    },
+    {
+      "category": "Popups",
+      "filename": "UI_PauseMenu.png",
+      "width": 800,
+      "height": 1000,
+      "prompt": "pause menu overlay with PAUSED title banner, vertical button stack (RESUME green, RESTART yellow, SETTINGS gear, QUIT red), semi-transparent dark background, ornate pause frame"
+    },
+    {
+      "category": "Screens",
+      "filename": "UI_Defeat.png",
+      "width": 1080,
+      "height": 1920,
+      "prompt": "defeat game over screen with skull icon or sad character, DEFEAT banner with red glow, stats summary panel (time score kills), RETRY button orange pulse, QUIT button gray, dark moody red lighting"
+    },
+    {
+      "category": "Components",
+      "filename": "UI_BottomNav.png",
+      "width": 1080,
+      "height": 200,
+      "prompt": "bottom navigation bar horizontal strip with 5 icon buttons evenly spaced (home castle, inventory bag, battle sword, shop cart, settings gear), active state glow effect, golden frame border top"
+    },
+    {
+      "category": "Components",
+      "filename": "UI_TopBar.png",
+      "width": 1080,
+      "height": 150,
+      "prompt": "top status bar horizontal strip with player avatar circle left, level badge, gold amount with coin icon, gem amount with diamond icon, settings gear button right, ornate frame border bottom"
+    }
+  ]
+}

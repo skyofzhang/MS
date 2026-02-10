@@ -1,28 +1,35 @@
 {
     "project": "MoShou",
-    "timestamp": "2026-02-06T23:36:39Z",
-    "error_count": 3,
+    "timestamp": "2026-02-10T17:28:04Z",
+    "error_count": 4,
     "errors": [
         {
-            "file": "Assets\\Scripts\\Core\\GameSceneSetup.cs",
-            "line": 312,
-            "column": 22,
-            "message": "Assets\\Scripts\\Core\\GameSceneSetup.cs(312,22): error CS0136: A local or parameter named 'mat' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter",
-            "code": "CS0136"
+            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
+            "line": 75,
+            "column": 107,
+            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(75,107): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
+            "code": "CS0117"
         },
         {
-            "file": "Assets\\Scripts\\Core\\GameSceneSetup.cs",
-            "line": 321,
-            "column": 22,
-            "message": "Assets\\Scripts\\Core\\GameSceneSetup.cs(321,22): error CS0136: A local or parameter named 'mat' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter",
-            "code": "CS0136"
+            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
+            "line": 129,
+            "column": 79,
+            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(129,79): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
+            "code": "CS0117"
         },
         {
-            "file": "Assets\\Scripts\\Core\\GameSceneSetup.cs",
-            "line": 333,
-            "column": 22,
-            "message": "Assets\\Scripts\\Core\\GameSceneSetup.cs(333,22): error CS0136: A local or parameter named 'mat' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter",
-            "code": "CS0136"
+            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
+            "line": 285,
+            "column": 36,
+            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(285,36): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
+            "code": "CS0117"
+        },
+        {
+            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
+            "line": 299,
+            "column": 36,
+            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(299,36): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
+            "code": "CS0117"
         }
     ]
 }

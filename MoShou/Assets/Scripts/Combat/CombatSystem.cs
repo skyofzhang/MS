@@ -24,13 +24,13 @@ public static class CombatSystem
         // 暴击判定
         bool isCrit = Random.value < CritRate;
         float finalDamage = baseDamage;
-        
+
         if (isCrit)
         {
             finalDamage *= CritDamage;
             Debug.Log($"[Combat] CRITICAL HIT! {attacker.name} -> {target.name}");
         }
-        
+
         // 根据目标类型处理伤害
         var monster = target.GetComponent<MonsterController>();
         if (monster != null)
@@ -38,14 +38,42 @@ public static class CombatSystem
             monster.TakeDamage(finalDamage);
             return;
         }
-        
+
         var player = target.GetComponent<PlayerController>();
         if (player != null)
         {
             player.TakeDamage(finalDamage);
             return;
         }
-        
+
+        Debug.LogWarning($"[Combat] Target {target.name} has no health component!");
+    }
+
+    /// <summary>
+    /// 处理伤害流程 (使用外部暴击判定，用于已计算暴击的情况)
+    /// </summary>
+    public static void DealDamage(GameObject attacker, GameObject target, float finalDamage, bool isCritical)
+    {
+        if (isCritical)
+        {
+            Debug.Log($"[Combat] CRITICAL HIT! {attacker.name} -> {target.name}");
+        }
+
+        // 根据目标类型处理伤害
+        var monster = target.GetComponent<MonsterController>();
+        if (monster != null)
+        {
+            monster.TakeDamage(finalDamage, isCritical);
+            return;
+        }
+
+        var player = target.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            player.TakeDamage(finalDamage);
+            return;
+        }
+
         Debug.LogWarning($"[Combat] Target {target.name} has no health component!");
     }
     

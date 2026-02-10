@@ -8,10 +8,14 @@ namespace MoShou.UI
 {
     /// <summary>
     /// 背包界面
+    /// 对应效果图: UI_Inventory.png
     /// </summary>
     public class InventoryPanel : MonoBehaviour
     {
+        public static InventoryPanel Instance { get; private set; }
+
         [Header("UI引用")]
+        [SerializeField] private Image backgroundImage;
         [SerializeField] private Transform slotsContainer;
         [SerializeField] private GameObject slotPrefab;
         [SerializeField] private Button closeButton;
@@ -21,6 +25,48 @@ namespace MoShou.UI
 
         private List<InventorySlotUI> slots = new List<InventorySlotUI>();
         private int selectedSlot = -1;
+        private CharacterInfoScreen.EquipmentSlotType? filterEquipmentSlot = null;
+        private CanvasGroup canvasGroup;
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            canvasGroup = GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+
+            // 尝试加载效果图背景
+            LoadMockupBackground();
+        }
+
+        private void LoadMockupBackground()
+        {
+            if (backgroundImage == null)
+            {
+                backgroundImage = GetComponent<Image>();
+            }
+
+            if (backgroundImage != null)
+            {
+                Sprite bgSprite = Resources.Load<Sprite>("UI_Mockups/Screens/UI_Inventory");
+                if (bgSprite != null)
+                {
+                    backgroundImage.sprite = bgSprite;
+                    backgroundImage.type = Image.Type.Simple;
+                }
+            }
+        }
 
         private void Start()
         {
@@ -38,14 +84,6 @@ namespace MoShou.UI
             }
 
             RefreshUI();
-        }
-
-        private void OnDestroy()
-        {
-            if (InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.OnInventoryChanged -= RefreshUI;
-            }
         }
 
         /// <summary>
@@ -81,7 +119,19 @@ namespace MoShou.UI
             for (int i = 0; i < slots.Count; i++)
             {
                 InventoryItem item = InventoryManager.Instance.GetItem(i);
-                slots[i].SetItem(item);
+
+                // 如果有装备过滤条件，检查是否匹配
+                if (filterEquipmentSlot.HasValue && item != null)
+                {
+                    bool matchesFilter = DoesItemMatchEquipmentSlot(item, filterEquipmentSlot.Value);
+                    slots[i].SetItem(item);
+                    slots[i].SetFilterHighlight(matchesFilter); // 匹配的物品高亮显示
+                }
+                else
+                {
+                    slots[i].SetItem(item);
+                    slots[i].SetFilterHighlight(true); // 无过滤时全部正常显示
+                }
             }
 
             // 更新金币显示
@@ -94,6 +144,36 @@ namespace MoShou.UI
             if (capacityText != null)
             {
                 capacityText.text = $"{InventoryManager.Instance.UsedSlots}/{InventoryManager.Instance.MaxSlots}";
+            }
+        }
+
+        /// <summary>
+        /// 检查物品是否匹配指定的装备槽位
+        /// </summary>
+        private bool DoesItemMatchEquipmentSlot(InventoryItem item, CharacterInfoScreen.EquipmentSlotType slotType)
+        {
+            if (item == null || string.IsNullOrEmpty(item.itemId)) return false;
+
+            // 根据物品类型判断是否匹配槽位
+            // 假设物品ID包含类型信息，如 WPN_001, ARM_001 等
+            string itemId = item.itemId.ToUpper();
+
+            switch (slotType)
+            {
+                case CharacterInfoScreen.EquipmentSlotType.Weapon:
+                    return itemId.StartsWith("WPN") || itemId.Contains("WEAPON") || itemId.Contains("SWORD") || itemId.Contains("BOW");
+                case CharacterInfoScreen.EquipmentSlotType.Helmet:
+                    return itemId.StartsWith("HLM") || itemId.Contains("HELMET") || itemId.Contains("HAT");
+                case CharacterInfoScreen.EquipmentSlotType.Armor:
+                    return itemId.StartsWith("ARM") || itemId.Contains("ARMOR") || itemId.Contains("CHEST");
+                case CharacterInfoScreen.EquipmentSlotType.Boots:
+                    return itemId.StartsWith("BOT") || itemId.StartsWith("PNT") || itemId.Contains("BOOTS") || itemId.Contains("PANTS") || itemId.Contains("SHOE");
+                case CharacterInfoScreen.EquipmentSlotType.Accessory1:
+                    return itemId.StartsWith("RNG") || itemId.Contains("RING");
+                case CharacterInfoScreen.EquipmentSlotType.Accessory2:
+                    return itemId.StartsWith("NKL") || itemId.StartsWith("ACC") || itemId.Contains("NECKLACE") || itemId.Contains("ACCESSORY");
+                default:
+                    return true;
             }
         }
 
@@ -176,6 +256,38 @@ namespace MoShou.UI
                 Hide();
             else
                 Show();
+        }
+
+        /// <summary>
+        /// 为装备选择显示背包
+        /// </summary>
+        public void ShowForEquipment(CharacterInfoScreen.EquipmentSlotType slotType)
+        {
+            filterEquipmentSlot = slotType;
+            Show();
+            Debug.Log($"[InventoryPanel] 显示背包，筛选槽位: {slotType}");
+        }
+
+        /// <summary>
+        /// 清除装备筛选
+        /// </summary>
+        public void ClearEquipmentFilter()
+        {
+            filterEquipmentSlot = null;
+            RefreshUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.OnInventoryChanged -= RefreshUI;
+            }
         }
     }
 }

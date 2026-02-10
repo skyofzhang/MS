@@ -115,6 +115,10 @@ namespace MoShou.Data
         public int expMin;
         public int expMax;
 
+        // 装备掉落配置
+        public float equipmentChance;   // 装备掉落概率 (0-1)
+        public string[] equipmentPool;  // 可掉落装备ID池
+
         /// <summary>
         /// 计算金币掉落
         /// </summary>
@@ -129,6 +133,23 @@ namespace MoShou.Data
         public int RollExp()
         {
             return UnityEngine.Random.Range(expMin, expMax + 1);
+        }
+
+        /// <summary>
+        /// 计算装备掉落
+        /// </summary>
+        /// <returns>掉落的装备ID，如果没有掉落返回null</returns>
+        public string RollEquipment()
+        {
+            if (equipmentPool == null || equipmentPool.Length == 0)
+                return null;
+
+            if (UnityEngine.Random.value > equipmentChance)
+                return null;
+
+            // 从装备池中随机选择一件
+            int index = UnityEngine.Random.Range(0, equipmentPool.Length);
+            return equipmentPool[index];
         }
     }
 

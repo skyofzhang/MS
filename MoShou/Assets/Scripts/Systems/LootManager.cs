@@ -32,11 +32,47 @@ namespace MoShou.Systems
             {
                 Instance = this;
                 LoadDropTables();
+                EnsureDropPickupPrefab();
             }
             else
             {
                 Destroy(gameObject);
             }
+        }
+
+        /// <summary>
+        /// 确保有掉落物预制体（运行时自动创建）
+        /// </summary>
+        private void EnsureDropPickupPrefab()
+        {
+            if (dropPickupPrefab != null) return;
+
+            // 运行时创建一个掉落物模板对象
+            dropPickupPrefab = new GameObject("DropPickup_RuntimePrefab");
+            dropPickupPrefab.SetActive(false); // 模板不显示
+
+            // 添加基础球体网格
+            MeshFilter mf = dropPickupPrefab.AddComponent<MeshFilter>();
+            GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            mf.sharedMesh = tempSphere.GetComponent<MeshFilter>().sharedMesh;
+            Destroy(tempSphere);
+
+            // 添加渲染器
+            MeshRenderer mr = dropPickupPrefab.AddComponent<MeshRenderer>();
+            mr.material = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+
+            // 添加触发碰撞器
+            SphereCollider col = dropPickupPrefab.AddComponent<SphereCollider>();
+            col.isTrigger = true;
+            col.radius = 0.5f;
+
+            // 添加 DropPickup 组件
+            dropPickupPrefab.AddComponent<DropPickup>();
+
+            // 隐藏在场景中，不会被销毁
+            DontDestroyOnLoad(dropPickupPrefab);
+
+            Debug.Log("[LootManager] 运行时创建了掉落物预制体");
         }
 
         /// <summary>
@@ -83,9 +119,10 @@ namespace MoShou.Systems
                 expMax = 20,
                 drops = new DropItem[]
                 {
-                    new DropItem { itemId = "WPN_001", dropRate = 0.05f, minCount = 1, maxCount = 1 },
-                    new DropItem { itemId = "ARM_001", dropRate = 0.05f, minCount = 1, maxCount = 1 }
-                }
+                    new DropItem { itemId = "POTION_HP_SMALL", dropRate = 0.10f, minCount = 1, maxCount = 1 }
+                },
+                equipmentChance = 0.08f,  // 8%装备掉落概率
+                equipmentPool = new string[] { "WPN_001", "ARM_001" }
             };
 
             // 精英怪物掉落表
@@ -98,9 +135,10 @@ namespace MoShou.Systems
                 expMax = 80,
                 drops = new DropItem[]
                 {
-                    new DropItem { itemId = "WPN_001", dropRate = 0.15f, minCount = 1, maxCount = 1 },
-                    new DropItem { itemId = "ARM_001", dropRate = 0.15f, minCount = 1, maxCount = 1 }
-                }
+                    new DropItem { itemId = "POTION_HP_MEDIUM", dropRate = 0.15f, minCount = 1, maxCount = 1 }
+                },
+                equipmentChance = 0.20f,  // 20%装备掉落概率
+                equipmentPool = new string[] { "WPN_001", "WPN_002", "ARM_001", "ARM_002", "HLM_002" }
             };
 
             // BOSS掉落表
@@ -113,10 +151,13 @@ namespace MoShou.Systems
                 expMax = 300,
                 drops = new DropItem[]
                 {
-                    new DropItem { itemId = "WPN_001", dropRate = 0.5f, minCount = 1, maxCount = 1 },
-                    new DropItem { itemId = "ARM_001", dropRate = 0.5f, minCount = 1, maxCount = 1 }
-                }
+                    new DropItem { itemId = "POTION_HP_LARGE", dropRate = 0.50f, minCount = 1, maxCount = 2 }
+                },
+                equipmentChance = 0.60f,  // 60%装备掉落概率
+                equipmentPool = new string[] { "WPN_002", "WPN_003", "WPN_004", "ARM_002", "ARM_003" }
             };
+
+            Debug.Log("[LootManager] 已创建默认掉落表（含装备掉落配置）");
         }
 
         /// <summary>
@@ -162,6 +203,14 @@ namespace MoShou.Systems
                     }
                 }
             }
+
+            // 掉落装备
+            string equipmentId = table.RollEquipment();
+            if (!string.IsNullOrEmpty(equipmentId))
+            {
+                SpawnDropPickup(position, DropPickupType.Equipment, 1, equipmentId);
+                Debug.Log($"[LootManager] 掉落装备: {equipmentId}");
+            }
         }
 
         /// <summary>
@@ -169,6 +218,14 @@ namespace MoShou.Systems
         /// </summary>
         private void SpawnDropPickup(Vector3 basePosition, DropPickupType type, int amount, string itemId)
         {
+            // 物品和装备需要检查背包空间
+            if ((type == DropPickupType.Item || type == DropPickupType.Equipment)
+                && InventoryManager.Instance != null && InventoryManager.Instance.IsFull())
+            {
+                Debug.Log($"[LootManager] 背包已满，丢弃掉落: {type} {itemId} x{amount}");
+                return;
+            }
+
             // 随机散布位置
             Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * dropSpreadRadius;
             Vector3 spawnPos = basePosition + new Vector3(randomOffset.x, 0, randomOffset.y);
@@ -176,6 +233,7 @@ namespace MoShou.Systems
             if (dropPickupPrefab != null)
             {
                 GameObject dropObj = Instantiate(dropPickupPrefab, spawnPos, Quaternion.identity);
+                dropObj.SetActive(true);
                 DropPickup pickup = dropObj.GetComponent<DropPickup>();
                 if (pickup != null)
                 {
@@ -219,6 +277,22 @@ namespace MoShou.Systems
                         OnItemPickup?.Invoke(itemId, amount);
                     }
                     break;
+
+                case DropPickupType.Equipment:
+                    if (InventoryManager.Instance != null)
+                    {
+                        int added = InventoryManager.Instance.AddItem(itemId, 1);
+                        if (added > 0)
+                        {
+                            OnItemPickup?.Invoke(itemId, 1);
+                            Debug.Log($"[LootManager] 装备已添加到背包: {itemId}");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[LootManager] 背包已满，无法拾取装备: {itemId}");
+                        }
+                    }
+                    break;
             }
         }
 
@@ -243,6 +317,7 @@ namespace MoShou.Systems
     {
         Gold,
         Exp,
-        Item
+        Item,
+        Equipment  // 装备掉落
     }
 }
