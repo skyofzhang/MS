@@ -278,21 +278,9 @@ public class SimpleInventoryPanel : MonoBehaviour
     {
         if (slotsContainer == null || slotIcons == null) return;
 
-        // 获取已装备的物品ID列表（每个槽位一个，用List以便消耗匹配）
-        // 装备不可堆叠，每件装备占一个格子。用List而非HashSet，
-        // 这样同ID装备只标记一个格子为"装备中"
-        var equippedIdList = new System.Collections.Generic.List<string>();
-        if (EquipmentManager.Instance != null)
-        {
-            var allEquips = EquipmentManager.Instance.GetAllEquipments();
-            foreach (var kvp in allEquips)
-            {
-                if (kvp.Value != null)
-                {
-                    equippedIdList.Add(kvp.Value.id);
-                }
-            }
-        }
+        // ★ 已装备的物品会从背包移除(UseItem→RemoveFromSlot)，
+        // 背包里剩余的同名装备是独立副本，不需要"装备中"标记。
+        // 所以不再标记任何背包物品为"装备中"。
 
         for (int i = 0; i < slotIcons.Length; i++)
         {
@@ -322,23 +310,14 @@ public class SimpleInventoryPanel : MonoBehaviour
                     slotCountTexts[i].text = item.count > 1 ? item.count.ToString() : "";
                 }
 
-                // 检查是否已装备 - 每个已装备ID只标记一个格子
-                // 从列表中移除第一个匹配的ID，避免同ID的多个格子都被标记
-                bool isEquipped = false;
-                int matchIndex = equippedIdList.IndexOf(item.itemId);
-                if (matchIndex >= 0)
-                {
-                    isEquipped = true;
-                    equippedIdList.RemoveAt(matchIndex); // 消耗掉，下个同ID格子不再标记
-                }
-
+                // 隐藏装备标记（背包里的物品都是未穿戴的）
                 if (slotEquipTags[i] != null)
                 {
-                    slotEquipTags[i].transform.parent.gameObject.SetActive(isEquipped);
+                    slotEquipTags[i].transform.parent.gameObject.SetActive(false);
                 }
                 if (slotBorders[i] != null)
                 {
-                    slotBorders[i].gameObject.SetActive(isEquipped);
+                    slotBorders[i].gameObject.SetActive(false);
                 }
             }
             else
@@ -353,7 +332,6 @@ public class SimpleInventoryPanel : MonoBehaviour
                 {
                     slotCountTexts[i].text = "";
                 }
-                // 隐藏装备标记
                 if (slotEquipTags[i] != null)
                 {
                     slotEquipTags[i].transform.parent.gameObject.SetActive(false);
