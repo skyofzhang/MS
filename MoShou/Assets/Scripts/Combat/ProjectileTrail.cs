@@ -146,7 +146,7 @@ namespace MoShou.Combat
                     startColor = new Color(1f, 1f, 0.3f, 1f);
                     endColor = new Color(1f, 0.8f, 0f, 0f);
                     trailTime = 0.4f;
-                    startWidth = 0.2f;
+                    startWidth = 0.12f;
                     break;
             }
 

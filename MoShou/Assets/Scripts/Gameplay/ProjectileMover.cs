@@ -69,11 +69,11 @@ public class ProjectileMover : MonoBehaviour
             );
         }
 
-        // 命中闪光 - 更大更明显
+        // 命中闪光
         GameObject hit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         hit.name = "HitEffect";
         hit.transform.position = target;
-        hit.transform.localScale = Vector3.one * 1.0f;
+        hit.transform.localScale = Vector3.one * 0.2f;
 
         Destroy(hit.GetComponent<Collider>());
 
@@ -119,8 +119,8 @@ public class FadeAndDestroy : MonoBehaviour
         float elapsed = Time.time - startTime;
         float t = elapsed / duration;
 
-        // 放大并淡出 - 更大的扩散效果
-        transform.localScale = Vector3.one * (1.0f + t * 1.0f);
+        // 放大并淡出
+        transform.localScale = Vector3.one * (0.2f + t * 0.3f);
 
         if (mat != null)
         {
@@ -239,7 +239,7 @@ public class ArcProjectileMover : MonoBehaviour
             GameObject particle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             particle.name = "HitParticle";
             particle.transform.position = targetPos;
-            particle.transform.localScale = Vector3.one * Random.Range(0.15f, 0.3f);
+            particle.transform.localScale = Vector3.one * Random.Range(0.04f, 0.08f);
 
             Destroy(particle.GetComponent<Collider>());
 
@@ -267,7 +267,7 @@ public class ArcProjectileMover : MonoBehaviour
         GameObject hit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         hit.name = "HitFlash";
         hit.transform.position = targetPos;
-        hit.transform.localScale = Vector3.one * 0.8f;
+        hit.transform.localScale = Vector3.one * 0.15f;
 
         Destroy(hit.GetComponent<Collider>());
 
@@ -319,7 +319,7 @@ public class ParticleScatter : MonoBehaviour
         transform.position += velocity * Time.deltaTime;
 
         // 缩小并淡出
-        transform.localScale = Vector3.one * Mathf.Lerp(0.1f, 0.02f, t);
+        transform.localScale = Vector3.one * Mathf.Lerp(0.05f, 0.01f, t);
 
         if (mat != null)
         {

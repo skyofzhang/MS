@@ -618,23 +618,23 @@ public class PlayerController : MonoBehaviour
             {
                 float angle = -30f + i * 15f;
                 Vector3 dir = Quaternion.Euler(0, angle, 0) * transform.forward;
-                CreateSkillProjectile(firePos, dir, effectColor, skill1Range, 0.6f,
+                CreateSkillProjectile(firePos, dir, effectColor, skill1Range, 0.12f,
                     MoShou.Combat.ProjectileTrail.TrailPreset.MultiShot);
             }
         }
         else
         {
-            // 穿透箭 - 一条粗大的蓝色光束直线穿透
+            // 穿透箭 - 蓝色光束直线穿透
             Color effectColor = new Color(0.3f, 0.8f, 1f, 0.9f);
-            // 主弹道（更大）
-            CreateSkillProjectile(firePos, transform.forward, effectColor, skill2Range, 1.0f,
+            // 主弹道
+            CreateSkillProjectile(firePos, transform.forward, effectColor, skill2Range, 0.2f,
                 MoShou.Combat.ProjectileTrail.TrailPreset.Pierce);
-            // 两侧辅助弹道增加宽度视觉
+            // 两侧辅助弹道
             Vector3 right = Quaternion.Euler(0, 5f, 0) * transform.forward;
             Vector3 left = Quaternion.Euler(0, -5f, 0) * transform.forward;
-            CreateSkillProjectile(firePos, right, new Color(0.5f, 0.9f, 1f, 0.7f), skill2Range, 0.6f,
+            CreateSkillProjectile(firePos, right, new Color(0.5f, 0.9f, 1f, 0.7f), skill2Range, 0.1f,
                 MoShou.Combat.ProjectileTrail.TrailPreset.Pierce);
-            CreateSkillProjectile(firePos, left, new Color(0.5f, 0.9f, 1f, 0.7f), skill2Range, 0.6f,
+            CreateSkillProjectile(firePos, left, new Color(0.5f, 0.9f, 1f, 0.7f), skill2Range, 0.1f,
                 MoShou.Combat.ProjectileTrail.TrailPreset.Pierce);
         }
     }
@@ -687,7 +687,7 @@ public class PlayerController : MonoBehaviour
             GameObject ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             ring.name = "ShoutVFX";
             ring.transform.position = transform.position + Vector3.up * 0.1f;
-            ring.transform.localScale = new Vector3(0.5f, 0.05f, 0.5f);
+            ring.transform.localScale = new Vector3(0.2f, 0.02f, 0.2f);
 
             Destroy(ring.GetComponent<Collider>());
 
@@ -705,8 +705,8 @@ public class PlayerController : MonoBehaviour
             // 添加扩散动画组件
             var expander = ring.AddComponent<RingExpander>();
             expander.delay = i * 0.15f;
-            expander.expandSpeed = 8f;
-            expander.maxScale = 6f;
+            expander.expandSpeed = 3f;
+            expander.maxScale = 2.5f;
             expander.fadeSpeed = 2f;
         }
     }
@@ -957,7 +957,7 @@ public class RingExpander : MonoBehaviour
         float currentScale = transform.localScale.x + expandSpeed * Time.deltaTime;
         if (currentScale < maxScale)
         {
-            transform.localScale = new Vector3(currentScale, 0.05f, currentScale);
+            transform.localScale = new Vector3(currentScale, 0.02f, currentScale);
         }
 
         // 淡出
