@@ -19,7 +19,7 @@
       "slot": 0,
       "quality": 1,
       "level": 5,
-      "attackBonus": 12,
+      "attackBonus": 15,
       "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.03,
@@ -28,29 +28,29 @@
     },
     {
       "id": "WPN_003",
-      "name": "精钢长剑",
+      "name": "精钢剑",
       "slot": 0,
       "quality": 2,
       "level": 10,
-      "attackBonus": 25,
-      "defenseBonus": 2,
+      "attackBonus": 30,
+      "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.05,
       "iconPath": "Icons/Weapons/steel_sword",
-      "description": "由精钢锻造的长剑，削铁如泥。"
+      "description": "精钢锻造的利剑，攻击+30。"
     },
     {
       "id": "WPN_004",
-      "name": "霜之哀伤",
+      "name": "猎人弓",
       "slot": 0,
-      "quality": 3,
-      "level": 20,
-      "attackBonus": 50,
-      "defenseBonus": 5,
-      "hpBonus": 50,
-      "critRateBonus": 0.10,
-      "iconPath": "Icons/Weapons/frostmourne",
-      "description": "传说中的魔剑，蕴含着冰霜之力。"
+      "quality": 1,
+      "level": 8,
+      "attackBonus": 20,
+      "defenseBonus": 0,
+      "hpBonus": 0,
+      "critRateBonus": 0.04,
+      "iconPath": "Icons/Weapons/hunter_bow",
+      "description": "远程武器，攻击+20。"
     },
     {
       "id": "ARM_001",
@@ -63,7 +63,7 @@
       "hpBonus": 10,
       "critRateBonus": 0,
       "iconPath": "Icons/Armor/cloth_armor",
-      "description": "普通的布制护甲，聊胜于无。"
+      "description": "基础护甲，防御+3。"
     },
     {
       "id": "ARM_002",
@@ -76,7 +76,7 @@
       "hpBonus": 25,
       "critRateBonus": 0,
       "iconPath": "Icons/Armor/leather_armor",
-      "description": "坚韧的皮革护甲，灵活而实用。"
+      "description": "轻型护甲，防御+8。"
     },
     {
       "id": "ARM_003",
@@ -85,11 +85,24 @@
       "quality": 2,
       "level": 10,
       "attackBonus": 0,
-      "defenseBonus": 18,
+      "defenseBonus": 15,
       "hpBonus": 50,
       "critRateBonus": 0,
       "iconPath": "Icons/Armor/chainmail",
-      "description": "环环相扣的锁子甲，兼顾防御与机动。"
+      "description": "中型护甲，防御+15。"
+    },
+    {
+      "id": "ARM_004",
+      "name": "板甲",
+      "slot": 2,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 0,
+      "defenseBonus": 25,
+      "hpBonus": 80,
+      "critRateBonus": 0,
+      "iconPath": "Icons/Armor/plate_armor",
+      "description": "重型护甲，防御+25。"
     },
     {
       "id": "HLM_001",

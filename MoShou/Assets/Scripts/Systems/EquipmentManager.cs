@@ -140,68 +140,68 @@ namespace MoShou.Systems
                 slot = EquipmentSlot.Weapon,
                 quality = EquipmentQuality.Green,
                 level = 5,
-                attackBonus = 12,
+                attackBonus = 15,
                 defenseBonus = 0,
                 hpBonus = 0,
                 critRateBonus = 0.03f,
-                description = "锻造精良的铁剑"
+                description = "普通铁剑，攻击+15"
             };
 
             equipmentDatabase["WPN_003"] = new Equipment
             {
                 id = "WPN_003",
-                name = "精钢长弓",
+                name = "精钢剑",
                 slot = EquipmentSlot.Weapon,
                 quality = EquipmentQuality.Blue,
                 level = 10,
-                attackBonus = 20,
+                attackBonus = 30,
                 defenseBonus = 0,
                 hpBonus = 0,
                 critRateBonus = 0.05f,
-                description = "精钢打造的长弓，威力惊人"
+                description = "精钢锻造的利剑，攻击+30"
             };
 
             equipmentDatabase["WPN_004"] = new Equipment
             {
                 id = "WPN_004",
-                name = "暗影之刃",
+                name = "猎人弓",
                 slot = EquipmentSlot.Weapon,
-                quality = EquipmentQuality.Purple,
-                level = 15,
-                attackBonus = 35,
+                quality = EquipmentQuality.Green,
+                level = 8,
+                attackBonus = 20,
                 defenseBonus = 0,
-                hpBonus = 20,
-                critRateBonus = 0.08f,
-                description = "蕴含暗影力量的神秘武器"
+                hpBonus = 0,
+                critRateBonus = 0.04f,
+                description = "远程武器，攻击+20"
             };
 
             // 护甲
             equipmentDatabase["ARM_002"] = new Equipment
             {
                 id = "ARM_002",
-                name = "锁子甲",
+                name = "皮甲",
                 slot = EquipmentSlot.Armor,
                 quality = EquipmentQuality.Green,
                 level = 5,
                 attackBonus = 0,
                 defenseBonus = 8,
-                hpBonus = 30,
+                hpBonus = 25,
                 critRateBonus = 0,
-                description = "环环相扣的铁链甲"
+                description = "轻型护甲，防御+8"
             };
 
             equipmentDatabase["ARM_003"] = new Equipment
             {
                 id = "ARM_003",
-                name = "龙鳞铠甲",
+                name = "锁子甲",
                 slot = EquipmentSlot.Armor,
                 quality = EquipmentQuality.Blue,
                 level = 10,
-                attackBonus = 5,
+                attackBonus = 0,
                 defenseBonus = 15,
-                hpBonus = 60,
+                hpBonus = 50,
                 critRateBonus = 0,
-                description = "用龙鳞锻造的坚固铠甲"
+                description = "中型护甲，防御+15"
             };
 
             // 头盔
