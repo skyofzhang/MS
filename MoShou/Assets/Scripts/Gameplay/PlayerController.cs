@@ -577,6 +577,13 @@ public class PlayerController : MonoBehaviour
 
     void PlaySkillVFX(string vfxName)
     {
+        // 多重箭和穿透箭始终使用代码弹道特效（飞行箭矢+拖尾），效果更好
+        if (vfxName.Contains("MultiShot") || vfxName.Contains("PierceShot"))
+        {
+            CreateFallbackSkillVFX(vfxName);
+            return;
+        }
+
         var vfxPrefab = Resources.Load<GameObject>($"Prefabs/VFX/{vfxName}");
         if (vfxPrefab != null)
         {
@@ -585,7 +592,6 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // 备用特效 - 创建简单的技能视觉效果
             CreateFallbackSkillVFX(vfxName);
         }
     }
