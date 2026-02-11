@@ -11,11 +11,32 @@
       "expReward": 45,
       "waveCount": 3,
       "waves": [
-        {"enemyIds": ["MON_SLIME_001", "MON_SLIME_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_SLIME_001", "MON_GOBLIN_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 1.5}
+        {
+          "enemyIds": [
+            "MON_SLIME_001",
+            "MON_SLIME_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_SLIME_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_GOBLIN_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 1.5
+        }
       ],
-      "firstClearReward": {"itemId": "WPN_001", "count": 1},
+      "firstClearReward": {
+        "itemId": "WPN_001",
+        "count": 1
+      },
       "backgroundMusic": "bgm_forest_01"
     },
     {
@@ -29,11 +50,32 @@
       "expReward": 60,
       "waveCount": 3,
       "waves": [
-        {"enemyIds": ["MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_WOLF_001", "MON_GOBLIN_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_WOLF_001", "MON_WOLF_001"], "spawnDelay": 1.5}
+        {
+          "enemyIds": [
+            "MON_GOBLIN_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_WOLF_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_WOLF_001",
+            "MON_WOLF_001"
+          ],
+          "spawnDelay": 1.5
+        }
       ],
-      "firstClearReward": {"itemId": "ARM_001", "count": 1},
+      "firstClearReward": {
+        "itemId": "ARM_001",
+        "count": 1
+      },
       "backgroundMusic": "bgm_forest_02"
     },
     {
@@ -47,11 +89,34 @@
       "expReward": 75,
       "waveCount": 3,
       "waves": [
-        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_SKELETON_001", "MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_WOLF_001"], "spawnDelay": 1.5}
+        {
+          "enemyIds": [
+            "MON_SKELETON_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_SKELETON_001",
+            "MON_GOBLIN_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_SKELETON_001",
+            "MON_SKELETON_001",
+            "MON_WOLF_001"
+          ],
+          "spawnDelay": 1.5
+        }
       ],
-      "firstClearReward": {"itemId": "HLM_001", "count": 1},
+      "firstClearReward": {
+        "itemId": "HLM_001",
+        "count": 1
+      },
       "backgroundMusic": "bgm_ruins_01"
     },
     {
@@ -65,12 +130,41 @@
       "expReward": 90,
       "waveCount": 4,
       "waves": [
-        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_WOLF_001", "MON_WOLF_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_GOBLIN_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_ORC_001"], "spawnDelay": 0}
+        {
+          "enemyIds": [
+            "MON_SKELETON_001",
+            "MON_SKELETON_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_WOLF_001",
+            "MON_WOLF_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_SKELETON_001",
+            "MON_SKELETON_001",
+            "MON_GOBLIN_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_ORC_001"
+          ],
+          "spawnDelay": 0
+        }
       ],
-      "firstClearReward": {"itemId": "RNG_001", "count": 1},
+      "firstClearReward": {
+        "itemId": "RNG_001",
+        "count": 1
+      },
       "backgroundMusic": "bgm_ruins_02"
     },
     {
@@ -84,12 +178,41 @@
       "expReward": 105,
       "waveCount": 4,
       "waves": [
-        {"enemyIds": ["MON_GOBLIN_001", "MON_GOBLIN_001", "MON_WOLF_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_ORC_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_WOLF_001", "MON_WOLF_001", "MON_WOLF_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_ORC_001", "MON_ORC_001"], "spawnDelay": 1}
+        {
+          "enemyIds": [
+            "MON_GOBLIN_001",
+            "MON_GOBLIN_001",
+            "MON_WOLF_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_ORC_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_WOLF_001",
+            "MON_WOLF_001",
+            "MON_WOLF_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_ORC_001",
+            "MON_ORC_001"
+          ],
+          "spawnDelay": 1
+        }
       ],
-      "firstClearReward": {"itemId": "WPN_002", "count": 1},
+      "firstClearReward": {
+        "itemId": "WPN_002",
+        "count": 1
+      },
       "backgroundMusic": "bgm_swamp_01"
     },
     {
@@ -103,12 +226,40 @@
       "expReward": 120,
       "waveCount": 4,
       "waves": [
-        {"enemyIds": ["MON_ORC_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_DARK_KNIGHT_001"], "spawnDelay": 0},
-        {"enemyIds": ["MON_ORC_001", "MON_ORC_001", "MON_GOBLIN_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_SKELETON_001"], "spawnDelay": 1}
+        {
+          "enemyIds": [
+            "MON_ORC_001",
+            "MON_SKELETON_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001"
+          ],
+          "spawnDelay": 0
+        },
+        {
+          "enemyIds": [
+            "MON_ORC_001",
+            "MON_ORC_001",
+            "MON_GOBLIN_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 1
+        }
       ],
-      "firstClearReward": {"itemId": "ARM_002", "count": 1},
+      "firstClearReward": {
+        "itemId": "ARM_002",
+        "count": 1
+      },
       "backgroundMusic": "bgm_fortress_01"
     },
     {
@@ -122,13 +273,48 @@
       "expReward": 150,
       "waveCount": 5,
       "waves": [
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_SKELETON_001"], "spawnDelay": 2},
-        {"enemyIds": ["MON_MAGE_001", "MON_ORC_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_MAGE_001", "MON_MAGE_001", "MON_SKELETON_001"], "spawnDelay": 1},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001"], "spawnDelay": 1}
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 2
+        },
+        {
+          "enemyIds": [
+            "MON_MAGE_001",
+            "MON_ORC_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_MAGE_001",
+            "MON_MAGE_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 1
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001",
+            "MON_MAGE_001"
+          ],
+          "spawnDelay": 1
+        }
       ],
-      "firstClearReward": {"itemId": "NCK_002", "count": 1},
+      "firstClearReward": {
+        "itemId": "NCK_002",
+        "count": 1
+      },
       "backgroundMusic": "bgm_fortress_02"
     },
     {
@@ -142,13 +328,52 @@
       "expReward": 180,
       "waveCount": 5,
       "waves": [
-        {"enemyIds": ["MON_SKELETON_001", "MON_SKELETON_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_MAGE_001", "MON_SKELETON_001", "MON_SKELETON_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001"], "spawnDelay": 1},
-        {"enemyIds": ["MON_MAGE_001", "MON_MAGE_001", "MON_MAGE_001"], "spawnDelay": 1},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 0.5}
+        {
+          "enemyIds": [
+            "MON_SKELETON_001",
+            "MON_SKELETON_001",
+            "MON_SKELETON_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_MAGE_001",
+            "MON_SKELETON_001",
+            "MON_SKELETON_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001",
+            "MON_MAGE_001"
+          ],
+          "spawnDelay": 1
+        },
+        {
+          "enemyIds": [
+            "MON_MAGE_001",
+            "MON_MAGE_001",
+            "MON_MAGE_001"
+          ],
+          "spawnDelay": 1
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001"
+          ],
+          "spawnDelay": 0.5
+        }
       ],
-      "firstClearReward": {"itemId": "WPN_003", "count": 1},
+      "firstClearReward": {
+        "itemId": "WPN_003",
+        "count": 1
+      },
       "backgroundMusic": "bgm_graveyard_01"
     },
     {
@@ -162,13 +387,54 @@
       "expReward": 230,
       "waveCount": 5,
       "waves": [
-        {"enemyIds": ["MON_ORC_001", "MON_ORC_001", "MON_ORC_001"], "spawnDelay": 1.5},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001"], "spawnDelay": 1},
-        {"enemyIds": ["MON_MAGE_001", "MON_MAGE_001", "MON_ORC_001", "MON_ORC_001"], "spawnDelay": 1},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 0.5},
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_MAGE_001", "MON_MAGE_001", "MON_ORC_001", "MON_ORC_001"], "spawnDelay": 0.5}
+        {
+          "enemyIds": [
+            "MON_ORC_001",
+            "MON_ORC_001",
+            "MON_ORC_001"
+          ],
+          "spawnDelay": 1.5
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001",
+            "MON_MAGE_001"
+          ],
+          "spawnDelay": 1
+        },
+        {
+          "enemyIds": [
+            "MON_MAGE_001",
+            "MON_MAGE_001",
+            "MON_ORC_001",
+            "MON_ORC_001"
+          ],
+          "spawnDelay": 1
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001"
+          ],
+          "spawnDelay": 0.5
+        },
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_MAGE_001",
+            "MON_MAGE_001",
+            "MON_ORC_001",
+            "MON_ORC_001"
+          ],
+          "spawnDelay": 0.5
+        }
       ],
-      "firstClearReward": {"itemId": "ARM_003", "count": 1},
+      "firstClearReward": {
+        "itemId": "ARM_003",
+        "count": 1
+      },
       "backgroundMusic": "bgm_volcano_01"
     },
     {
@@ -182,12 +448,1127 @@
       "expReward": 350,
       "waveCount": 3,
       "waves": [
-        {"enemyIds": ["MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001", "MON_MAGE_001", "MON_MAGE_001"], "spawnDelay": 1},
-        {"enemyIds": ["MON_ORC_001", "MON_ORC_001", "MON_ORC_001", "MON_DARK_KNIGHT_001", "MON_DARK_KNIGHT_001"], "spawnDelay": 0.5},
-        {"enemyIds": ["MON_BOSS_DRAGON_001"], "spawnDelay": 0}
+        {
+          "enemyIds": [
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001",
+            "MON_MAGE_001",
+            "MON_MAGE_001"
+          ],
+          "spawnDelay": 1
+        },
+        {
+          "enemyIds": [
+            "MON_ORC_001",
+            "MON_ORC_001",
+            "MON_ORC_001",
+            "MON_DARK_KNIGHT_001",
+            "MON_DARK_KNIGHT_001"
+          ],
+          "spawnDelay": 0.5
+        },
+        {
+          "enemyIds": [
+            "MON_BOSS_DRAGON_001"
+          ],
+          "spawnDelay": 0
+        }
       ],
-      "firstClearReward": {"itemId": "WPN_004", "count": 1},
+      "firstClearReward": {
+        "itemId": "WPN_004",
+        "count": 1
+      },
       "backgroundMusic": "bgm_boss_01",
+      "isFinalStage": true
+    },
+    {
+      "id": 11,
+      "name": "荒野小径",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 21,
+      "waveCount": 4,
+      "goldReward": 440,
+      "expReward": 290,
+      "backgroundMusic": "bgm_wild_01"
+    },
+    {
+      "id": 12,
+      "name": "毒蛇沼泽",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 23,
+      "waveCount": 4,
+      "goldReward": 482,
+      "expReward": 318,
+      "backgroundMusic": "bgm_wild_01"
+    },
+    {
+      "id": 13,
+      "name": "枯骨荒原",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 25,
+      "waveCount": 4,
+      "goldReward": 524,
+      "expReward": 346,
+      "backgroundMusic": "bgm_wild_01"
+    },
+    {
+      "id": 14,
+      "name": "迷雾林地",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 27,
+      "waveCount": 4,
+      "goldReward": 568,
+      "expReward": 375,
+      "backgroundMusic": "bgm_wild_02"
+    },
+    {
+      "id": 15,
+      "name": "野狼谷",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 29,
+      "waveCount": 4,
+      "goldReward": 612,
+      "expReward": 405,
+      "backgroundMusic": "bgm_wild_02"
+    },
+    {
+      "id": 16,
+      "name": "蛛丝洞穴",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 31,
+      "waveCount": 4,
+      "goldReward": 658,
+      "expReward": 435,
+      "backgroundMusic": "bgm_wild_02"
+    },
+    {
+      "id": 17,
+      "name": "腐败湿地",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 33,
+      "waveCount": 4,
+      "goldReward": 704,
+      "expReward": 466,
+      "backgroundMusic": "bgm_wild_03"
+    },
+    {
+      "id": 18,
+      "name": "盗贼营地",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 35,
+      "waveCount": 4,
+      "goldReward": 752,
+      "expReward": 498,
+      "backgroundMusic": "bgm_wild_03"
+    },
+    {
+      "id": 19,
+      "name": "荒废哨塔",
+      "chapter": 2,
+      "description": "荒野区域的冒险，危险等级1。",
+      "difficulty": 1,
+      "recommendedLevel": 37,
+      "waveCount": 4,
+      "goldReward": 800,
+      "expReward": 530,
+      "backgroundMusic": "bgm_wild_03"
+    },
+    {
+      "id": 20,
+      "name": "荒野领主",
+      "chapter": 2,
+      "description": "荒野区域的最终挑战，击败强大的首领！",
+      "difficulty": 1,
+      "recommendedLevel": 39,
+      "waveCount": 5,
+      "goldReward": 850,
+      "expReward": 563,
+      "backgroundMusic": "bgm_wild_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 21,
+      "name": "山脚小道",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 41,
+      "waveCount": 5,
+      "goldReward": 900,
+      "expReward": 597,
+      "backgroundMusic": "bgm_mountain_01"
+    },
+    {
+      "id": 22,
+      "name": "采矿隧道",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 43,
+      "waveCount": 5,
+      "goldReward": 952,
+      "expReward": 631,
+      "backgroundMusic": "bgm_mountain_01"
+    },
+    {
+      "id": 23,
+      "name": "岩石峡谷",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 45,
+      "waveCount": 5,
+      "goldReward": 1004,
+      "expReward": 666,
+      "backgroundMusic": "bgm_mountain_01"
+    },
+    {
+      "id": 24,
+      "name": "飞瀑悬崖",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 47,
+      "waveCount": 5,
+      "goldReward": 1058,
+      "expReward": 702,
+      "backgroundMusic": "bgm_mountain_02"
+    },
+    {
+      "id": 25,
+      "name": "矮人矿场",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 49,
+      "waveCount": 5,
+      "goldReward": 1112,
+      "expReward": 738,
+      "backgroundMusic": "bgm_mountain_02"
+    },
+    {
+      "id": 26,
+      "name": "地底暗河",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 51,
+      "waveCount": 5,
+      "goldReward": 1168,
+      "expReward": 775,
+      "backgroundMusic": "bgm_mountain_02"
+    },
+    {
+      "id": 27,
+      "name": "熔岩裂隙",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 53,
+      "waveCount": 5,
+      "goldReward": 1224,
+      "expReward": 813,
+      "backgroundMusic": "bgm_mountain_03"
+    },
+    {
+      "id": 28,
+      "name": "巨鹰巢穴",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 55,
+      "waveCount": 5,
+      "goldReward": 1282,
+      "expReward": 851,
+      "backgroundMusic": "bgm_mountain_03"
+    },
+    {
+      "id": 29,
+      "name": "冰封山顶",
+      "chapter": 3,
+      "description": "山脉区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 57,
+      "waveCount": 5,
+      "goldReward": 1340,
+      "expReward": 890,
+      "backgroundMusic": "bgm_mountain_03"
+    },
+    {
+      "id": 30,
+      "name": "山脉霸主",
+      "chapter": 3,
+      "description": "山脉区域的最终挑战，击败强大的首领！",
+      "difficulty": 2,
+      "recommendedLevel": 59,
+      "waveCount": 6,
+      "goldReward": 1400,
+      "expReward": 930,
+      "backgroundMusic": "bgm_mountain_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 31,
+      "name": "沙漠入口",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 61,
+      "waveCount": 6,
+      "goldReward": 1460,
+      "expReward": 970,
+      "backgroundMusic": "bgm_desert_01"
+    },
+    {
+      "id": 32,
+      "name": "流沙陷阱",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 63,
+      "waveCount": 6,
+      "goldReward": 1522,
+      "expReward": 1011,
+      "backgroundMusic": "bgm_desert_01"
+    },
+    {
+      "id": 33,
+      "name": "仙人掌谷",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 65,
+      "waveCount": 6,
+      "goldReward": 1584,
+      "expReward": 1053,
+      "backgroundMusic": "bgm_desert_01"
+    },
+    {
+      "id": 34,
+      "name": "干涸绿洲",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 67,
+      "waveCount": 6,
+      "goldReward": 1648,
+      "expReward": 1095,
+      "backgroundMusic": "bgm_desert_02"
+    },
+    {
+      "id": 35,
+      "name": "沙虫巢穴",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 69,
+      "waveCount": 6,
+      "goldReward": 1712,
+      "expReward": 1138,
+      "backgroundMusic": "bgm_desert_02"
+    },
+    {
+      "id": 36,
+      "name": "古老神殿",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 71,
+      "waveCount": 6,
+      "goldReward": 1778,
+      "expReward": 1182,
+      "backgroundMusic": "bgm_desert_02"
+    },
+    {
+      "id": 37,
+      "name": "法老密室",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 73,
+      "waveCount": 6,
+      "goldReward": 1844,
+      "expReward": 1226,
+      "backgroundMusic": "bgm_desert_03"
+    },
+    {
+      "id": 38,
+      "name": "沙暴迷途",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 75,
+      "waveCount": 6,
+      "goldReward": 1912,
+      "expReward": 1271,
+      "backgroundMusic": "bgm_desert_03"
+    },
+    {
+      "id": 39,
+      "name": "黄金金字塔",
+      "chapter": 4,
+      "description": "沙漠区域的冒险，危险等级2。",
+      "difficulty": 2,
+      "recommendedLevel": 77,
+      "waveCount": 6,
+      "goldReward": 1980,
+      "expReward": 1317,
+      "backgroundMusic": "bgm_desert_03"
+    },
+    {
+      "id": 40,
+      "name": "沙漠帝王",
+      "chapter": 4,
+      "description": "沙漠区域的最终挑战，击败强大的首领！",
+      "difficulty": 2,
+      "recommendedLevel": 79,
+      "waveCount": 7,
+      "goldReward": 2050,
+      "expReward": 1363,
+      "backgroundMusic": "bgm_desert_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 41,
+      "name": "冰原边境",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 81,
+      "waveCount": 7,
+      "goldReward": 2120,
+      "expReward": 1410,
+      "backgroundMusic": "bgm_ice_01"
+    },
+    {
+      "id": 42,
+      "name": "冻土荒野",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 83,
+      "waveCount": 7,
+      "goldReward": 2192,
+      "expReward": 1458,
+      "backgroundMusic": "bgm_ice_01"
+    },
+    {
+      "id": 43,
+      "name": "冰晶洞穴",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 85,
+      "waveCount": 7,
+      "goldReward": 2264,
+      "expReward": 1506,
+      "backgroundMusic": "bgm_ice_01"
+    },
+    {
+      "id": 44,
+      "name": "雪狼领地",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 87,
+      "waveCount": 7,
+      "goldReward": 2338,
+      "expReward": 1555,
+      "backgroundMusic": "bgm_ice_02"
+    },
+    {
+      "id": 45,
+      "name": "冰封河谷",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 89,
+      "waveCount": 7,
+      "goldReward": 2412,
+      "expReward": 1605,
+      "backgroundMusic": "bgm_ice_02"
+    },
+    {
+      "id": 46,
+      "name": "霜巨人营",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 91,
+      "waveCount": 7,
+      "goldReward": 2488,
+      "expReward": 1655,
+      "backgroundMusic": "bgm_ice_02"
+    },
+    {
+      "id": 47,
+      "name": "暴风雪原",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 93,
+      "waveCount": 7,
+      "goldReward": 2564,
+      "expReward": 1706,
+      "backgroundMusic": "bgm_ice_03"
+    },
+    {
+      "id": 48,
+      "name": "冰之神殿",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 95,
+      "waveCount": 7,
+      "goldReward": 2642,
+      "expReward": 1758,
+      "backgroundMusic": "bgm_ice_03"
+    },
+    {
+      "id": 49,
+      "name": "永冻冰川",
+      "chapter": 5,
+      "description": "冰原区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 97,
+      "waveCount": 7,
+      "goldReward": 2720,
+      "expReward": 1810,
+      "backgroundMusic": "bgm_ice_03"
+    },
+    {
+      "id": 50,
+      "name": "冰原之王",
+      "chapter": 5,
+      "description": "冰原区域的最终挑战，击败强大的首领！",
+      "difficulty": 3,
+      "recommendedLevel": 99,
+      "waveCount": 8,
+      "goldReward": 2800,
+      "expReward": 1863,
+      "backgroundMusic": "bgm_ice_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 51,
+      "name": "火山山脚",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 101,
+      "waveCount": 8,
+      "goldReward": 2880,
+      "expReward": 1917,
+      "backgroundMusic": "bgm_volcano_01"
+    },
+    {
+      "id": 52,
+      "name": "熔岩河道",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 103,
+      "waveCount": 8,
+      "goldReward": 2962,
+      "expReward": 1971,
+      "backgroundMusic": "bgm_volcano_01"
+    },
+    {
+      "id": 53,
+      "name": "灰烬平原",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 105,
+      "waveCount": 8,
+      "goldReward": 3044,
+      "expReward": 2026,
+      "backgroundMusic": "bgm_volcano_01"
+    },
+    {
+      "id": 54,
+      "name": "火焰洞窟",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 107,
+      "waveCount": 8,
+      "goldReward": 3128,
+      "expReward": 2082,
+      "backgroundMusic": "bgm_volcano_02"
+    },
+    {
+      "id": 55,
+      "name": "岩浆湖畔",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 109,
+      "waveCount": 8,
+      "goldReward": 3212,
+      "expReward": 2138,
+      "backgroundMusic": "bgm_volcano_02"
+    },
+    {
+      "id": 56,
+      "name": "炎魔领地",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 111,
+      "waveCount": 8,
+      "goldReward": 3298,
+      "expReward": 2195,
+      "backgroundMusic": "bgm_volcano_02"
+    },
+    {
+      "id": 57,
+      "name": "烈焰熔炉",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 113,
+      "waveCount": 8,
+      "goldReward": 3384,
+      "expReward": 2253,
+      "backgroundMusic": "bgm_volcano_03"
+    },
+    {
+      "id": 58,
+      "name": "龙蛋孵化场",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 115,
+      "waveCount": 8,
+      "goldReward": 3472,
+      "expReward": 2311,
+      "backgroundMusic": "bgm_volcano_03"
+    },
+    {
+      "id": 59,
+      "name": "火山口",
+      "chapter": 6,
+      "description": "火山区域的冒险，危险等级3。",
+      "difficulty": 3,
+      "recommendedLevel": 117,
+      "waveCount": 8,
+      "goldReward": 3560,
+      "expReward": 2370,
+      "backgroundMusic": "bgm_volcano_03"
+    },
+    {
+      "id": 60,
+      "name": "火山君主",
+      "chapter": 6,
+      "description": "火山区域的最终挑战，击败强大的首领！",
+      "difficulty": 3,
+      "recommendedLevel": 119,
+      "waveCount": 9,
+      "goldReward": 3650,
+      "expReward": 2430,
+      "backgroundMusic": "bgm_volcano_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 61,
+      "name": "深渊入口",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 121,
+      "waveCount": 9,
+      "goldReward": 3740,
+      "expReward": 2490,
+      "backgroundMusic": "bgm_abyss_01"
+    },
+    {
+      "id": 62,
+      "name": "黑暗通道",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 123,
+      "waveCount": 9,
+      "goldReward": 3832,
+      "expReward": 2551,
+      "backgroundMusic": "bgm_abyss_01"
+    },
+    {
+      "id": 63,
+      "name": "恶魔矿场",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 125,
+      "waveCount": 9,
+      "goldReward": 3924,
+      "expReward": 2613,
+      "backgroundMusic": "bgm_abyss_01"
+    },
+    {
+      "id": 64,
+      "name": "影之迷宫",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 127,
+      "waveCount": 9,
+      "goldReward": 4018,
+      "expReward": 2675,
+      "backgroundMusic": "bgm_abyss_02"
+    },
+    {
+      "id": 65,
+      "name": "腐化花园",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 129,
+      "waveCount": 9,
+      "goldReward": 4112,
+      "expReward": 2738,
+      "backgroundMusic": "bgm_abyss_02"
+    },
+    {
+      "id": 66,
+      "name": "噩梦走廊",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 131,
+      "waveCount": 9,
+      "goldReward": 4208,
+      "expReward": 2802,
+      "backgroundMusic": "bgm_abyss_02"
+    },
+    {
+      "id": 67,
+      "name": "深渊祭坛",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 133,
+      "waveCount": 9,
+      "goldReward": 4304,
+      "expReward": 2866,
+      "backgroundMusic": "bgm_abyss_03"
+    },
+    {
+      "id": 68,
+      "name": "魔眼巢穴",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 135,
+      "waveCount": 9,
+      "goldReward": 4402,
+      "expReward": 2931,
+      "backgroundMusic": "bgm_abyss_03"
+    },
+    {
+      "id": 69,
+      "name": "混沌裂口",
+      "chapter": 7,
+      "description": "深渊区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 137,
+      "waveCount": 9,
+      "goldReward": 4500,
+      "expReward": 2997,
+      "backgroundMusic": "bgm_abyss_03"
+    },
+    {
+      "id": 70,
+      "name": "深渊领主",
+      "chapter": 7,
+      "description": "深渊区域的最终挑战，击败强大的首领！",
+      "difficulty": 4,
+      "recommendedLevel": 139,
+      "waveCount": 10,
+      "goldReward": 4600,
+      "expReward": 3063,
+      "backgroundMusic": "bgm_abyss_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 71,
+      "name": "浮空阶梯",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 141,
+      "waveCount": 10,
+      "goldReward": 4700,
+      "expReward": 3130,
+      "backgroundMusic": "bgm_sky_01"
+    },
+    {
+      "id": 72,
+      "name": "云海栈道",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 143,
+      "waveCount": 10,
+      "goldReward": 4802,
+      "expReward": 3198,
+      "backgroundMusic": "bgm_sky_01"
+    },
+    {
+      "id": 73,
+      "name": "天使花园",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 145,
+      "waveCount": 10,
+      "goldReward": 4904,
+      "expReward": 3266,
+      "backgroundMusic": "bgm_sky_01"
+    },
+    {
+      "id": 74,
+      "name": "风暴平台",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 147,
+      "waveCount": 10,
+      "goldReward": 5008,
+      "expReward": 3335,
+      "backgroundMusic": "bgm_sky_02"
+    },
+    {
+      "id": 75,
+      "name": "雷电塔楼",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 149,
+      "waveCount": 10,
+      "goldReward": 5112,
+      "expReward": 3405,
+      "backgroundMusic": "bgm_sky_02"
+    },
+    {
+      "id": 76,
+      "name": "圣光神殿",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 151,
+      "waveCount": 10,
+      "goldReward": 5218,
+      "expReward": 3475,
+      "backgroundMusic": "bgm_sky_02"
+    },
+    {
+      "id": 77,
+      "name": "星辰走廊",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 153,
+      "waveCount": 10,
+      "goldReward": 5324,
+      "expReward": 3546,
+      "backgroundMusic": "bgm_sky_03"
+    },
+    {
+      "id": 78,
+      "name": "月影庭院",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 155,
+      "waveCount": 10,
+      "goldReward": 5432,
+      "expReward": 3618,
+      "backgroundMusic": "bgm_sky_03"
+    },
+    {
+      "id": 79,
+      "name": "天穹圣殿",
+      "chapter": 8,
+      "description": "天空区域的冒险，危险等级4。",
+      "difficulty": 4,
+      "recommendedLevel": 157,
+      "waveCount": 10,
+      "goldReward": 5540,
+      "expReward": 3690,
+      "backgroundMusic": "bgm_sky_03"
+    },
+    {
+      "id": 80,
+      "name": "天空之王",
+      "chapter": 8,
+      "description": "天空区域的最终挑战，击败强大的首领！",
+      "difficulty": 4,
+      "recommendedLevel": 159,
+      "waveCount": 11,
+      "goldReward": 5650,
+      "expReward": 3763,
+      "backgroundMusic": "bgm_sky_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 81,
+      "name": "时空裂隙",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 161,
+      "waveCount": 11,
+      "goldReward": 5760,
+      "expReward": 3837,
+      "backgroundMusic": "bgm_chaos_01"
+    },
+    {
+      "id": 82,
+      "name": "扭曲走廊",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 163,
+      "waveCount": 11,
+      "goldReward": 5872,
+      "expReward": 3911,
+      "backgroundMusic": "bgm_chaos_01"
+    },
+    {
+      "id": 83,
+      "name": "虚空之境",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 165,
+      "waveCount": 11,
+      "goldReward": 5984,
+      "expReward": 3986,
+      "backgroundMusic": "bgm_chaos_01"
+    },
+    {
+      "id": 84,
+      "name": "混沌漩涡",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 167,
+      "waveCount": 11,
+      "goldReward": 6098,
+      "expReward": 4062,
+      "backgroundMusic": "bgm_chaos_02"
+    },
+    {
+      "id": 85,
+      "name": "维度夹缝",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 169,
+      "waveCount": 11,
+      "goldReward": 6212,
+      "expReward": 4138,
+      "backgroundMusic": "bgm_chaos_02"
+    },
+    {
+      "id": 86,
+      "name": "末日边境",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 171,
+      "waveCount": 11,
+      "goldReward": 6328,
+      "expReward": 4215,
+      "backgroundMusic": "bgm_chaos_02"
+    },
+    {
+      "id": 87,
+      "name": "毁灭通道",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 173,
+      "waveCount": 11,
+      "goldReward": 6444,
+      "expReward": 4293,
+      "backgroundMusic": "bgm_chaos_03"
+    },
+    {
+      "id": 88,
+      "name": "湮灭之地",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 175,
+      "waveCount": 11,
+      "goldReward": 6562,
+      "expReward": 4371,
+      "backgroundMusic": "bgm_chaos_03"
+    },
+    {
+      "id": 89,
+      "name": "混沌核心",
+      "chapter": 9,
+      "description": "混沌区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 177,
+      "waveCount": 11,
+      "goldReward": 6680,
+      "expReward": 4450,
+      "backgroundMusic": "bgm_chaos_03"
+    },
+    {
+      "id": 90,
+      "name": "混沌支配者",
+      "chapter": 9,
+      "description": "混沌区域的最终挑战，击败强大的首领！",
+      "difficulty": 5,
+      "recommendedLevel": 179,
+      "waveCount": 12,
+      "goldReward": 6800,
+      "expReward": 4530,
+      "backgroundMusic": "bgm_chaos_boss",
+      "isBossStage": true
+    },
+    {
+      "id": 91,
+      "name": "王座之路",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 181,
+      "waveCount": 12,
+      "goldReward": 6920,
+      "expReward": 4610,
+      "backgroundMusic": "bgm_final_01"
+    },
+    {
+      "id": 92,
+      "name": "暗影殿堂",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 183,
+      "waveCount": 12,
+      "goldReward": 7042,
+      "expReward": 4691,
+      "backgroundMusic": "bgm_final_01"
+    },
+    {
+      "id": 93,
+      "name": "灵魂炼狱",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 185,
+      "waveCount": 12,
+      "goldReward": 7164,
+      "expReward": 4773,
+      "backgroundMusic": "bgm_final_01"
+    },
+    {
+      "id": 94,
+      "name": "命运十字",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 187,
+      "waveCount": 12,
+      "goldReward": 7288,
+      "expReward": 4855,
+      "backgroundMusic": "bgm_final_02"
+    },
+    {
+      "id": 95,
+      "name": "诸神黄昏",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 189,
+      "waveCount": 12,
+      "goldReward": 7412,
+      "expReward": 4938,
+      "backgroundMusic": "bgm_final_02"
+    },
+    {
+      "id": 96,
+      "name": "世界之树",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 191,
+      "waveCount": 12,
+      "goldReward": 7538,
+      "expReward": 5022,
+      "backgroundMusic": "bgm_final_02"
+    },
+    {
+      "id": 97,
+      "name": "创世祭坛",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 193,
+      "waveCount": 12,
+      "goldReward": 7664,
+      "expReward": 5106,
+      "backgroundMusic": "bgm_final_03"
+    },
+    {
+      "id": 98,
+      "name": "终焉回廊",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 195,
+      "waveCount": 12,
+      "goldReward": 7792,
+      "expReward": 5191,
+      "backgroundMusic": "bgm_final_03"
+    },
+    {
+      "id": 99,
+      "name": "魔王城堡",
+      "chapter": 10,
+      "description": "终末区域的冒险，危险等级5。",
+      "difficulty": 5,
+      "recommendedLevel": 197,
+      "waveCount": 12,
+      "goldReward": 7920,
+      "expReward": 5277,
+      "backgroundMusic": "bgm_final_03"
+    },
+    {
+      "id": 100,
+      "name": "最终决战",
+      "chapter": 10,
+      "description": "终末区域的最终挑战，击败强大的首领！",
+      "difficulty": 5,
+      "recommendedLevel": 199,
+      "waveCount": 13,
+      "goldReward": 8050,
+      "expReward": 5363,
+      "backgroundMusic": "bgm_final_boss",
+      "isBossStage": true,
       "isFinalStage": true
     }
   ]

@@ -2,18 +2,22 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System.Collections;
 using MoShou.Systems;
 using MoShou.UI;
+using MoShou.Data;
 
 /// <summary>
-/// 选关场景初始化 - 自动创建选关UI
+/// 选关场景初始化 - 竖排卡片列表（100关）
 /// 依据策划案: 竖屏 1080x1920
-/// 基于效果图: UI_StageSelect.png
-/// 风格: 卡通魔兽风格，地图路径布局，金属边框装饰
+/// 风格: 卡通魔兽风格，竖排关卡卡片列表
 /// </summary>
 public class StageSelectSceneSetup : MonoBehaviour
 {
     private static bool isInitialized = false;
+
+    // 关卡配置缓存
+    private StageConfigTable stageConfigTable;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()
@@ -61,7 +65,10 @@ public class StageSelectSceneSetup : MonoBehaviour
 
     void SetupStageSelect()
     {
-        Debug.Log("[StageSelectSetup] 开始创建选关UI（效果图风格）...");
+        Debug.Log("[StageSelectSetup] 开始创建选关UI（竖排卡片列表）...");
+
+        // 加载关卡配置
+        LoadStageConfigs();
 
         // 确保有EventSystem
         if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
@@ -71,12 +78,10 @@ public class StageSelectSceneSetup : MonoBehaviour
             esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
         }
 
-        // 销毁所有现有的低优先级Canvas，强制创建新UI
-        // 使用DestroyImmediate确保旧UI立即被移除，避免新旧UI叠加
+        // 销毁所有现有的低优先级Canvas
         Canvas[] existingCanvases = FindObjectsOfType<Canvas>();
         foreach (var canvas in existingCanvases)
         {
-            // 只销毁sortingOrder < 500的Canvas（保留系统级Canvas如ConfirmDialog等）
             if (canvas.sortingOrder < 500)
             {
                 Debug.Log($"[StageSelectSetup] 立即销毁现有Canvas: {canvas.gameObject.name}");
@@ -84,8 +89,7 @@ public class StageSelectSceneSetup : MonoBehaviour
             }
         }
 
-        // 销毁旧的StageSelectManager（如果存在）
-        // ★ 必须用DestroyImmediate，否则其Start()会在Destroy生效前执行并创建残留UI
+        // 销毁旧的StageSelectManager
         var oldManager = FindObjectOfType<MoShou.Core.StageSelectManager>();
         if (oldManager != null)
         {
@@ -93,15 +97,15 @@ public class StageSelectSceneSetup : MonoBehaviour
             DestroyImmediate(oldManager.gameObject);
         }
 
-        // 销毁旧的StageSelectScreen（避免重复UI）
+        // 销毁旧的StageSelectScreen
         var oldScreen = FindObjectOfType<MoShou.UI.StageSelectScreen>();
         if (oldScreen != null)
         {
-            Debug.Log("[StageSelectSetup] 立即销毁旧的StageSelectScreen，使用SceneSetup版本");
+            Debug.Log("[StageSelectSetup] 立即销毁旧的StageSelectScreen");
             DestroyImmediate(oldScreen.gameObject);
         }
 
-        // 清理 StageSelectManager 可能已创建的残留UI（"StageButtonsParent" 竖排按钮列表）
+        // 清理残留UI
         var stageButtonsParent = GameObject.Find("StageButtonsParent");
         if (stageButtonsParent != null)
         {
@@ -109,15 +113,62 @@ public class StageSelectSceneSetup : MonoBehaviour
             DestroyImmediate(stageButtonsParent);
         }
 
-        // 创建新的效果图风格UI
+        // 创建新UI
         CreateStageSelectUI();
+    }
+
+    /// <summary>
+    /// 加载关卡配置表
+    /// </summary>
+    void LoadStageConfigs()
+    {
+        TextAsset json = Resources.Load<TextAsset>("Configs/StageConfigs");
+        if (json != null)
+        {
+            stageConfigTable = JsonUtility.FromJson<StageConfigTable>(json.text);
+            Debug.Log($"[StageSelectSetup] 加载了 {stageConfigTable.stages.Length} 个关卡配置");
+        }
+        else
+        {
+            Debug.LogWarning("[StageSelectSetup] 无法加载 StageConfigs.json");
+            stageConfigTable = new StageConfigTable { stages = new StageConfigEntry[0] };
+        }
+    }
+
+    /// <summary>
+    /// 获取关卡配置（优先JSON，否则算法生成）
+    /// </summary>
+    StageConfigEntry GetStageConfig(int stageNum)
+    {
+        // 先从JSON查找
+        if (stageConfigTable != null && stageConfigTable.stages != null)
+        {
+            foreach (var entry in stageConfigTable.stages)
+            {
+                if (entry.id == stageNum)
+                    return entry;
+            }
+        }
+
+        // 算法生成 fallback
+        string[] themeNames = { "未知区域", "荒野", "山脉", "沙漠", "冰原", "火山", "深渊", "天空", "混沌", "终末" };
+        int regionIdx = Mathf.Clamp((stageNum - 1) / 10, 0, themeNames.Length - 1);
+
+        return new StageConfigEntry
+        {
+            id = stageNum,
+            name = $"{themeNames[regionIdx]}·关卡{stageNum}",
+            chapter = regionIdx + 1,
+            difficulty = Mathf.Min(5, 1 + (stageNum - 1) / 20),
+            recommendedLevel = Mathf.Max(1, stageNum * 2 - 1),
+            waveCount = 3 + stageNum / 10,
+            goldReward = Mathf.FloorToInt(50 + stageNum * 30 + stageNum * stageNum * 0.5f),
+            expReward = Mathf.FloorToInt(30 + stageNum * 20 + stageNum * stageNum / 3f)
+        };
     }
 
     void CreateStageSelectUI()
     {
-        // 尝试加载效果图作为背景
-        Sprite mockupBg = Resources.Load<Sprite>("UI_Mockups/Screens/UI_StageSelect");
-
         // 创建Canvas
         GameObject canvasGO = new GameObject("StageSelectCanvas");
         Canvas canvas = canvasGO.AddComponent<Canvas>();
@@ -132,29 +183,27 @@ public class StageSelectSceneSetup : MonoBehaviour
         canvasGO.AddComponent<GraphicRaycaster>();
 
         // === 背景层 ===
-        CreateBackgroundLayer(canvasGO.transform, mockupBg);
+        CreateBackgroundLayer(canvasGO.transform);
 
         // === 顶部标题栏 ===
         CreateTopTitleBar(canvasGO.transform);
 
-        // === 章节标签页 ===
-        CreateChapterTabs(canvasGO.transform);
-
-        // === 地图路径关卡 ===
-        CreateMapPathArea(canvasGO.transform);
+        // === 关卡卡片列表 ===
+        CreateStageListArea(canvasGO.transform);
 
         // === 底部信息栏 ===
         CreateBottomInfoBar(canvasGO.transform);
 
-        Debug.Log("[StageSelectSetup] 选关UI创建完成（效果图风格）");
+        Debug.Log("[StageSelectSetup] 选关UI创建完成（竖排卡片列表）");
     }
 
     /// <summary>
-    /// 创建背景层 - 效果图风格：深色幻想地图背景
+    /// 创建背景层
     /// </summary>
-    void CreateBackgroundLayer(Transform parent, Sprite mockupBg)
+    void CreateBackgroundLayer(Transform parent)
     {
-        // 主背景
+        Sprite mockupBg = Resources.Load<Sprite>("UI_Mockups/Screens/UI_StageSelect");
+
         GameObject bgGO = new GameObject("Background");
         bgGO.transform.SetParent(parent, false);
         RectTransform bgRect = bgGO.AddComponent<RectTransform>();
@@ -170,14 +219,12 @@ public class StageSelectSceneSetup : MonoBehaviour
             bgImage.sprite = mockupBg;
             bgImage.preserveAspect = false;
             bgImage.color = Color.white;
-            Debug.Log("[StageSelectSetup] 效果图背景加载成功");
         }
         else
         {
-            // 创建深色幻想地图风格背景
             bgImage.color = new Color(0.08f, 0.12f, 0.18f);
 
-            // 渐变层 - 底部更暗
+            // 渐变层
             GameObject gradientGO = new GameObject("Gradient");
             gradientGO.transform.SetParent(bgGO.transform, false);
             RectTransform gradRect = gradientGO.AddComponent<RectTransform>();
@@ -188,9 +235,6 @@ public class StageSelectSceneSetup : MonoBehaviour
 
             Image gradImg = gradientGO.AddComponent<Image>();
             gradImg.color = new Color(0.03f, 0.05f, 0.08f, 0.7f);
-
-            // 地图纹理效果 - 多层叠加
-            CreateMapTexture(bgGO.transform);
         }
 
         // 暗角效果
@@ -207,38 +251,8 @@ public class StageSelectSceneSetup : MonoBehaviour
         vigImage.raycastTarget = false;
     }
 
-    void CreateMapTexture(Transform parent)
-    {
-        // 模拟地图格子纹理
-        for (int i = 0; i < 8; i++)
-        {
-            GameObject lineGO = new GameObject($"MapLine_{i}");
-            lineGO.transform.SetParent(parent, false);
-            RectTransform lineRect = lineGO.AddComponent<RectTransform>();
-
-            bool isHorizontal = i < 4;
-            if (isHorizontal)
-            {
-                lineRect.anchorMin = new Vector2(0, 0.2f + i * 0.2f);
-                lineRect.anchorMax = new Vector2(1, 0.2f + i * 0.2f);
-                lineRect.sizeDelta = new Vector2(0, 1);
-            }
-            else
-            {
-                int col = i - 4;
-                lineRect.anchorMin = new Vector2(0.15f + col * 0.25f, 0);
-                lineRect.anchorMax = new Vector2(0.15f + col * 0.25f, 1);
-                lineRect.sizeDelta = new Vector2(1, 0);
-            }
-
-            Image lineImg = lineGO.AddComponent<Image>();
-            lineImg.color = new Color(0.15f, 0.2f, 0.28f, 0.3f);
-            lineImg.raycastTarget = false;
-        }
-    }
-
     /// <summary>
-    /// 创建顶部标题栏 - 效果图风格：金属装饰边框
+    /// 创建顶部标题栏 - 简化版：只有"关卡选择"标题
     /// </summary>
     void CreateTopTitleBar(Transform parent)
     {
@@ -249,7 +263,7 @@ public class StageSelectSceneSetup : MonoBehaviour
         topRect.anchorMax = new Vector2(1, 1);
         topRect.pivot = new Vector2(0.5f, 1);
         topRect.anchoredPosition = Vector2.zero;
-        topRect.sizeDelta = new Vector2(0, 160);
+        topRect.sizeDelta = new Vector2(0, 140);
 
         // 半透明背景
         Image topBg = topBarGO.AddComponent<Image>();
@@ -258,14 +272,70 @@ public class StageSelectSceneSetup : MonoBehaviour
         // 金色底部边框线
         CreateGoldBorderLine(topBarGO.transform, false);
 
-        // 返回按钮 - 左侧
-        CreateBackButton(topBarGO.transform);
+        // 标题文字 - "关卡选择"
+        GameObject titleGO = new GameObject("Title");
+        titleGO.transform.SetParent(topBarGO.transform, false);
+        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+        titleRect.anchorMin = Vector2.zero;
+        titleRect.anchorMax = Vector2.one;
+        titleRect.offsetMin = new Vector2(20, 0);
+        titleRect.offsetMax = new Vector2(-20, -10);
 
-        // 章节标题 - 中央
-        CreateChapterTitleBanner(topBarGO.transform);
+        Text titleText = titleGO.AddComponent<Text>();
+        titleText.text = "关卡选择";
+        titleText.fontSize = 48;
+        titleText.fontStyle = FontStyle.Bold;
+        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.color = UIStyleHelper.Colors.Gold;
+        titleText.font = UIStyleHelper.GetDefaultFont();
 
-        // 设置按钮 - 右侧
-        CreateSettingsButton(topBarGO.transform);
+        // 标题描边
+        Outline titleOutline = titleGO.AddComponent<Outline>();
+        titleOutline.effectColor = new Color(0.3f, 0.2f, 0.1f);
+        titleOutline.effectDistance = new Vector2(2, -2);
+
+        // 标题阴影
+        Shadow titleShadow = titleGO.AddComponent<Shadow>();
+        titleShadow.effectColor = new Color(0, 0, 0, 0.6f);
+        titleShadow.effectDistance = new Vector2(3, -3);
+
+        // 返回主菜单按钮（右上角小按钮）
+        GameObject backBtnGO = new GameObject("BackToMenuBtn");
+        backBtnGO.transform.SetParent(topBarGO.transform, false);
+        RectTransform backRect = backBtnGO.AddComponent<RectTransform>();
+        backRect.anchorMin = new Vector2(0, 0.5f);
+        backRect.anchorMax = new Vector2(0, 0.5f);
+        backRect.anchoredPosition = new Vector2(60, -5);
+        backRect.sizeDelta = new Vector2(70, 70);
+
+        Image backBg = backBtnGO.AddComponent<Image>();
+        backBg.color = new Color(0.2f, 0.25f, 0.35f, 0.85f);
+
+        Button backBtn = backBtnGO.AddComponent<Button>();
+        backBtn.targetGraphic = backBg;
+        backBtn.onClick.AddListener(() =>
+        {
+            Debug.Log("[StageSelect] 返回主菜单");
+            if (UIFeedbackSystem.Instance != null)
+                UIFeedbackSystem.Instance.PlayButtonClick(backBtnGO.transform);
+            SceneManager.LoadScene("MainMenu");
+        });
+
+        // 返回图标
+        GameObject backIconGO = new GameObject("Icon");
+        backIconGO.transform.SetParent(backBtnGO.transform, false);
+        RectTransform backIconRect = backIconGO.AddComponent<RectTransform>();
+        backIconRect.anchorMin = Vector2.zero;
+        backIconRect.anchorMax = Vector2.one;
+        backIconRect.offsetMin = Vector2.zero;
+        backIconRect.offsetMax = Vector2.zero;
+
+        Text backIconText = backIconGO.AddComponent<Text>();
+        backIconText.text = "←";
+        backIconText.fontSize = 36;
+        backIconText.alignment = TextAnchor.MiddleCenter;
+        backIconText.color = UIStyleHelper.Colors.Gold;
+        backIconText.font = UIStyleHelper.GetDefaultFont();
     }
 
     void CreateGoldBorderLine(Transform parent, bool isTop)
@@ -307,326 +377,26 @@ public class StageSelectSceneSetup : MonoBehaviour
         glowImg.raycastTarget = false;
     }
 
-    void CreateBackButton(Transform parent)
-    {
-        GameObject btnGO = new GameObject("BackButton");
-        btnGO.transform.SetParent(parent, false);
-        RectTransform btnRect = btnGO.AddComponent<RectTransform>();
-        btnRect.anchorMin = new Vector2(0, 0.5f);
-        btnRect.anchorMax = new Vector2(0, 0.5f);
-        btnRect.anchoredPosition = new Vector2(80, -10);
-        btnRect.sizeDelta = new Vector2(100, 80);
-
-        // 按钮背景 - 半透明圆角
-        Image btnBg = btnGO.AddComponent<Image>();
-        btnBg.color = new Color(0.2f, 0.25f, 0.35f, 0.85f);
-
-        Button btn = btnGO.AddComponent<Button>();
-        btn.targetGraphic = btnBg;
-
-        ColorBlock colors = btn.colors;
-        colors.normalColor = Color.white;
-        colors.highlightedColor = new Color(1.2f, 1.1f, 1.0f);
-        colors.pressedColor = new Color(0.8f, 0.8f, 0.8f);
-        btn.colors = colors;
-
-        btn.onClick.AddListener(() =>
-        {
-            Debug.Log("[StageSelect] 返回主菜单");
-            // 播放点击反馈
-            if (UIFeedbackSystem.Instance != null)
-                UIFeedbackSystem.Instance.PlayButtonClick(btnGO.transform);
-            SceneManager.LoadScene("MainMenu");
-        });
-
-        // 返回箭头图标
-        GameObject iconGO = new GameObject("Icon");
-        iconGO.transform.SetParent(btnGO.transform, false);
-        RectTransform iconRect = iconGO.AddComponent<RectTransform>();
-        iconRect.anchorMin = Vector2.zero;
-        iconRect.anchorMax = Vector2.one;
-        iconRect.offsetMin = Vector2.zero;
-        iconRect.offsetMax = Vector2.zero;
-
-        Text iconText = iconGO.AddComponent<Text>();
-        iconText.text = "◀";
-        iconText.fontSize = 42;
-        iconText.alignment = TextAnchor.MiddleCenter;
-        iconText.color = UIStyleHelper.Colors.Gold;
-        iconText.font = UIStyleHelper.GetDefaultFont();
-
-        // 边框
-        Outline outline = iconGO.AddComponent<Outline>();
-        outline.effectColor = new Color(0.4f, 0.25f, 0.1f);
-        outline.effectDistance = new Vector2(2, -2);
-    }
-
-    void CreateChapterTitleBanner(Transform parent)
-    {
-        GameObject bannerGO = new GameObject("ChapterBanner");
-        bannerGO.transform.SetParent(parent, false);
-        RectTransform bannerRect = bannerGO.AddComponent<RectTransform>();
-        bannerRect.anchorMin = new Vector2(0.5f, 0.5f);
-        bannerRect.anchorMax = new Vector2(0.5f, 0.5f);
-        bannerRect.anchoredPosition = new Vector2(0, -10);
-        bannerRect.sizeDelta = new Vector2(500, 90);
-
-        // 横幅背景 - 木纹/皮革效果
-        Image bannerBg = bannerGO.AddComponent<Image>();
-        bannerBg.color = new Color(0.25f, 0.18f, 0.12f, 0.95f);
-
-        // 金色边框
-        GameObject borderGO = new GameObject("Border");
-        borderGO.transform.SetParent(bannerGO.transform, false);
-        RectTransform borderRect = borderGO.AddComponent<RectTransform>();
-        borderRect.anchorMin = Vector2.zero;
-        borderRect.anchorMax = Vector2.one;
-        borderRect.offsetMin = new Vector2(-4, -4);
-        borderRect.offsetMax = new Vector2(4, 4);
-
-        Image borderImg = borderGO.AddComponent<Image>();
-        borderImg.color = UIStyleHelper.Colors.GoldDark;
-        borderImg.raycastTarget = false;
-        borderGO.transform.SetAsFirstSibling();
-
-        // 内层高光
-        GameObject innerGO = new GameObject("Inner");
-        innerGO.transform.SetParent(bannerGO.transform, false);
-        RectTransform innerRect = innerGO.AddComponent<RectTransform>();
-        innerRect.anchorMin = new Vector2(0, 0.7f);
-        innerRect.anchorMax = new Vector2(1, 1);
-        innerRect.offsetMin = new Vector2(5, 0);
-        innerRect.offsetMax = new Vector2(-5, -3);
-
-        Image innerImg = innerGO.AddComponent<Image>();
-        innerImg.color = new Color(1, 1, 1, 0.08f);
-        innerImg.raycastTarget = false;
-
-        // 章节标题文字
-        GameObject titleGO = new GameObject("Title");
-        titleGO.transform.SetParent(bannerGO.transform, false);
-        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
-        titleRect.anchorMin = Vector2.zero;
-        titleRect.anchorMax = Vector2.one;
-        titleRect.offsetMin = Vector2.zero;
-        titleRect.offsetMax = Vector2.zero;
-
-        Text titleText = titleGO.AddComponent<Text>();
-        titleText.text = "第一章 · 新手村";
-        titleText.fontSize = 40;
-        titleText.fontStyle = FontStyle.Bold;
-        titleText.alignment = TextAnchor.MiddleCenter;
-        titleText.color = UIStyleHelper.Colors.Gold;
-        titleText.font = UIStyleHelper.GetDefaultFont();
-
-        // 标题描边
-        Outline titleOutline = titleGO.AddComponent<Outline>();
-        titleOutline.effectColor = new Color(0.3f, 0.2f, 0.1f);
-        titleOutline.effectDistance = new Vector2(2, -2);
-
-        // 标题阴影
-        Shadow titleShadow = titleGO.AddComponent<Shadow>();
-        titleShadow.effectColor = new Color(0, 0, 0, 0.6f);
-        titleShadow.effectDistance = new Vector2(3, -3);
-
-        // 左右装饰
-        CreateBannerDecoration(bannerGO.transform, true);
-        CreateBannerDecoration(bannerGO.transform, false);
-    }
-
-    void CreateBannerDecoration(Transform parent, bool isLeft)
-    {
-        GameObject decoGO = new GameObject(isLeft ? "LeftDeco" : "RightDeco");
-        decoGO.transform.SetParent(parent, false);
-        RectTransform decoRect = decoGO.AddComponent<RectTransform>();
-        decoRect.anchorMin = new Vector2(isLeft ? 0 : 1, 0.5f);
-        decoRect.anchorMax = new Vector2(isLeft ? 0 : 1, 0.5f);
-        decoRect.anchoredPosition = new Vector2(isLeft ? -30 : 30, 0);
-        decoRect.sizeDelta = new Vector2(40, 60);
-
-        Text decoText = decoGO.AddComponent<Text>();
-        decoText.text = isLeft ? "◆" : "◆";
-        decoText.fontSize = 30;
-        decoText.alignment = TextAnchor.MiddleCenter;
-        decoText.color = UIStyleHelper.Colors.Gold;
-        decoText.font = UIStyleHelper.GetDefaultFont();
-    }
-
-    void CreateSettingsButton(Transform parent)
-    {
-        GameObject btnGO = new GameObject("SettingsButton");
-        btnGO.transform.SetParent(parent, false);
-        RectTransform btnRect = btnGO.AddComponent<RectTransform>();
-        btnRect.anchorMin = new Vector2(1, 0.5f);
-        btnRect.anchorMax = new Vector2(1, 0.5f);
-        btnRect.anchoredPosition = new Vector2(-80, -10);
-        btnRect.sizeDelta = new Vector2(80, 80);
-
-        Image btnBg = btnGO.AddComponent<Image>();
-        btnBg.color = new Color(0.2f, 0.25f, 0.35f, 0.85f);
-
-        Button btn = btnGO.AddComponent<Button>();
-        btn.targetGraphic = btnBg;
-        btn.onClick.AddListener(() =>
-        {
-            if (SettingsPanel.Instance != null)
-                SettingsPanel.Instance.Show();
-        });
-
-        // 齿轮图标
-        GameObject iconGO = new GameObject("Icon");
-        iconGO.transform.SetParent(btnGO.transform, false);
-        RectTransform iconRect = iconGO.AddComponent<RectTransform>();
-        iconRect.anchorMin = Vector2.zero;
-        iconRect.anchorMax = Vector2.one;
-        iconRect.offsetMin = Vector2.zero;
-        iconRect.offsetMax = Vector2.zero;
-
-        Text iconText = iconGO.AddComponent<Text>();
-        iconText.text = "⚙";
-        iconText.fontSize = 38;
-        iconText.alignment = TextAnchor.MiddleCenter;
-        iconText.color = Color.white;
-        iconText.font = UIStyleHelper.GetDefaultFont();
-    }
-
     /// <summary>
-    /// 创建章节标签页
+    /// 创建关卡卡片列表区域
     /// </summary>
-    void CreateChapterTabs(Transform parent)
-    {
-        // Notion UI_003规范: 章节标签区域
-        // anchorMin:[0.05, 0.82], anchorMax:[0.95, 0.88]
-        GameObject tabsGO = new GameObject("ChapterTabs");
-        tabsGO.transform.SetParent(parent, false);
-        RectTransform tabsRect = tabsGO.AddComponent<RectTransform>();
-        tabsRect.anchorMin = new Vector2(0.05f, 0.855f);
-        tabsRect.anchorMax = new Vector2(0.95f, 0.905f);
-        tabsRect.offsetMin = Vector2.zero;
-        tabsRect.offsetMax = Vector2.zero;
-
-        // 标签背景 - 半透明深色
-        Image tabsBg = tabsGO.AddComponent<Image>();
-        tabsBg.color = new Color(0.08f, 0.1f, 0.15f, 0.85f);
-
-        // 水平布局 - Notion规范: spacing=16px, padding=8px
-        HorizontalLayoutGroup hlg = tabsGO.AddComponent<HorizontalLayoutGroup>();
-        hlg.childAlignment = TextAnchor.MiddleCenter;
-        hlg.spacing = 16;
-        hlg.padding = new RectOffset(16, 16, 8, 8);
-        hlg.childForceExpandWidth = true;
-        hlg.childForceExpandHeight = true;
-
-        // 创建4个章节标签
-        string[] chapters = { "第一章", "第二章", "第三章", "第四章" };
-        int[] chapterFirstStage = { 1, 11, 21, 31 }; // 每章第一关的关卡ID
-
-        // 从SaveSystem获取最高解锁关卡
-        int highestUnlockedStage = MoShou.Systems.SaveSystem.Instance != null
-            ? MoShou.Systems.SaveSystem.Instance.GetHighestUnlockedStage()
-            : 1;
-
-        // 动态计算章节解锁状态
-        bool[] unlocked = new bool[chapters.Length];
-        for (int i = 0; i < chapters.Length; i++)
-        {
-            // 章节解锁条件：最高解锁关卡 >= 该章节第一关
-            unlocked[i] = highestUnlockedStage >= chapterFirstStage[i];
-        }
-
-        Debug.Log($"[StageSelectSetup] 最高解锁关卡: {highestUnlockedStage}, 章节解锁: [{string.Join(", ", unlocked)}]");
-
-        for (int i = 0; i < chapters.Length; i++)
-        {
-            CreateChapterTab(tabsGO.transform, chapters[i], i + 1, i == 0, unlocked[i]);
-        }
-    }
-
-    void CreateChapterTab(Transform parent, string name, int chapter, bool isSelected, bool isUnlocked)
-    {
-        GameObject tabGO = new GameObject($"Tab_{chapter}");
-        tabGO.transform.SetParent(parent, false);
-
-        Image tabBg = tabGO.AddComponent<Image>();
-        if (isSelected)
-            tabBg.color = new Color(0.8f, 0.6f, 0.2f, 0.9f);
-        else if (isUnlocked)
-            tabBg.color = new Color(0.2f, 0.25f, 0.35f, 0.8f);
-        else
-            tabBg.color = new Color(0.15f, 0.15f, 0.2f, 0.6f);
-
-        Button tabBtn = tabGO.AddComponent<Button>();
-        tabBtn.targetGraphic = tabBg;
-        tabBtn.interactable = isUnlocked;
-
-        int chapterNum = chapter;
-        tabBtn.onClick.AddListener(() =>
-        {
-            Debug.Log($"[StageSelect] 切换到章节 {chapterNum}");
-            // TODO: 切换章节逻辑
-        });
-
-        // 标签文字
-        GameObject textGO = new GameObject("Text");
-        textGO.transform.SetParent(tabGO.transform, false);
-        RectTransform textRect = textGO.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = Vector2.zero;
-        textRect.offsetMax = Vector2.zero;
-
-        Text tabText = textGO.AddComponent<Text>();
-        tabText.text = name;
-        tabText.fontSize = 26;
-        tabText.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
-        tabText.alignment = TextAnchor.MiddleCenter;
-        tabText.color = isUnlocked ? Color.white : new Color(0.5f, 0.5f, 0.5f);
-        tabText.font = UIStyleHelper.GetDefaultFont();
-
-        if (isSelected)
-        {
-            Outline outline = textGO.AddComponent<Outline>();
-            outline.effectColor = new Color(0.4f, 0.25f, 0.1f);
-            outline.effectDistance = new Vector2(1, -1);
-        }
-
-        // 锁定图标
-        if (!isUnlocked)
-        {
-            GameObject lockGO = new GameObject("Lock");
-            lockGO.transform.SetParent(tabGO.transform, false);
-            RectTransform lockRect = lockGO.AddComponent<RectTransform>();
-            lockRect.anchorMin = new Vector2(1, 1);
-            lockRect.anchorMax = new Vector2(1, 1);
-            lockRect.anchoredPosition = new Vector2(-5, -5);
-            lockRect.sizeDelta = new Vector2(25, 25);
-
-            Text lockText = lockGO.AddComponent<Text>();
-            lockText.text = "🔒";
-            lockText.fontSize = 18;
-            lockText.alignment = TextAnchor.MiddleCenter;
-            lockText.font = UIStyleHelper.GetDefaultFont();
-        }
-    }
-
-    /// <summary>
-    /// 创建地图路径区域 - 效果图风格：节点连线布局
-    /// </summary>
-    void CreateMapPathArea(Transform parent)
+    void CreateStageListArea(Transform parent)
     {
         // 滚动区域
-        GameObject scrollGO = new GameObject("MapScrollView");
+        GameObject scrollGO = new GameObject("StageListScrollView");
         scrollGO.transform.SetParent(parent, false);
-        RectTransform scrollRect = scrollGO.AddComponent<RectTransform>();
-        scrollRect.anchorMin = new Vector2(0, 0);
-        scrollRect.anchorMax = new Vector2(1, 1);
-        scrollRect.offsetMin = new Vector2(30, 160);
-        scrollRect.offsetMax = new Vector2(-30, -300);
+        RectTransform scrollRectT = scrollGO.AddComponent<RectTransform>();
+        scrollRectT.anchorMin = new Vector2(0, 0);
+        scrollRectT.anchorMax = new Vector2(1, 1);
+        scrollRectT.offsetMin = new Vector2(0, 155);   // 底部信息栏上方
+        scrollRectT.offsetMax = new Vector2(0, -145);   // 顶部标题栏下方
 
         ScrollRect scroll = scrollGO.AddComponent<ScrollRect>();
         scroll.horizontal = false;
         scroll.vertical = true;
-        scroll.scrollSensitivity = 30f;
+        scroll.scrollSensitivity = 40f;
+        scroll.movementType = ScrollRect.MovementType.Elastic;
+        scroll.elasticity = 0.1f;
 
         // 视口
         GameObject viewportGO = new GameObject("Viewport");
@@ -644,366 +414,442 @@ public class StageSelectSceneSetup : MonoBehaviour
 
         scroll.viewport = viewportRect;
 
-        // 内容容器
+        // 内容容器 - 使用VerticalLayoutGroup
         GameObject contentGO = new GameObject("Content");
         contentGO.transform.SetParent(viewportGO.transform, false);
         RectTransform contentRect = contentGO.AddComponent<RectTransform>();
-        contentRect.anchorMin = new Vector2(0.5f, 1);
-        contentRect.anchorMax = new Vector2(0.5f, 1);
+        contentRect.anchorMin = new Vector2(0, 1);
+        contentRect.anchorMax = new Vector2(1, 1);
         contentRect.pivot = new Vector2(0.5f, 1);
         contentRect.anchoredPosition = Vector2.zero;
-        contentRect.sizeDelta = new Vector2(1000, 1600);
+
+        VerticalLayoutGroup vlg = contentGO.AddComponent<VerticalLayoutGroup>();
+        vlg.childAlignment = TextAnchor.UpperCenter;
+        vlg.spacing = 12;
+        vlg.padding = new RectOffset(20, 20, 20, 40);
+        vlg.childForceExpandWidth = false;
+        vlg.childForceExpandHeight = false;
+        vlg.childControlWidth = false;
+        vlg.childControlHeight = false;
+
+        ContentSizeFitter csf = contentGO.AddComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         scroll.content = contentRect;
 
         // 获取存档数据
-        int clearedCount = 3;
-        int highestUnlocked = 4;
+        int highestUnlocked = 1;
         if (SaveSystem.Instance != null)
         {
             highestUnlocked = SaveSystem.Instance.GetHighestUnlockedStage();
-            clearedCount = highestUnlocked - 1;
         }
 
-        // 创建路径连接线
-        CreatePathLines(contentGO.transform, 12);
+        // 总关卡数
+        int totalStages = 100;
 
-        // 创建关卡节点 - Z字形布局
-        CreateStageNodes(contentGO.transform, 12, clearedCount, highestUnlocked);
-    }
-
-    void CreatePathLines(Transform parent, int nodeCount)
-    {
-        // 创建节点之间的连线
-        GameObject linesGO = new GameObject("PathLines");
-        linesGO.transform.SetParent(parent, false);
-        RectTransform linesRect = linesGO.AddComponent<RectTransform>();
-        linesRect.anchorMin = Vector2.zero;
-        linesRect.anchorMax = Vector2.one;
-        linesRect.offsetMin = Vector2.zero;
-        linesRect.offsetMax = Vector2.zero;
-
-        // 使用简化的垂直路径
-        float startY = -100;
-        float spacing = 120;
-
-        for (int i = 0; i < nodeCount - 1; i++)
+        // 创建100个关卡卡片
+        for (int i = 1; i <= totalStages; i++)
         {
-            float y1 = startY - i * spacing;
-            float y2 = startY - (i + 1) * spacing;
+            bool isCleared = false;
+            if (SaveSystem.Instance != null)
+            {
+                isCleared = SaveSystem.Instance.IsStageCleared(i);
+            }
+            else
+            {
+                isCleared = i < highestUnlocked;
+            }
+            bool isUnlocked = i <= highestUnlocked;
+            bool isCurrent = i == highestUnlocked;
 
-            // Z字形偏移
-            float x1 = (i % 2 == 0) ? -100 : 100;
-            float x2 = ((i + 1) % 2 == 0) ? -100 : 100;
-
-            // 垂直线段
-            CreateLineBetween(linesGO.transform, new Vector2(x1, y1), new Vector2(x2, y2), i);
+            StageConfigEntry config = GetStageConfig(i);
+            CreateStageCard(contentGO.transform, i, config, isCleared, isUnlocked, isCurrent);
         }
+
+        // 自动滚动到当前关卡
+        StartCoroutine(ScrollToCurrentStage(scroll, contentRect, highestUnlocked, totalStages));
     }
 
-    void CreateLineBetween(Transform parent, Vector2 start, Vector2 end, int index)
-    {
-        GameObject lineGO = new GameObject($"Line_{index}");
-        lineGO.transform.SetParent(parent, false);
-        RectTransform lineRect = lineGO.AddComponent<RectTransform>();
-
-        Vector2 center = (start + end) / 2;
-        float distance = Vector2.Distance(start, end);
-        float angle = Mathf.Atan2(end.y - start.y, end.x - start.x) * Mathf.Rad2Deg;
-
-        lineRect.anchorMin = new Vector2(0.5f, 1);
-        lineRect.anchorMax = new Vector2(0.5f, 1);
-        lineRect.anchoredPosition = center;
-        lineRect.sizeDelta = new Vector2(distance, 8);
-        lineRect.localRotation = Quaternion.Euler(0, 0, angle);
-
-        Image lineImg = lineGO.AddComponent<Image>();
-        lineImg.color = new Color(0.5f, 0.4f, 0.25f, 0.6f);
-        lineImg.raycastTarget = false;
-
-        // 发光效果
-        GameObject glowGO = new GameObject("Glow");
-        glowGO.transform.SetParent(lineGO.transform, false);
-        RectTransform glowRect = glowGO.AddComponent<RectTransform>();
-        glowRect.anchorMin = Vector2.zero;
-        glowRect.anchorMax = Vector2.one;
-        glowRect.offsetMin = new Vector2(0, -4);
-        glowRect.offsetMax = new Vector2(0, 4);
-
-        Image glowImg = glowGO.AddComponent<Image>();
-        glowImg.color = new Color(0.8f, 0.6f, 0.3f, 0.15f);
-        glowImg.raycastTarget = false;
-    }
-
-    void CreateStageNodes(Transform parent, int nodeCount, int clearedCount, int highestUnlocked)
-    {
-        float startY = -100;
-        float spacing = 120;
-
-        for (int i = 0; i < nodeCount; i++)
-        {
-            int stageNum = i + 1;
-            bool isCleared = stageNum <= clearedCount;
-            bool isUnlocked = stageNum <= highestUnlocked;
-            bool isCurrent = stageNum == highestUnlocked;
-
-            // Z字形布局
-            float xOffset = (i % 2 == 0) ? -100 : 100;
-            float yPos = startY - i * spacing;
-
-            CreateStageNode(parent, stageNum, xOffset, yPos, isCleared, isUnlocked, isCurrent);
-        }
-    }
-
-    void CreateStageNode(Transform parent, int stageNum, float xPos, float yPos,
+    /// <summary>
+    /// 创建单个关卡卡片
+    /// </summary>
+    void CreateStageCard(Transform parent, int stageNum, StageConfigEntry config,
         bool isCleared, bool isUnlocked, bool isCurrent)
     {
-        GameObject nodeGO = new GameObject($"Stage_{stageNum}");
-        nodeGO.transform.SetParent(parent, false);
-        RectTransform nodeRect = nodeGO.AddComponent<RectTransform>();
-        nodeRect.anchorMin = new Vector2(0.5f, 1);
-        nodeRect.anchorMax = new Vector2(0.5f, 1);
-        nodeRect.anchoredPosition = new Vector2(xPos, yPos);
-        nodeRect.sizeDelta = new Vector2(160, 160);
+        GameObject cardGO = new GameObject($"StageCard_{stageNum}");
+        cardGO.transform.SetParent(parent, false);
+        RectTransform cardRect = cardGO.AddComponent<RectTransform>();
+        cardRect.sizeDelta = new Vector2(920, 140);
 
-        // 节点背景 - 圆形/六边形效果
-        Image nodeBg = nodeGO.AddComponent<Image>();
+        // 卡片背景
+        Image cardBg = cardGO.AddComponent<Image>();
         if (isCleared)
-            nodeBg.color = new Color(0.2f, 0.5f, 0.3f, 0.95f); // 绿色已通关
+            cardBg.color = new Color(0.25f, 0.18f, 0.12f, 0.9f); // 深棕色已通关
         else if (isUnlocked)
-            nodeBg.color = new Color(0.3f, 0.35f, 0.5f, 0.95f); // 蓝色可进入
+            cardBg.color = new Color(0.2f, 0.17f, 0.12f, 0.95f); // 稍亮棕色可进入
         else
-            nodeBg.color = new Color(0.2f, 0.2f, 0.25f, 0.8f); // 灰色锁定
+            cardBg.color = new Color(0.15f, 0.15f, 0.18f, 0.7f); // 暗灰锁定
 
-        Button nodeBtn = nodeGO.AddComponent<Button>();
-        nodeBtn.targetGraphic = nodeBg;
-        nodeBtn.interactable = isUnlocked;
+        // 按钮组件
+        Button cardBtn = cardGO.AddComponent<Button>();
+        cardBtn.targetGraphic = cardBg;
+        cardBtn.interactable = isUnlocked;
 
-        ColorBlock colors = nodeBtn.colors;
+        ColorBlock colors = cardBtn.colors;
         colors.normalColor = Color.white;
-        colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
+        colors.highlightedColor = new Color(1.1f, 1.1f, 1.05f);
         colors.pressedColor = new Color(0.85f, 0.85f, 0.85f);
-        colors.disabledColor = new Color(0.6f, 0.6f, 0.6f);
-        nodeBtn.colors = colors;
+        colors.disabledColor = new Color(0.7f, 0.7f, 0.7f);
+        cardBtn.colors = colors;
 
         int level = stageNum;
-        nodeBtn.onClick.AddListener(() =>
+        cardBtn.onClick.AddListener(() =>
         {
             Debug.Log($"[StageSelect] 选择关卡 {level}");
-            ShowStageConfirm(level);
+            ShowStageConfirm(level, config);
         });
 
-        // 边框
-        CreateNodeBorder(nodeGO.transform, isCleared, isUnlocked, isCurrent);
-
-        // 关卡图标/数字
-        CreateNodeIcon(nodeGO.transform, stageNum, isUnlocked);
-
-        // 关卡名称
-        CreateNodeName(nodeGO.transform, stageNum, isUnlocked);
-
-        // 星星评级
-        if (isCleared)
-        {
-            int starCount = SaveSystem.Instance != null
-                ? SaveSystem.Instance.GetStageStars(stageNum)
-                : 1;
-            if (starCount < 1) starCount = 1; // 已通关至少1星
-            CreateNodeStars(nodeGO.transform, starCount);
-        }
-
-        // 锁定图标
-        if (!isUnlocked)
-        {
-            CreateLockIcon(nodeGO.transform);
-        }
-
-        // 当前关卡指示器
+        // 金色边框（当前关卡高亮）
         if (isCurrent)
         {
-            CreateCurrentIndicator(nodeGO.transform);
+            GameObject borderGO = new GameObject("GoldBorder");
+            borderGO.transform.SetParent(cardGO.transform, false);
+            RectTransform borderRect = borderGO.AddComponent<RectTransform>();
+            borderRect.anchorMin = Vector2.zero;
+            borderRect.anchorMax = Vector2.one;
+            borderRect.offsetMin = new Vector2(-3, -3);
+            borderRect.offsetMax = new Vector2(3, 3);
+
+            Image borderImg = borderGO.AddComponent<Image>();
+            borderImg.color = new Color(1f, 0.8f, 0.2f, 0.9f);
+            borderImg.raycastTarget = false;
+            borderGO.transform.SetAsFirstSibling();
+
+            // 内层发光
+            GameObject glowGO = new GameObject("Glow");
+            glowGO.transform.SetParent(cardGO.transform, false);
+            RectTransform glowRect = glowGO.AddComponent<RectTransform>();
+            glowRect.anchorMin = Vector2.zero;
+            glowRect.anchorMax = Vector2.one;
+            glowRect.offsetMin = new Vector2(-8, -8);
+            glowRect.offsetMax = new Vector2(8, 8);
+
+            Image glowImg = glowGO.AddComponent<Image>();
+            glowImg.color = new Color(1f, 0.8f, 0.3f, 0.15f);
+            glowImg.raycastTarget = false;
+            glowGO.transform.SetAsFirstSibling();
         }
-    }
-
-    void CreateNodeBorder(Transform parent, bool isCleared, bool isUnlocked, bool isCurrent)
-    {
-        GameObject borderGO = new GameObject("Border");
-        borderGO.transform.SetParent(parent, false);
-        RectTransform borderRect = borderGO.AddComponent<RectTransform>();
-        borderRect.anchorMin = Vector2.zero;
-        borderRect.anchorMax = Vector2.one;
-        borderRect.offsetMin = new Vector2(-5, -5);
-        borderRect.offsetMax = new Vector2(5, 5);
-
-        Image borderImg = borderGO.AddComponent<Image>();
-        borderImg.raycastTarget = false;
-
-        if (isCurrent)
-            borderImg.color = new Color(1f, 0.8f, 0.2f, 1f); // 金色当前
         else if (isCleared)
-            borderImg.color = new Color(0.4f, 0.7f, 0.4f, 0.8f); // 绿色通关
-        else if (isUnlocked)
-            borderImg.color = new Color(0.5f, 0.6f, 0.8f, 0.6f); // 蓝色解锁
-        else
-            borderImg.color = new Color(0.3f, 0.3f, 0.35f, 0.5f); // 灰色锁定
+        {
+            // 通关卡片 - 细边框
+            GameObject borderGO = new GameObject("Border");
+            borderGO.transform.SetParent(cardGO.transform, false);
+            RectTransform borderRect = borderGO.AddComponent<RectTransform>();
+            borderRect.anchorMin = Vector2.zero;
+            borderRect.anchorMax = Vector2.one;
+            borderRect.offsetMin = new Vector2(-2, -2);
+            borderRect.offsetMax = new Vector2(2, 2);
 
-        borderGO.transform.SetAsFirstSibling();
-    }
+            Image borderImg = borderGO.AddComponent<Image>();
+            borderImg.color = new Color(0.5f, 0.4f, 0.25f, 0.6f);
+            borderImg.raycastTarget = false;
+            borderGO.transform.SetAsFirstSibling();
+        }
 
-    void CreateNodeIcon(Transform parent, int stageNum, bool isUnlocked)
-    {
-        GameObject iconGO = new GameObject("Icon");
-        iconGO.transform.SetParent(parent, false);
-        RectTransform iconRect = iconGO.AddComponent<RectTransform>();
-        iconRect.anchorMin = new Vector2(0.5f, 0.55f);
-        iconRect.anchorMax = new Vector2(0.5f, 0.55f);
-        iconRect.sizeDelta = new Vector2(80, 70);
-
-        Text iconText = iconGO.AddComponent<Text>();
-        iconText.text = stageNum.ToString();
-        iconText.fontSize = 48;
-        iconText.fontStyle = FontStyle.Bold;
-        iconText.alignment = TextAnchor.MiddleCenter;
-        iconText.color = isUnlocked ? UIStyleHelper.Colors.Gold : new Color(0.4f, 0.4f, 0.4f);
-        iconText.font = UIStyleHelper.GetDefaultFont();
-
+        // 卡片内容
         if (isUnlocked)
         {
-            Outline outline = iconGO.AddComponent<Outline>();
-            outline.effectColor = new Color(0.3f, 0.2f, 0.1f);
-            outline.effectDistance = new Vector2(2, -2);
+            CreateCardContent(cardGO.transform, stageNum, config, isCleared, isCurrent);
+        }
+        else
+        {
+            CreateLockedCardContent(cardGO.transform, stageNum, config);
+        }
 
-            Shadow shadow = iconGO.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0, 0, 0, 0.5f);
-            shadow.effectDistance = new Vector2(3, -3);
+        // 难度标签（右上角）
+        if (isUnlocked)
+        {
+            CreateDifficultyBadge(cardGO.transform, config.difficulty);
+        }
+
+        // "GO!" 标记（当前关卡）
+        if (isCurrent)
+        {
+            CreateCurrentBadge(cardGO.transform);
         }
     }
 
-    void CreateNodeName(Transform parent, int stageNum, bool isUnlocked)
+    /// <summary>
+    /// 创建解锁关卡的卡片内容
+    /// </summary>
+    void CreateCardContent(Transform parent, int stageNum, StageConfigEntry config,
+        bool isCleared, bool isCurrent)
     {
-        GameObject nameGO = new GameObject("Name");
+        // 第1行: "关卡 N: 名称"
+        GameObject nameGO = new GameObject("StageName");
         nameGO.transform.SetParent(parent, false);
         RectTransform nameRect = nameGO.AddComponent<RectTransform>();
-        nameRect.anchorMin = new Vector2(0, 0.15f);
-        nameRect.anchorMax = new Vector2(1, 0.35f);
-        nameRect.offsetMin = new Vector2(5, 0);
-        nameRect.offsetMax = new Vector2(-5, 0);
+        nameRect.anchorMin = new Vector2(0, 0.58f);
+        nameRect.anchorMax = new Vector2(0.8f, 0.95f);
+        nameRect.offsetMin = new Vector2(24, 0);
+        nameRect.offsetMax = new Vector2(-10, 0);
 
         Text nameText = nameGO.AddComponent<Text>();
-        nameText.text = $"关卡 1-{stageNum}";
-        nameText.fontSize = 20;
+        string displayName = !string.IsNullOrEmpty(config.name) ? config.name : $"关卡{stageNum}";
+        nameText.text = $"关卡 {stageNum}: {displayName}";
+        nameText.fontSize = 30;
         nameText.fontStyle = FontStyle.Bold;
-        nameText.alignment = TextAnchor.MiddleCenter;
-        nameText.color = isUnlocked ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+        nameText.alignment = TextAnchor.MiddleLeft;
+        nameText.color = isCurrent ? UIStyleHelper.Colors.Gold : new Color(0.95f, 0.9f, 0.8f);
         nameText.font = UIStyleHelper.GetDefaultFont();
 
-        if (isUnlocked)
+        Outline nameOutline = nameGO.AddComponent<Outline>();
+        nameOutline.effectColor = new Color(0, 0, 0, 0.5f);
+        nameOutline.effectDistance = new Vector2(1, -1);
+
+        // 第2行: 星级
+        int starCount = 0;
+        if (isCleared)
         {
-            Outline outline = nameGO.AddComponent<Outline>();
-            outline.effectColor = new Color(0, 0, 0, 0.6f);
-            outline.effectDistance = new Vector2(1, -1);
+            starCount = SaveSystem.Instance != null
+                ? SaveSystem.Instance.GetStageStars(stageNum)
+                : 1;
+            if (starCount < 1) starCount = 1;
         }
+
+        GameObject starsGO = new GameObject("Stars");
+        starsGO.transform.SetParent(parent, false);
+        RectTransform starsRect = starsGO.AddComponent<RectTransform>();
+        starsRect.anchorMin = new Vector2(0, 0.28f);
+        starsRect.anchorMax = new Vector2(0.5f, 0.58f);
+        starsRect.offsetMin = new Vector2(24, 0);
+        starsRect.offsetMax = new Vector2(0, 0);
+
+        Text starsText = starsGO.AddComponent<Text>();
+        string stars = "";
+        for (int i = 0; i < 5; i++)
+        {
+            stars += i < starCount ? "★" : "☆";
+        }
+        starsText.text = stars;
+        starsText.fontSize = 26;
+        starsText.alignment = TextAnchor.MiddleLeft;
+        starsText.color = isCleared ? new Color(1f, 0.85f, 0.3f) : new Color(0.4f, 0.4f, 0.4f);
+        starsText.font = UIStyleHelper.GetDefaultFont();
+
+        // 第3行: 推荐等级 + 波次
+        GameObject infoGO = new GameObject("StageInfo");
+        infoGO.transform.SetParent(parent, false);
+        RectTransform infoRect = infoGO.AddComponent<RectTransform>();
+        infoRect.anchorMin = new Vector2(0, 0.05f);
+        infoRect.anchorMax = new Vector2(0.8f, 0.32f);
+        infoRect.offsetMin = new Vector2(24, 0);
+        infoRect.offsetMax = new Vector2(0, 0);
+
+        Text infoText = infoGO.AddComponent<Text>();
+        infoText.text = $"推荐等级: {config.recommendedLevel}    波次: {config.waveCount}";
+        infoText.fontSize = 22;
+        infoText.alignment = TextAnchor.MiddleLeft;
+        infoText.color = new Color(0.65f, 0.6f, 0.55f);
+        infoText.font = UIStyleHelper.GetDefaultFont();
     }
 
-    void CreateNodeStars(Transform parent, int starCount)
+    /// <summary>
+    /// 创建锁定关卡的卡片内容
+    /// </summary>
+    void CreateLockedCardContent(Transform parent, int stageNum, StageConfigEntry config)
     {
-        GameObject starsGO = UIStyleHelper.CreateStarRating(parent, "Stars", starCount, 3,
-            new Vector2(24, 24));
+        // 关卡名（灰色）
+        GameObject nameGO = new GameObject("StageName");
+        nameGO.transform.SetParent(parent, false);
+        RectTransform nameRect = nameGO.AddComponent<RectTransform>();
+        nameRect.anchorMin = new Vector2(0, 0.45f);
+        nameRect.anchorMax = new Vector2(0.75f, 0.95f);
+        nameRect.offsetMin = new Vector2(24, 0);
+        nameRect.offsetMax = new Vector2(-10, 0);
 
-        RectTransform starsRect = starsGO.GetComponent<RectTransform>();
-        starsRect.anchorMin = new Vector2(0.5f, 0);
-        starsRect.anchorMax = new Vector2(0.5f, 0);
-        starsRect.anchoredPosition = new Vector2(0, 25);
-        starsRect.sizeDelta = new Vector2(90, 30);
-    }
+        Text nameText = nameGO.AddComponent<Text>();
+        string displayName = !string.IsNullOrEmpty(config.name) ? config.name : $"关卡{stageNum}";
+        nameText.text = $"关卡 {stageNum}: {displayName}";
+        nameText.fontSize = 28;
+        nameText.fontStyle = FontStyle.Bold;
+        nameText.alignment = TextAnchor.MiddleLeft;
+        nameText.color = new Color(0.45f, 0.45f, 0.48f);
+        nameText.font = UIStyleHelper.GetDefaultFont();
 
-    void CreateLockIcon(Transform parent)
-    {
+        // 锁定图标
         GameObject lockGO = new GameObject("LockIcon");
         lockGO.transform.SetParent(parent, false);
         RectTransform lockRect = lockGO.AddComponent<RectTransform>();
-        lockRect.anchorMin = new Vector2(0.5f, 0.5f);
-        lockRect.anchorMax = new Vector2(0.5f, 0.5f);
-        lockRect.sizeDelta = new Vector2(60, 60);
+        lockRect.anchorMin = new Vector2(1, 0.5f);
+        lockRect.anchorMax = new Vector2(1, 0.5f);
+        lockRect.anchoredPosition = new Vector2(-60, 0);
+        lockRect.sizeDelta = new Vector2(50, 50);
 
-        // 半透明遮罩
-        Image lockBg = lockGO.AddComponent<Image>();
-        lockBg.color = new Color(0, 0, 0, 0.5f);
-        lockBg.raycastTarget = false;
+        Text lockText = lockGO.AddComponent<Text>();
+        lockText.text = "🔒";
+        lockText.fontSize = 34;
+        lockText.alignment = TextAnchor.MiddleCenter;
+        lockText.font = UIStyleHelper.GetDefaultFont();
 
-        // 锁图标
-        GameObject iconGO = new GameObject("Icon");
-        iconGO.transform.SetParent(lockGO.transform, false);
-        RectTransform iconRect = iconGO.AddComponent<RectTransform>();
-        iconRect.anchorMin = Vector2.zero;
-        iconRect.anchorMax = Vector2.one;
-        iconRect.offsetMin = Vector2.zero;
-        iconRect.offsetMax = Vector2.zero;
+        // 推荐等级（灰色）
+        GameObject infoGO = new GameObject("StageInfo");
+        infoGO.transform.SetParent(parent, false);
+        RectTransform infoRect = infoGO.AddComponent<RectTransform>();
+        infoRect.anchorMin = new Vector2(0, 0.05f);
+        infoRect.anchorMax = new Vector2(0.7f, 0.45f);
+        infoRect.offsetMin = new Vector2(24, 0);
+        infoRect.offsetMax = new Vector2(0, 0);
 
-        Text iconText = iconGO.AddComponent<Text>();
-        iconText.text = "🔒";
-        iconText.fontSize = 36;
-        iconText.alignment = TextAnchor.MiddleCenter;
-        iconText.font = UIStyleHelper.GetDefaultFont();
+        Text infoText = infoGO.AddComponent<Text>();
+        infoText.text = $"推荐等级: {config.recommendedLevel}    波次: {config.waveCount}";
+        infoText.fontSize = 20;
+        infoText.alignment = TextAnchor.MiddleLeft;
+        infoText.color = new Color(0.4f, 0.4f, 0.42f);
+        infoText.font = UIStyleHelper.GetDefaultFont();
     }
 
-    void CreateCurrentIndicator(Transform parent)
+    /// <summary>
+    /// 创建"GO!"标记（当前关卡）
+    /// </summary>
+    void CreateCurrentBadge(Transform parent)
     {
-        // 当前关卡闪烁指示器
-        GameObject indicatorGO = new GameObject("CurrentIndicator");
-        indicatorGO.transform.SetParent(parent, false);
-        RectTransform indRect = indicatorGO.AddComponent<RectTransform>();
-        indRect.anchorMin = new Vector2(0.5f, 1);
-        indRect.anchorMax = new Vector2(0.5f, 1);
-        indRect.anchoredPosition = new Vector2(0, 20);
-        indRect.sizeDelta = new Vector2(80, 30);
+        GameObject badgeGO = new GameObject("CurrentBadge");
+        badgeGO.transform.SetParent(parent, false);
+        RectTransform badgeRect = badgeGO.AddComponent<RectTransform>();
+        badgeRect.anchorMin = new Vector2(1, 0.5f);
+        badgeRect.anchorMax = new Vector2(1, 0.5f);
+        badgeRect.anchoredPosition = new Vector2(-60, 0);
+        badgeRect.sizeDelta = new Vector2(80, 50);
 
-        Image indBg = indicatorGO.AddComponent<Image>();
-        indBg.color = new Color(1f, 0.8f, 0.2f, 0.9f);
-        indBg.raycastTarget = false;
+        Image badgeBg = badgeGO.AddComponent<Image>();
+        badgeBg.color = new Color(1f, 0.75f, 0.15f, 1f);
+        badgeBg.raycastTarget = false;
 
-        Text indText = indicatorGO.AddComponent<Text>();
-        if (indText == null)
+        // GO! 文字
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(badgeGO.transform, false);
+        RectTransform textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+
+        Text goText = textGO.AddComponent<Text>();
+        goText.text = "GO!";
+        goText.fontSize = 26;
+        goText.fontStyle = FontStyle.Bold;
+        goText.alignment = TextAnchor.MiddleCenter;
+        goText.color = new Color(0.25f, 0.15f, 0.05f);
+        goText.font = UIStyleHelper.GetDefaultFont();
+
+        Outline outline = textGO.AddComponent<Outline>();
+        outline.effectColor = new Color(1, 1, 1, 0.3f);
+        outline.effectDistance = new Vector2(1, -1);
+    }
+
+    /// <summary>
+    /// 创建难度标签（右上角）
+    /// </summary>
+    void CreateDifficultyBadge(Transform parent, int difficulty)
+    {
+        GameObject badgeGO = new GameObject("DifficultyBadge");
+        badgeGO.transform.SetParent(parent, false);
+        RectTransform badgeRect = badgeGO.AddComponent<RectTransform>();
+        badgeRect.anchorMin = new Vector2(1, 1);
+        badgeRect.anchorMax = new Vector2(1, 1);
+        badgeRect.anchoredPosition = new Vector2(-16, -8);
+        badgeRect.pivot = new Vector2(1, 1);
+        badgeRect.sizeDelta = new Vector2(70, 28);
+
+        Image badgeBg = badgeGO.AddComponent<Image>();
+        // 颜色根据难度
+        switch (difficulty)
         {
-            GameObject textGO = new GameObject("Text");
-            textGO.transform.SetParent(indicatorGO.transform, false);
-            RectTransform textRect = textGO.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
-
-            Text text = textGO.AddComponent<Text>();
-            text.text = "NEW!";
-            text.fontSize = 18;
-            text.fontStyle = FontStyle.Bold;
-            text.alignment = TextAnchor.MiddleCenter;
-            text.color = new Color(0.3f, 0.2f, 0.1f);
-            text.font = UIStyleHelper.GetDefaultFont();
+            case 1: badgeBg.color = new Color(0.3f, 0.6f, 0.3f, 0.9f); break; // 绿
+            case 2: badgeBg.color = new Color(0.3f, 0.5f, 0.7f, 0.9f); break; // 蓝
+            case 3: badgeBg.color = new Color(0.7f, 0.5f, 0.2f, 0.9f); break; // 橙
+            case 4: badgeBg.color = new Color(0.7f, 0.25f, 0.25f, 0.9f); break; // 红
+            case 5: badgeBg.color = new Color(0.6f, 0.2f, 0.6f, 0.9f); break; // 紫
+            default: badgeBg.color = new Color(0.4f, 0.4f, 0.4f, 0.9f); break;
         }
+        badgeBg.raycastTarget = false;
+
+        // 难度文字
+        string[] diffNames = { "", "简单", "普通", "困难", "噩梦", "地狱" };
+        string diffName = difficulty >= 1 && difficulty <= 5 ? diffNames[difficulty] : "???";
+
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(badgeGO.transform, false);
+        RectTransform textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+
+        Text diffText = textGO.AddComponent<Text>();
+        diffText.text = diffName;
+        diffText.fontSize = 18;
+        diffText.fontStyle = FontStyle.Bold;
+        diffText.alignment = TextAnchor.MiddleCenter;
+        diffText.color = Color.white;
+        diffText.font = UIStyleHelper.GetDefaultFont();
     }
 
-    void ShowStageConfirm(int stageNum)
+    /// <summary>
+    /// 自动滚动到当前关卡位置
+    /// </summary>
+    IEnumerator ScrollToCurrentStage(ScrollRect scrollRect, RectTransform content, int currentStage, int totalStages)
     {
-        // 设置当前关卡并进入游戏
+        yield return null; // 等一帧让布局计算完成
+        yield return null; // 再等一帧确保ContentSizeFitter生效
+
+        if (currentStage <= 1) yield break;
+
+        // 计算滚动位置
+        float cardHeight = 140f;
+        float spacing = 12f;
+        float padding = 20f;
+        float totalHeight = content.rect.height;
+        float viewportHeight = scrollRect.viewport.rect.height;
+
+        if (totalHeight <= viewportHeight) yield break;
+
+        // 目标关卡的y位置（从顶部开始算）
+        float targetY = padding + (currentStage - 1) * (cardHeight + spacing);
+        // 居中显示
+        targetY -= viewportHeight / 2 - cardHeight / 2;
+        targetY = Mathf.Clamp(targetY, 0, totalHeight - viewportHeight);
+
+        float normalizedPos = 1f - (targetY / (totalHeight - viewportHeight));
+        normalizedPos = Mathf.Clamp01(normalizedPos);
+
+        scrollRect.verticalNormalizedPosition = normalizedPos;
+    }
+
+    void ShowStageConfirm(int stageNum, StageConfigEntry config)
+    {
+        // 设置当前关卡
         if (GameManager.Instance != null)
         {
             GameManager.Instance.CurrentLevel = stageNum;
         }
 
+        string title = $"关卡 {stageNum}: {config.name}";
+        string msg = $"推荐等级: {config.recommendedLevel}\n波次: {config.waveCount}\n\n是否进入此关卡？";
+
         // 使用确认弹窗
         if (ConfirmDialog.Instance != null)
         {
             ConfirmDialog.Instance.Show(
-                $"关卡 1-{stageNum}",
-                "是否进入此关卡？",
+                title,
+                msg,
                 () => SceneManager.LoadScene("GameScene"),
                 null
             );
         }
         else
         {
-            // 直接进入
             SceneManager.LoadScene("GameScene");
         }
     }
@@ -1013,17 +859,16 @@ public class StageSelectSceneSetup : MonoBehaviour
     /// </summary>
     void CreateBottomInfoBar(Transform parent)
     {
-        // Notion UI_003规范: 底部信息栏
-        // anchorMin:[0, 0], anchorMax:[1, 0.08]
         GameObject bottomGO = new GameObject("BottomInfoBar");
         bottomGO.transform.SetParent(parent, false);
         RectTransform bottomRect = bottomGO.AddComponent<RectTransform>();
         bottomRect.anchorMin = new Vector2(0, 0);
-        bottomRect.anchorMax = new Vector2(1, 0.08f);
-        bottomRect.offsetMin = Vector2.zero;
-        bottomRect.offsetMax = Vector2.zero;
+        bottomRect.anchorMax = new Vector2(1, 0);
+        bottomRect.pivot = new Vector2(0.5f, 0);
+        bottomRect.anchoredPosition = Vector2.zero;
+        bottomRect.sizeDelta = new Vector2(0, 150);
 
-        // 背景 - 深色半透明
+        // 背景
         Image bottomBg = bottomGO.AddComponent<Image>();
         bottomBg.color = new Color(0.05f, 0.08f, 0.12f, 0.92f);
 
@@ -1033,10 +878,10 @@ public class StageSelectSceneSetup : MonoBehaviour
         // 玩家信息 - 左侧
         CreatePlayerInfoSection(bottomGO.transform);
 
-        // 章节进度 - 中间
-        CreateChapterProgressSection(bottomGO.transform);
+        // 进度 - 中间
+        CreateProgressSection(bottomGO.transform);
 
-        // 金币显示 - 右侧
+        // 金币 - 右侧
         CreateGoldSection(bottomGO.transform);
     }
 
@@ -1050,11 +895,9 @@ public class StageSelectSceneSetup : MonoBehaviour
         sectionRect.anchoredPosition = new Vector2(120, 0);
         sectionRect.sizeDelta = new Vector2(180, 80);
 
-        // 背景
         Image sectionBg = sectionGO.AddComponent<Image>();
         sectionBg.color = new Color(0.15f, 0.18f, 0.25f, 0.8f);
 
-        // 等级文字
         int playerLevel = 1;
         if (SaveSystem.Instance?.CurrentPlayerStats != null)
         {
@@ -1065,23 +908,23 @@ public class StageSelectSceneSetup : MonoBehaviour
             $"Lv.{playerLevel}", 34, new Color(0.5f, 0.8f, 1f));
     }
 
-    void CreateChapterProgressSection(Transform parent)
+    void CreateProgressSection(Transform parent)
     {
-        GameObject sectionGO = new GameObject("ChapterProgress");
+        GameObject sectionGO = new GameObject("ProgressSection");
         sectionGO.transform.SetParent(parent, false);
         RectTransform sectionRect = sectionGO.AddComponent<RectTransform>();
         sectionRect.anchorMin = new Vector2(0.5f, 0.5f);
         sectionRect.anchorMax = new Vector2(0.5f, 0.5f);
         sectionRect.sizeDelta = new Vector2(300, 60);
 
-        int clearedCount = 3;
+        int clearedCount = 0;
         if (SaveSystem.Instance != null)
         {
             clearedCount = Mathf.Max(0, SaveSystem.Instance.GetHighestUnlockedStage() - 1);
         }
 
         Text progressText = UIStyleHelper.CreateText(sectionGO.transform, "Text",
-            $"进度: {clearedCount}/12 关卡", 26, Color.white, TextAnchor.MiddleCenter);
+            $"进度: {clearedCount}/100 关卡", 26, Color.white, TextAnchor.MiddleCenter);
     }
 
     void CreateGoldSection(Transform parent)
@@ -1094,7 +937,6 @@ public class StageSelectSceneSetup : MonoBehaviour
         sectionRect.anchoredPosition = new Vector2(-120, 0);
         sectionRect.sizeDelta = new Vector2(180, 70);
 
-        // 背景
         Image sectionBg = sectionGO.AddComponent<Image>();
         sectionBg.color = new Color(0.25f, 0.2f, 0.12f, 0.8f);
 

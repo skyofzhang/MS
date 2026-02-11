@@ -46,7 +46,7 @@ namespace MoShou.Data
     {
         public int id;
         public string name;
-        public string chapter;
+        public int chapter;
         public string description;
         public int difficulty;
         public int recommendedLevel;
