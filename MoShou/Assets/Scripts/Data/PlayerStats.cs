@@ -152,6 +152,19 @@ namespace MoShou.Data
         public static PlayerStats CreateDefault()
         {
             var stats = new PlayerStats();
+
+            // 从 GameSettings.json 读取基础属性（有配置用配置，无配置用字段默认值）
+            if (ConfigManager.Instance?.IsLoaded == true)
+            {
+                var cfg = ConfigManager.Instance.Settings.playerSettings;
+                stats.baseMaxHp = cfg.baseMaxHp;
+                stats.baseAttack = cfg.baseAttack;
+                stats.baseDefense = cfg.baseDefense;
+                stats.baseCritRate = cfg.baseCritRate;
+                stats.baseCritDamage = cfg.baseCritDamage;
+                Debug.Log($"[PlayerStats] 从GameSettings加载基础属性: HP={cfg.baseMaxHp}, ATK={cfg.baseAttack}, DEF={cfg.baseDefense}");
+            }
+
             stats.currentHp = stats.GetTotalMaxHp();
             return stats;
         }

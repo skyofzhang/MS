@@ -112,7 +112,7 @@ public class SimpleInventoryPanel : MonoBehaviour
                     nameRect.offsetMin = new Vector2(2, 0);
                     nameRect.offsetMax = new Vector2(-2, -2);
                     slotNameTexts[i] = nameGO.AddComponent<Text>();
-                    slotNameTexts[i].fontSize = 11;
+                    slotNameTexts[i].fontSize = 18;
                     slotNameTexts[i].alignment = TextAnchor.MiddleCenter;
                     slotNameTexts[i].color = Color.white;
                     slotNameTexts[i].horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -144,7 +144,7 @@ public class SimpleInventoryPanel : MonoBehaviour
                     countRect.offsetMin = Vector2.zero;
                     countRect.offsetMax = Vector2.zero;
                     slotCountTexts[i] = countGO.AddComponent<Text>();
-                    slotCountTexts[i].fontSize = 13;
+                    slotCountTexts[i].fontSize = 20;
                     slotCountTexts[i].alignment = TextAnchor.LowerRight;
                     slotCountTexts[i].color = Color.white;
                     slotCountTexts[i].raycastTarget = false;
@@ -172,8 +172,8 @@ public class SimpleInventoryPanel : MonoBehaviour
                     RectTransform tagRect = tagGO.AddComponent<RectTransform>();
                     tagRect.anchorMin = new Vector2(0, 1);
                     tagRect.anchorMax = new Vector2(0, 1);
-                    tagRect.anchoredPosition = new Vector2(22, -8);
-                    tagRect.sizeDelta = new Vector2(38, 16);
+                    tagRect.anchoredPosition = new Vector2(28, -10);
+                    tagRect.sizeDelta = new Vector2(56, 24);
                     Image tagBg = tagGO.AddComponent<Image>();
                     tagBg.color = new Color(0.1f, 0.7f, 0.2f, 0.85f);
                     tagBg.raycastTarget = false;
@@ -188,7 +188,7 @@ public class SimpleInventoryPanel : MonoBehaviour
                     ttRect.offsetMax = Vector2.zero;
                     slotEquipTags[i] = tagTextGO.AddComponent<Text>();
                     slotEquipTags[i].text = "装备中";
-                    slotEquipTags[i].fontSize = 10;
+                    slotEquipTags[i].fontSize = 16;
                     slotEquipTags[i].alignment = TextAnchor.MiddleCenter;
                     slotEquipTags[i].color = Color.white;
                     slotEquipTags[i].raycastTarget = false;
@@ -292,8 +292,18 @@ public class SimpleInventoryPanel : MonoBehaviour
 
             if (item != null && item.count > 0)
             {
-                // 有物品 - 显示颜色图标
-                slotIcons[i].color = GetItemColor(item.itemId);
+                // 有物品 - 优先加载图标Sprite，回退到颜色
+                Sprite itemSprite = LoadItemIcon(item);
+                if (itemSprite != null)
+                {
+                    slotIcons[i].sprite = itemSprite;
+                    slotIcons[i].color = Color.white;  // 显示原色
+                }
+                else
+                {
+                    slotIcons[i].sprite = null;
+                    slotIcons[i].color = GetItemColor(item.itemId);
+                }
                 slotIcons[i].gameObject.SetActive(true);
 
                 // 显示物品名称
@@ -323,6 +333,7 @@ public class SimpleInventoryPanel : MonoBehaviour
             else
             {
                 // 空格子
+                slotIcons[i].sprite = null;
                 slotIcons[i].color = Color.clear;
                 if (slotNameTexts[i] != null)
                 {
@@ -501,19 +512,28 @@ public class SimpleInventoryPanel : MonoBehaviour
         actionMenu = new GameObject("ActionMenu");
         actionMenu.transform.SetParent(transform, false);
         RectTransform menuRect = actionMenu.AddComponent<RectTransform>();
-        menuRect.sizeDelta = new Vector2(100, 130);
+        menuRect.sizeDelta = new Vector2(150, 180);
 
-        // 菜单背景
+        // 菜单背景 - 使用Kenney内嵌面板
         Image menuBg = actionMenu.AddComponent<Image>();
-        menuBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
-
-        // 添加Outline边框
-        Outline menuOutline = actionMenu.AddComponent<Outline>();
-        menuOutline.effectColor = new Color(0.5f, 0.5f, 0.6f);
-        menuOutline.effectDistance = new Vector2(2, -2);
+        Sprite menuBgSprite = MoShou.UI.UIResourceLoader.PanelInsetBrown;
+        if (menuBgSprite != null)
+        {
+            menuBg.sprite = menuBgSprite;
+            menuBg.type = Image.Type.Sliced;
+            menuBg.color = Color.white;
+        }
+        else
+        {
+            menuBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+            // 添加Outline边框
+            Outline menuOutline = actionMenu.AddComponent<Outline>();
+            menuOutline.effectColor = new Color(0.5f, 0.5f, 0.6f);
+            menuOutline.effectDistance = new Vector2(2, -2);
+        }
 
         // 穿戴/使用 按钮
-        CreateMenuButton(actionMenu.transform, "UseBtn", "穿戴", new Vector2(0, 40),
+        CreateMenuButton(actionMenu.transform, "UseBtn", "穿戴", new Vector2(0, 56),
             new Color(0.2f, 0.6f, 0.3f), defaultFont, OnActionUse);
 
         // 丢弃 按钮
@@ -521,7 +541,7 @@ public class SimpleInventoryPanel : MonoBehaviour
             new Color(0.6f, 0.3f, 0.2f), defaultFont, OnActionDrop);
 
         // 售卖 按钮
-        CreateMenuButton(actionMenu.transform, "SellBtn", "售卖", new Vector2(0, -40),
+        CreateMenuButton(actionMenu.transform, "SellBtn", "售卖", new Vector2(0, -56),
             new Color(0.6f, 0.6f, 0.2f), defaultFont, OnActionSell);
 
         actionMenu.SetActive(false);
@@ -533,19 +553,59 @@ public class SimpleInventoryPanel : MonoBehaviour
         btnGO.transform.SetParent(parent, false);
         RectTransform btnRect = btnGO.AddComponent<RectTransform>();
         btnRect.anchoredPosition = pos;
-        btnRect.sizeDelta = new Vector2(90, 32);
+        btnRect.sizeDelta = new Vector2(135, 44);
 
         Image btnBg = btnGO.AddComponent<Image>();
-        btnBg.color = color;
+
+        // 使用Kenney按钮图片 - 根据颜色选择不同按钮
+        Sprite btnSprite = null;
+        Sprite btnPressedSprite = null;
+        if (color.g > color.r && color.g > color.b) // 绿色 = 穿戴
+        {
+            btnSprite = MoShou.UI.UIResourceLoader.ButtonBlue;
+            btnPressedSprite = MoShou.UI.UIResourceLoader.ButtonBluePressed;
+        }
+        else if (color.r > color.g && color.r > color.b) // 红色 = 丢弃
+        {
+            btnSprite = MoShou.UI.UIResourceLoader.ButtonBrown;
+            btnPressedSprite = MoShou.UI.UIResourceLoader.ButtonBrownPressed;
+        }
+        else // 黄色 = 售卖
+        {
+            btnSprite = MoShou.UI.UIResourceLoader.ButtonBeige;
+            btnPressedSprite = MoShou.UI.UIResourceLoader.ButtonBeigePressed;
+        }
+
+        if (btnSprite != null)
+        {
+            btnBg.sprite = btnSprite;
+            btnBg.type = Image.Type.Sliced;
+            btnBg.color = Color.white;
+        }
+        else
+        {
+            btnBg.color = color;
+        }
 
         Button btn = btnGO.AddComponent<Button>();
         btn.targetGraphic = btnBg;
 
-        // 高亮色
-        var colors = btn.colors;
-        colors.highlightedColor = new Color(color.r + 0.15f, color.g + 0.15f, color.b + 0.15f);
-        colors.pressedColor = new Color(color.r - 0.1f, color.g - 0.1f, color.b - 0.1f);
-        btn.colors = colors;
+        if (btnSprite != null && btnPressedSprite != null)
+        {
+            var spriteState = new SpriteState();
+            spriteState.pressedSprite = btnPressedSprite;
+            spriteState.highlightedSprite = btnSprite;
+            btn.spriteState = spriteState;
+            btn.transition = Selectable.Transition.SpriteSwap;
+        }
+        else
+        {
+            // 高亮色
+            var colors = btn.colors;
+            colors.highlightedColor = new Color(color.r + 0.15f, color.g + 0.15f, color.b + 0.15f);
+            colors.pressedColor = new Color(color.r - 0.1f, color.g - 0.1f, color.b - 0.1f);
+            btn.colors = colors;
+        }
 
         btn.onClick.AddListener(onClick);
 
@@ -559,11 +619,16 @@ public class SimpleInventoryPanel : MonoBehaviour
         textRect.offsetMax = Vector2.zero;
         Text text = textGO.AddComponent<Text>();
         text.text = label;
-        text.fontSize = 16;
+        text.fontSize = 22;
         text.alignment = TextAnchor.MiddleCenter;
-        text.color = Color.white;
+        text.color = (btnSprite != null) ? new Color(0.25f, 0.2f, 0.15f) : Color.white; // 深色文字配浅色按钮
         text.raycastTarget = false;
         if (font != null) text.font = font;
+
+        // 文字描边
+        Outline textOutline = textGO.AddComponent<Outline>();
+        textOutline.effectColor = new Color(1f, 1f, 1f, 0.3f);
+        textOutline.effectDistance = new Vector2(0.5f, -0.5f);
     }
 
     /// <summary>
@@ -677,6 +742,15 @@ public class SimpleInventoryPanel : MonoBehaviour
 
         HideActionMenu();
         RefreshUI();
+    }
+
+    /// <summary>
+    /// 加载物品图标Sprite
+    /// 统一使用RuntimeIconGenerator内存生成，确保风格一致
+    /// </summary>
+    Sprite LoadItemIcon(InventoryItem item)
+    {
+        return RuntimeIconGenerator.GetIcon(item.itemId);
     }
 
     /// <summary>

@@ -1,35 +1,21 @@
 {
     "project": "MoShou",
-    "timestamp": "2026-02-10T17:28:04Z",
-    "error_count": 4,
+    "timestamp": "2026-02-10T21:18:38Z",
+    "error_count": 2,
     "errors": [
         {
-            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
-            "line": 75,
-            "column": 107,
-            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(75,107): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
-            "code": "CS0117"
+            "file": "Assets\\Scripts\\UI\\MinimapSystem.cs",
+            "line": 603,
+            "column": 17,
+            "message": "Assets\\Scripts\\UI\\MinimapSystem.cs(603,17): error CS0234: The type or namespace name 'GameManager' does not exist in the namespace 'MoShou.Systems' (are you missing an assembly reference?)",
+            "code": "CS0234"
         },
         {
-            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
-            "line": 129,
-            "column": 79,
-            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(129,79): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
-            "code": "CS0117"
-        },
-        {
-            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
-            "line": 285,
-            "column": 36,
-            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(285,36): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
-            "code": "CS0117"
-        },
-        {
-            "file": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs",
-            "line": 299,
-            "column": 36,
-            "message": "Assets\\Scripts\\UI\\SimpleEquipmentPanel.cs(299,36): error CS0117: 'EquipmentSlot' does not contain a definition for 'Boots'",
-            "code": "CS0117"
+            "file": "Assets\\Scripts\\UI\\MinimapSystem.cs",
+            "line": 605,
+            "column": 24,
+            "message": "Assets\\Scripts\\UI\\MinimapSystem.cs(605,24): error CS0234: The type or namespace name 'GameManager' does not exist in the namespace 'MoShou.Systems' (are you missing an assembly reference?)",
+            "code": "CS0234"
         }
     ]
 }

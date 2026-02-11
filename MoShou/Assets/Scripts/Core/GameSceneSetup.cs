@@ -1171,7 +1171,7 @@ public class GameSceneSetup : MonoBehaviour
         GameObject hudGO = new GameObject("HUD");
         hudGO.transform.SetParent(parent, false);
         RectTransform hudRect = hudGO.AddComponent<RectTransform>();
-        hudRect.anchorMin = new Vector2(0, 0.92f);
+        hudRect.anchorMin = new Vector2(0, 0.88f);
         hudRect.anchorMax = new Vector2(1, 1);
         hudRect.offsetMin = Vector2.zero;
         hudRect.offsetMax = Vector2.zero;
@@ -1187,8 +1187,8 @@ public class GameSceneSetup : MonoBehaviour
         RectTransform iconFrameRect = playerIconGO.AddComponent<RectTransform>();
         iconFrameRect.anchorMin = new Vector2(0, 0.5f);
         iconFrameRect.anchorMax = new Vector2(0, 0.5f);
-        iconFrameRect.anchoredPosition = new Vector2(52, 0);  // 40px margin + 半宽
-        iconFrameRect.sizeDelta = new Vector2(64, 64);
+        iconFrameRect.anchoredPosition = new Vector2(60, 10);  // 40px margin + 半宽
+        iconFrameRect.sizeDelta = new Vector2(80, 80);
         UnityEngine.UI.Image iconFrameImg = playerIconGO.AddComponent<UnityEngine.UI.Image>();
         if (playerIconFrame != null)
             iconFrameImg.sprite = playerIconFrame;
@@ -1201,8 +1201,8 @@ public class GameSceneSetup : MonoBehaviour
         RectTransform hbRect = healthBgGO.AddComponent<RectTransform>();
         hbRect.anchorMin = new Vector2(0, 0.5f);
         hbRect.anchorMax = new Vector2(0, 0.5f);
-        hbRect.anchoredPosition = new Vector2(240, 12);  // 头像右侧
-        hbRect.sizeDelta = new Vector2(280, 24);
+        hbRect.anchoredPosition = new Vector2(270, 20);  // 头像右侧
+        hbRect.sizeDelta = new Vector2(340, 32);
         UnityEngine.UI.Image hbImage = healthBgGO.AddComponent<UnityEngine.UI.Image>();
         if (hpBarBg != null)
         {
@@ -1241,7 +1241,7 @@ public class GameSceneSetup : MonoBehaviour
         waveBgRect.anchorMin = new Vector2(0.5f, 0.5f);
         waveBgRect.anchorMax = new Vector2(0.5f, 0.5f);
         waveBgRect.anchoredPosition = new Vector2(0, 0);
-        waveBgRect.sizeDelta = new Vector2(180, 48);
+        waveBgRect.sizeDelta = new Vector2(200, 52);
         UnityEngine.UI.Image waveBgImage = waveBgGO.AddComponent<UnityEngine.UI.Image>();
         if (waveBg != null)
         {
@@ -1261,7 +1261,7 @@ public class GameSceneSetup : MonoBehaviour
         waveRect.offsetMax = Vector2.zero;
         UnityEngine.UI.Text waveText = waveTextGO.AddComponent<UnityEngine.UI.Text>();
         waveText.text = "波次 1/3";
-        waveText.fontSize = 22;
+        waveText.fontSize = 26;
         waveText.fontStyle = FontStyle.Bold;
         waveText.alignment = TextAnchor.MiddleCenter;
         waveText.color = Color.white;
@@ -1275,8 +1275,8 @@ public class GameSceneSetup : MonoBehaviour
         RectTransform goldIconRect = goldIconGO.AddComponent<RectTransform>();
         goldIconRect.anchorMin = new Vector2(1, 0.5f);
         goldIconRect.anchorMax = new Vector2(1, 0.5f);
-        goldIconRect.anchoredPosition = new Vector2(-150, 0);  // 右边距40 + 文字宽度
-        goldIconRect.sizeDelta = new Vector2(32, 32);
+        goldIconRect.anchoredPosition = new Vector2(-160, 0);  // 右边距40 + 文字宽度
+        goldIconRect.sizeDelta = new Vector2(36, 36);
         UnityEngine.UI.Image goldIconImg = goldIconGO.AddComponent<UnityEngine.UI.Image>();
         if (goldIcon != null)
             goldIconImg.sprite = goldIcon;
@@ -1293,14 +1293,95 @@ public class GameSceneSetup : MonoBehaviour
         goldRect.sizeDelta = new Vector2(100, 36);
         UnityEngine.UI.Text goldText = goldTextGO.AddComponent<UnityEngine.UI.Text>();
         goldText.text = "0";
-        goldText.fontSize = 26;
+        goldText.fontSize = 30;
         goldText.fontStyle = FontStyle.Bold;
         goldText.alignment = TextAnchor.MiddleLeft;
         goldText.color = new Color(1f, 0.85f, 0.2f);  // #FFD700 金色
         goldText.font = GetDefaultFont();
         uiManager.goldText = goldText;
 
-        Debug.Log($"[GameSceneSetup] HUD创建完成 (Notion UI_004规范, 资源: HPBar={hpBarBg != null}, GoldIcon={goldIcon != null})");
+        // ========== 血条上方HP文字 ==========
+        GameObject hpTextGO = new GameObject("HealthText");
+        hpTextGO.transform.SetParent(healthBgGO.transform, false);
+        RectTransform hpTextRect = hpTextGO.AddComponent<RectTransform>();
+        hpTextRect.anchorMin = Vector2.zero;
+        hpTextRect.anchorMax = Vector2.one;
+        hpTextRect.offsetMin = Vector2.zero;
+        hpTextRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text hpText = hpTextGO.AddComponent<UnityEngine.UI.Text>();
+        hpText.text = "100/100";
+        hpText.fontSize = 20;
+        hpText.fontStyle = FontStyle.Bold;
+        hpText.alignment = TextAnchor.MiddleCenter;
+        hpText.color = Color.white;
+        hpText.font = GetDefaultFont();
+        hpText.raycastTarget = false;
+        UnityEngine.UI.Outline hpOutline = hpTextGO.AddComponent<UnityEngine.UI.Outline>();
+        hpOutline.effectColor = Color.black;
+        hpOutline.effectDistance = new Vector2(1, -1);
+        uiManager.healthText = hpText;
+
+        // ========== 玩家等级（头像框下方） ==========
+        GameObject lvTextGO = new GameObject("LevelText");
+        lvTextGO.transform.SetParent(hudGO.transform, false);
+        RectTransform lvTextRect = lvTextGO.AddComponent<RectTransform>();
+        lvTextRect.anchorMin = new Vector2(0, 0.5f);
+        lvTextRect.anchorMax = new Vector2(0, 0.5f);
+        lvTextRect.anchoredPosition = new Vector2(60, -50);
+        lvTextRect.sizeDelta = new Vector2(90, 26);
+        UnityEngine.UI.Text lvText = lvTextGO.AddComponent<UnityEngine.UI.Text>();
+        lvText.text = "Lv.1";
+        lvText.fontSize = 20;
+        lvText.fontStyle = FontStyle.Bold;
+        lvText.alignment = TextAnchor.MiddleCenter;
+        lvText.color = new Color(1f, 0.9f, 0.5f);
+        lvText.font = GetDefaultFont();
+        lvText.raycastTarget = false;
+        UnityEngine.UI.Outline lvOutline = lvTextGO.AddComponent<UnityEngine.UI.Outline>();
+        lvOutline.effectColor = Color.black;
+        lvOutline.effectDistance = new Vector2(1, -1);
+        uiManager.playerLevelText = lvText;
+
+        // ========== ATK/DEF 属性显示（血条下方） ==========
+        GameObject atkTextGO = new GameObject("AttackText");
+        atkTextGO.transform.SetParent(hudGO.transform, false);
+        RectTransform atkTextRect = atkTextGO.AddComponent<RectTransform>();
+        atkTextRect.anchorMin = new Vector2(0, 0.5f);
+        atkTextRect.anchorMax = new Vector2(0, 0.5f);
+        atkTextRect.anchoredPosition = new Vector2(180, -18);
+        atkTextRect.sizeDelta = new Vector2(150, 26);
+        UnityEngine.UI.Text atkText = atkTextGO.AddComponent<UnityEngine.UI.Text>();
+        atkText.text = "攻击: 15";
+        atkText.fontSize = 20;
+        atkText.alignment = TextAnchor.MiddleLeft;
+        atkText.color = new Color(1f, 0.5f, 0.3f);
+        atkText.font = GetDefaultFont();
+        atkText.raycastTarget = false;
+        UnityEngine.UI.Outline atkOutline = atkTextGO.AddComponent<UnityEngine.UI.Outline>();
+        atkOutline.effectColor = Color.black;
+        atkOutline.effectDistance = new Vector2(1, -1);
+        uiManager.attackText = atkText;
+
+        GameObject defTextGO = new GameObject("DefenseText");
+        defTextGO.transform.SetParent(hudGO.transform, false);
+        RectTransform defTextRect = defTextGO.AddComponent<RectTransform>();
+        defTextRect.anchorMin = new Vector2(0, 0.5f);
+        defTextRect.anchorMax = new Vector2(0, 0.5f);
+        defTextRect.anchoredPosition = new Vector2(340, -18);
+        defTextRect.sizeDelta = new Vector2(150, 26);
+        UnityEngine.UI.Text defText = defTextGO.AddComponent<UnityEngine.UI.Text>();
+        defText.text = "防御: 5";
+        defText.fontSize = 20;
+        defText.alignment = TextAnchor.MiddleLeft;
+        defText.color = new Color(0.3f, 0.7f, 1f);
+        defText.font = GetDefaultFont();
+        defText.raycastTarget = false;
+        UnityEngine.UI.Outline defOutline = defTextGO.AddComponent<UnityEngine.UI.Outline>();
+        defOutline.effectColor = Color.black;
+        defOutline.effectDistance = new Vector2(1, -1);
+        uiManager.defenseText = defText;
+
+        Debug.Log($"[GameSceneSetup] HUD创建完成 (含HP/ATK/DEF/Level, 资源: HPBar={hpBarBg != null}, GoldIcon={goldIcon != null})");
     }
 
     GameObject CreateResultPanel(Transform parent, string name, string title, Color bgColor)
@@ -1551,6 +1632,12 @@ public class GameSceneSetup : MonoBehaviour
         Sprite multiShotIcon = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Icon_MultiShot");
         Sprite pierceIcon = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Icon_Pierce");
         Sprite battleShoutIcon = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Icon_BattleShout");
+
+        // null 检查警告
+        if (skillSlotBg == null) Debug.LogWarning("[GameSceneSetup] Skill slot BG sprite not found at Sprites/UI/Skills/UI_Skill_Slot_BG");
+        if (multiShotIcon == null) Debug.LogWarning("[GameSceneSetup] MultiShot icon not found at Sprites/UI/Skills/UI_Skill_Icon_MultiShot");
+        if (pierceIcon == null) Debug.LogWarning("[GameSceneSetup] Pierce icon not found at Sprites/UI/Skills/UI_Skill_Icon_Pierce");
+        if (battleShoutIcon == null) Debug.LogWarning("[GameSceneSetup] BattleShout icon not found at Sprites/UI/Skills/UI_Skill_Icon_BattleShout");
 
         // 普通攻击按钮 (右下角最大)
         CreateSkillButtonWithIcon(skillsGO.transform, "AttackBtn", null, skillSlotBg,
@@ -1879,7 +1966,7 @@ public class GameSceneSetup : MonoBehaviour
         panelRect.offsetMin = Vector2.zero;
         panelRect.offsetMax = Vector2.zero;
         UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
-        bgImage.color = new Color(0, 0, 0, 0.7f);
+        bgImage.color = new Color(0, 0, 0, 0.65f);
 
         // 中心内容框
         GameObject contentGO = new GameObject("Content");
@@ -1887,42 +1974,105 @@ public class GameSceneSetup : MonoBehaviour
         RectTransform contentRect = contentGO.AddComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0.5f, 0.5f);
         contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-        contentRect.sizeDelta = new Vector2(400, 350);
+        contentRect.sizeDelta = new Vector2(340, 380);
         UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
-        contentBg.color = new Color(0.3f, 0.3f, 0.5f);
+        contentBg.color = new Color(0.18f, 0.18f, 0.28f, 0.97f);
+
+        // 顶部装饰条
+        GameObject topBar = new GameObject("TopBar");
+        topBar.transform.SetParent(contentGO.transform, false);
+        RectTransform topBarRect = topBar.AddComponent<RectTransform>();
+        topBarRect.anchorMin = new Vector2(0, 1);
+        topBarRect.anchorMax = new Vector2(1, 1);
+        topBarRect.anchoredPosition = new Vector2(0, 0);
+        topBarRect.sizeDelta = new Vector2(0, 5);
+        UnityEngine.UI.Image topBarImg = topBar.AddComponent<UnityEngine.UI.Image>();
+        topBarImg.color = new Color(0.6f, 0.5f, 0.2f, 1f);
 
         // 标题
         GameObject titleGO = new GameObject("Title");
         titleGO.transform.SetParent(contentGO.transform, false);
         RectTransform titleRect = titleGO.AddComponent<RectTransform>();
-        titleRect.anchorMin = new Vector2(0.5f, 1);
-        titleRect.anchorMax = new Vector2(0.5f, 1);
-        titleRect.anchoredPosition = new Vector2(0, -60);
-        titleRect.sizeDelta = new Vector2(350, 80);
+        titleRect.anchorMin = new Vector2(0, 1);
+        titleRect.anchorMax = new Vector2(1, 1);
+        titleRect.anchoredPosition = new Vector2(0, -45);
+        titleRect.sizeDelta = new Vector2(0, 60);
         UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
-        titleText.text = "暂停";
-        titleText.fontSize = 48;
+        titleText.text = "游戏暂停";
+        titleText.fontSize = 36;
+        titleText.fontStyle = FontStyle.Bold;
         titleText.alignment = TextAnchor.MiddleCenter;
-        titleText.color = Color.white;
+        titleText.color = new Color(1f, 0.9f, 0.6f);
         titleText.font = GetDefaultFont();
 
-        // 继续按钮
-        CreateButton(contentGO.transform, "ResumeButton", "继续游戏", new Vector2(0, -20), () => {
+        // 分隔线
+        GameObject sepLine = new GameObject("SepLine");
+        sepLine.transform.SetParent(contentGO.transform, false);
+        RectTransform sepRect = sepLine.AddComponent<RectTransform>();
+        sepRect.anchorMin = new Vector2(0.15f, 1);
+        sepRect.anchorMax = new Vector2(0.85f, 1);
+        sepRect.anchoredPosition = new Vector2(0, -80);
+        sepRect.sizeDelta = new Vector2(0, 2);
+        UnityEngine.UI.Image sepImg = sepLine.AddComponent<UnityEngine.UI.Image>();
+        sepImg.color = new Color(0.5f, 0.5f, 0.6f, 0.5f);
+
+        // 按钮区域 - 使用更大间距
+        CreatePauseButton(contentGO.transform, "ResumeButton", "继续游戏",
+            new Vector2(0, -115), new Color(0.25f, 0.55f, 0.3f), () => {
             if (UIManager.Instance != null) UIManager.Instance.OnResumeClick();
         });
 
-        // 重试按钮
-        CreateButton(contentGO.transform, "RetryButton", "重试", new Vector2(0, -90), () => {
+        CreatePauseButton(contentGO.transform, "RetryButton", "重试",
+            new Vector2(0, -190), new Color(0.4f, 0.35f, 0.2f), () => {
             if (UIManager.Instance != null) UIManager.Instance.OnRetryClick();
         });
 
-        // 返回主菜单按钮
-        CreateButton(contentGO.transform, "MenuButton", "主菜单", new Vector2(0, -160), () => {
+        CreatePauseButton(contentGO.transform, "MenuButton", "返回主菜单",
+            new Vector2(0, -265), new Color(0.5f, 0.2f, 0.2f), () => {
             if (UIManager.Instance != null) UIManager.Instance.OnMainMenuClick();
         });
 
         panelGO.SetActive(false);
         return panelGO;
+    }
+
+    void CreatePauseButton(Transform parent, string name, string text, Vector2 pos,
+        Color bgColor, UnityEngine.Events.UnityAction onClick)
+    {
+        GameObject btnGO = new GameObject(name);
+        btnGO.transform.SetParent(parent, false);
+        RectTransform btnRect = btnGO.AddComponent<RectTransform>();
+        btnRect.anchorMin = new Vector2(0.5f, 1);
+        btnRect.anchorMax = new Vector2(0.5f, 1);
+        btnRect.anchoredPosition = pos;
+        btnRect.sizeDelta = new Vector2(250, 55);
+
+        UnityEngine.UI.Image btnImage = btnGO.AddComponent<UnityEngine.UI.Image>();
+        btnImage.color = bgColor;
+
+        UnityEngine.UI.Button btn = btnGO.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = btnImage;
+        var colors = btn.colors;
+        colors.highlightedColor = new Color(bgColor.r + 0.15f, bgColor.g + 0.15f, bgColor.b + 0.15f);
+        colors.pressedColor = new Color(bgColor.r - 0.1f, bgColor.g - 0.1f, bgColor.b - 0.1f);
+        btn.colors = colors;
+        btn.onClick.AddListener(onClick);
+
+        // 按钮文字
+        GameObject textGO = new GameObject("Text");
+        textGO.transform.SetParent(btnGO.transform, false);
+        RectTransform textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+        UnityEngine.UI.Text btnText = textGO.AddComponent<UnityEngine.UI.Text>();
+        btnText.text = text;
+        btnText.fontSize = 26;
+        btnText.fontStyle = FontStyle.Bold;
+        btnText.alignment = TextAnchor.MiddleCenter;
+        btnText.color = Color.white;
+        btnText.font = GetDefaultFont();
     }
 
     void CreateButton(Transform parent, string name, string text, Vector2 pos, UnityEngine.Events.UnityAction onClick)
@@ -1987,9 +2137,20 @@ public class GameSceneSetup : MonoBehaviour
         RectTransform contentRect = contentGO.AddComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0.5f, 0.5f);
         contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-        contentRect.sizeDelta = new Vector2(600, 500);
+        contentRect.sizeDelta = new Vector2(780, 700);
         UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
-        contentBg.color = new Color(0.2f, 0.2f, 0.25f);
+        // 使用Kenney面板背景
+        Sprite invPanelBg = UIResourceLoader.PanelBeige;
+        if (invPanelBg != null)
+        {
+            contentBg.sprite = invPanelBg;
+            contentBg.type = UnityEngine.UI.Image.Type.Sliced;
+            contentBg.color = Color.white;
+        }
+        else
+        {
+            contentBg.color = new Color(0.2f, 0.2f, 0.25f);
+        }
 
         // 标题
         GameObject titleGO = new GameObject("Title");
@@ -2003,10 +2164,13 @@ public class GameSceneSetup : MonoBehaviour
         titleText.text = "背包";
         titleText.fontSize = 32;
         titleText.alignment = TextAnchor.MiddleCenter;
-        titleText.color = Color.white;
+        titleText.color = new Color(0.3f, 0.2f, 0.1f); // 棕色文字配浅色面板
         titleText.font = GetDefaultFont();
+        UnityEngine.UI.Outline titleOutline = titleGO.AddComponent<UnityEngine.UI.Outline>();
+        titleOutline.effectColor = new Color(1f, 1f, 1f, 0.3f);
+        titleOutline.effectDistance = new Vector2(1, -1);
 
-        // 关闭按钮
+        // 关闭按钮 - 使用Kenney方形按钮
         GameObject closeBtnGO = new GameObject("CloseButton");
         closeBtnGO.transform.SetParent(contentGO.transform, false);
         RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
@@ -2015,11 +2179,21 @@ public class GameSceneSetup : MonoBehaviour
         closeRect.anchoredPosition = new Vector2(-30, -30);
         closeRect.sizeDelta = new Vector2(50, 50);
         UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
-        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        Sprite closeBtnSprite = UIResourceLoader.ButtonSquareBrown;
+        if (closeBtnSprite != null)
+        {
+            closeImg.sprite = closeBtnSprite;
+            closeImg.type = UnityEngine.UI.Image.Type.Sliced;
+            closeImg.color = Color.white;
+        }
+        else
+        {
+            closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        }
         UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
         closeBtn.onClick.AddListener(() => invPanel.Hide());
 
-        // 关闭按钮文字
+        // 关闭按钮图标 - 优先使用Kenney X图标
         GameObject closeTextGO = new GameObject("Text");
         closeTextGO.transform.SetParent(closeBtnGO.transform, false);
         RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
@@ -2027,12 +2201,26 @@ public class GameSceneSetup : MonoBehaviour
         ctRect.anchorMax = Vector2.one;
         ctRect.offsetMin = Vector2.zero;
         ctRect.offsetMax = Vector2.zero;
-        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
-        closeText.text = "X";
-        closeText.fontSize = 28;
-        closeText.alignment = TextAnchor.MiddleCenter;
-        closeText.color = Color.white;
-        closeText.font = GetDefaultFont();
+        Sprite crossIcon = UIResourceLoader.IconCrossBrown;
+        if (crossIcon != null)
+        {
+            UnityEngine.UI.Image crossImg = closeTextGO.AddComponent<UnityEngine.UI.Image>();
+            crossImg.sprite = crossIcon;
+            crossImg.color = Color.white;
+            crossImg.raycastTarget = false;
+            // 缩小图标留边距
+            ctRect.offsetMin = new Vector2(8, 8);
+            ctRect.offsetMax = new Vector2(-8, -8);
+        }
+        else
+        {
+            UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+            closeText.text = "X";
+            closeText.fontSize = 28;
+            closeText.alignment = TextAnchor.MiddleCenter;
+            closeText.color = Color.white;
+            closeText.font = GetDefaultFont();
+        }
 
         // ScrollView容器（支持滚动）
         GameObject scrollViewGO = new GameObject("ScrollView");
@@ -2041,7 +2229,7 @@ public class GameSceneSetup : MonoBehaviour
         scrollViewRect.anchorMin = new Vector2(0.5f, 0.5f);
         scrollViewRect.anchorMax = new Vector2(0.5f, 0.5f);
         scrollViewRect.anchoredPosition = new Vector2(0, -20);
-        scrollViewRect.sizeDelta = new Vector2(560, 340);
+        scrollViewRect.sizeDelta = new Vector2(720, 520);
 
         // 添加ScrollRect组件
         var scrollRect = scrollViewGO.AddComponent<UnityEngine.UI.ScrollRect>();
@@ -2050,9 +2238,19 @@ public class GameSceneSetup : MonoBehaviour
         scrollRect.movementType = UnityEngine.UI.ScrollRect.MovementType.Clamped;
         scrollRect.scrollSensitivity = 30f;
 
-        // 添加遮罩
+        // 添加遮罩 - 使用Kenney内嵌面板
         UnityEngine.UI.Image scrollBg = scrollViewGO.AddComponent<UnityEngine.UI.Image>();
-        scrollBg.color = new Color(0.18f, 0.18f, 0.22f, 0.3f);
+        Sprite invInsetBg = UIResourceLoader.PanelInsetBeige;
+        if (invInsetBg != null)
+        {
+            scrollBg.sprite = invInsetBg;
+            scrollBg.type = UnityEngine.UI.Image.Type.Sliced;
+            scrollBg.color = Color.white;
+        }
+        else
+        {
+            scrollBg.color = new Color(0.18f, 0.18f, 0.22f, 0.3f);
+        }
         var mask = scrollViewGO.AddComponent<UnityEngine.UI.Mask>();
         mask.showMaskGraphic = true;
 
@@ -2083,13 +2281,13 @@ public class GameSceneSetup : MonoBehaviour
 
         // 添加GridLayoutGroup
         var grid = slotsGO.AddComponent<UnityEngine.UI.GridLayoutGroup>();
-        grid.cellSize = new Vector2(80, 80);
+        grid.cellSize = new Vector2(130, 130);
         grid.spacing = new Vector2(10, 10);
         grid.startCorner = UnityEngine.UI.GridLayoutGroup.Corner.UpperLeft;
         grid.startAxis = UnityEngine.UI.GridLayoutGroup.Axis.Horizontal;
         grid.childAlignment = TextAnchor.UpperLeft;
         grid.constraint = UnityEngine.UI.GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 6;
+        grid.constraintCount = 5;
         grid.padding = new RectOffset(5, 5, 5, 5);
 
         // 设置ScrollRect的content
@@ -2206,9 +2404,20 @@ public class GameSceneSetup : MonoBehaviour
         RectTransform contentRect = contentGO.AddComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0.5f, 0.5f);
         contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-        contentRect.sizeDelta = new Vector2(400, 500);
+        contentRect.sizeDelta = new Vector2(540, 740);
         UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
-        contentBg.color = new Color(0.2f, 0.2f, 0.25f);
+        // 使用Kenney蓝色面板背景（装备面板区分于背包面板）
+        Sprite equipPanelBg = UIResourceLoader.PanelBlue;
+        if (equipPanelBg != null)
+        {
+            contentBg.sprite = equipPanelBg;
+            contentBg.type = UnityEngine.UI.Image.Type.Sliced;
+            contentBg.color = Color.white;
+        }
+        else
+        {
+            contentBg.color = new Color(0.2f, 0.2f, 0.25f);
+        }
 
         // 标题
         GameObject titleGO = new GameObject("Title");
@@ -2224,8 +2433,11 @@ public class GameSceneSetup : MonoBehaviour
         titleText.alignment = TextAnchor.MiddleCenter;
         titleText.color = Color.white;
         titleText.font = GetDefaultFont();
+        UnityEngine.UI.Outline equipTitleOutline = titleGO.AddComponent<UnityEngine.UI.Outline>();
+        equipTitleOutline.effectColor = new Color(0, 0, 0, 0.5f);
+        equipTitleOutline.effectDistance = new Vector2(1, -1);
 
-        // 关闭按钮
+        // 关闭按钮 - 使用Kenney方形按钮
         GameObject closeBtnGO = new GameObject("CloseButton");
         closeBtnGO.transform.SetParent(contentGO.transform, false);
         RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
@@ -2234,11 +2446,21 @@ public class GameSceneSetup : MonoBehaviour
         closeRect.anchoredPosition = new Vector2(-30, -30);
         closeRect.sizeDelta = new Vector2(50, 50);
         UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
-        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        Sprite eqCloseBtnSprite = UIResourceLoader.ButtonSquareBlue;
+        if (eqCloseBtnSprite != null)
+        {
+            closeImg.sprite = eqCloseBtnSprite;
+            closeImg.type = UnityEngine.UI.Image.Type.Sliced;
+            closeImg.color = Color.white;
+        }
+        else
+        {
+            closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        }
         UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
         closeBtn.onClick.AddListener(() => panelGO.SetActive(false));
 
-        // 关闭按钮文字
+        // 关闭按钮图标
         GameObject closeTextGO = new GameObject("Text");
         closeTextGO.transform.SetParent(closeBtnGO.transform, false);
         RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
@@ -2246,21 +2468,34 @@ public class GameSceneSetup : MonoBehaviour
         ctRect.anchorMax = Vector2.one;
         ctRect.offsetMin = Vector2.zero;
         ctRect.offsetMax = Vector2.zero;
-        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
-        closeText.text = "X";
-        closeText.fontSize = 28;
-        closeText.alignment = TextAnchor.MiddleCenter;
-        closeText.color = Color.white;
-        closeText.font = GetDefaultFont();
+        Sprite eqCrossIcon = UIResourceLoader.IconCrossGrey;
+        if (eqCrossIcon != null)
+        {
+            UnityEngine.UI.Image eqCrossImg = closeTextGO.AddComponent<UnityEngine.UI.Image>();
+            eqCrossImg.sprite = eqCrossIcon;
+            eqCrossImg.color = Color.white;
+            eqCrossImg.raycastTarget = false;
+            ctRect.offsetMin = new Vector2(8, 8);
+            ctRect.offsetMax = new Vector2(-8, -8);
+        }
+        else
+        {
+            UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+            closeText.text = "X";
+            closeText.fontSize = 28;
+            closeText.alignment = TextAnchor.MiddleCenter;
+            closeText.color = Color.white;
+            closeText.font = GetDefaultFont();
+        }
 
         // ★ 专用装备槽容器（避免与Title/CloseButton/Stats混在一起导致索引错乱）
         GameObject slotsContainerGO = new GameObject("SlotsContainer");
         slotsContainerGO.transform.SetParent(contentGO.transform, false);
         RectTransform slotsContainerRect = slotsContainerGO.AddComponent<RectTransform>();
-        slotsContainerRect.anchorMin = new Vector2(0, 0.2f);
-        slotsContainerRect.anchorMax = new Vector2(1, 0.85f);
-        slotsContainerRect.offsetMin = new Vector2(15, 0);
-        slotsContainerRect.offsetMax = new Vector2(-15, 0);
+        slotsContainerRect.anchorMin = new Vector2(0, 0.15f);
+        slotsContainerRect.anchorMax = new Vector2(1, 0.88f);
+        slotsContainerRect.offsetMin = new Vector2(15, 10);
+        slotsContainerRect.offsetMax = new Vector2(-15, -50);
 
         // 装备槽位 - 放入专用容器
         string[] slotNames = { "武器", "护甲", "头盔", "护腿", "戒指", "项链" };
@@ -2275,11 +2510,11 @@ public class GameSceneSetup : MonoBehaviour
         RectTransform statsRect = statsGO.AddComponent<RectTransform>();
         statsRect.anchorMin = new Vector2(0, 0);
         statsRect.anchorMax = new Vector2(1, 0);
-        statsRect.anchoredPosition = new Vector2(0, 60);
-        statsRect.sizeDelta = new Vector2(0, 100);
+        statsRect.anchoredPosition = new Vector2(0, 55);
+        statsRect.sizeDelta = new Vector2(0, 90);
         UnityEngine.UI.Text statsText = statsGO.AddComponent<UnityEngine.UI.Text>();
         statsText.text = "攻击: +0\n防御: +0\n生命: +0";
-        statsText.fontSize = 20;
+        statsText.fontSize = 22;
         statsText.alignment = TextAnchor.MiddleCenter;
         statsText.color = Color.white;
         statsText.font = GetDefaultFont();
@@ -2312,11 +2547,22 @@ public class GameSceneSetup : MonoBehaviour
         // 使用相对于容器的定位（容器已经在正确位置）
         slotRect.anchorMin = new Vector2(0.5f, 1);
         slotRect.anchorMax = new Vector2(0.5f, 1);
-        slotRect.anchoredPosition = new Vector2(-85 + col * 170, -10 - row * 95);
-        slotRect.sizeDelta = new Vector2(155, 85);
+        slotRect.anchoredPosition = new Vector2(-115 + col * 230, -8 - row * 120);
+        slotRect.sizeDelta = new Vector2(220, 110);
 
         UnityEngine.UI.Image slotBg = slotGO.AddComponent<UnityEngine.UI.Image>();
-        slotBg.color = new Color(0.3f, 0.3f, 0.35f);
+        // 使用RPGKit通用框架作为默认槽位背景
+        Sprite eqSlotFrame = UIResourceLoader.FrameRarityCommon;
+        if (eqSlotFrame != null)
+        {
+            slotBg.sprite = eqSlotFrame;
+            slotBg.type = UnityEngine.UI.Image.Type.Simple;
+            slotBg.color = new Color(0.7f, 0.7f, 0.7f, 0.6f);
+        }
+        else
+        {
+            slotBg.color = new Color(0.3f, 0.3f, 0.35f);
+        }
 
         // 槽位类型标签（左上角小标签）
         GameObject labelGO = new GameObject("SlotLabel");
@@ -2325,7 +2571,7 @@ public class GameSceneSetup : MonoBehaviour
         labelRect.anchorMin = new Vector2(0, 1);
         labelRect.anchorMax = new Vector2(0, 1);
         labelRect.anchoredPosition = new Vector2(25, -10);
-        labelRect.sizeDelta = new Vector2(45, 18);
+        labelRect.sizeDelta = new Vector2(50, 20);
         UnityEngine.UI.Image labelBg = labelGO.AddComponent<UnityEngine.UI.Image>();
         labelBg.color = new Color(0.4f, 0.4f, 0.5f, 0.7f);
         labelBg.raycastTarget = false;
@@ -2339,7 +2585,7 @@ public class GameSceneSetup : MonoBehaviour
         ltRect.offsetMax = Vector2.zero;
         UnityEngine.UI.Text labelText = labelTextGO.AddComponent<UnityEngine.UI.Text>();
         labelText.text = slotName;
-        labelText.fontSize = 11;
+        labelText.fontSize = 15;
         labelText.alignment = TextAnchor.MiddleCenter;
         labelText.color = new Color(0.7f, 0.7f, 0.7f);
         labelText.font = GetDefaultFont();
@@ -2355,7 +2601,7 @@ public class GameSceneSetup : MonoBehaviour
         nameRect.offsetMax = new Vector2(-5, 0);
         UnityEngine.UI.Text nameText = nameGO.AddComponent<UnityEngine.UI.Text>();
         nameText.text = slotName;
-        nameText.fontSize = 14;
+        nameText.fontSize = 17;
         nameText.alignment = TextAnchor.MiddleCenter;
         nameText.color = Color.gray;
         nameText.font = GetDefaultFont();
@@ -2368,7 +2614,7 @@ public class GameSceneSetup : MonoBehaviour
         iconRect.anchorMin = new Vector2(0.5f, 0.4f);
         iconRect.anchorMax = new Vector2(0.5f, 0.95f);
         iconRect.anchoredPosition = new Vector2(0, 0);
-        iconRect.sizeDelta = new Vector2(45, 0);
+        iconRect.sizeDelta = new Vector2(55, 0);
         UnityEngine.UI.Image iconImg = iconGO.AddComponent<UnityEngine.UI.Image>();
         iconImg.color = new Color(0.5f, 0.5f, 0.5f, 0.3f);
         iconImg.raycastTarget = false;
@@ -2403,7 +2649,18 @@ public class GameSceneSetup : MonoBehaviour
         contentRect.offsetMin = Vector2.zero;
         contentRect.offsetMax = Vector2.zero;
         UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
-        contentBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+        // 使用Kenney米色浅面板（商店面板）
+        Sprite shopPanelBg = UIResourceLoader.PanelBeigeLight;
+        if (shopPanelBg != null)
+        {
+            contentBg.sprite = shopPanelBg;
+            contentBg.type = UnityEngine.UI.Image.Type.Sliced;
+            contentBg.color = Color.white;
+        }
+        else
+        {
+            contentBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+        }
 
         // 标题
         GameObject titleGO = new GameObject("Title");
@@ -2418,8 +2675,11 @@ public class GameSceneSetup : MonoBehaviour
         titleText.fontSize = 36;
         titleText.fontStyle = FontStyle.Bold;
         titleText.alignment = TextAnchor.MiddleCenter;
-        titleText.color = new Color(1f, 0.85f, 0.2f);
+        titleText.color = new Color(0.6f, 0.4f, 0.1f); // 深金色
         titleText.font = GetDefaultFont();
+        UnityEngine.UI.Outline shopTitleOutline = titleGO.AddComponent<UnityEngine.UI.Outline>();
+        shopTitleOutline.effectColor = new Color(1f, 1f, 1f, 0.3f);
+        shopTitleOutline.effectDistance = new Vector2(1, -1);
         shopPanel.titleText = titleText;
 
         // 关闭按钮
@@ -2431,12 +2691,22 @@ public class GameSceneSetup : MonoBehaviour
         closeRect.anchoredPosition = new Vector2(-30, -30);
         closeRect.sizeDelta = new Vector2(50, 50);
         UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
-        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        Sprite shopCloseBtn = UIResourceLoader.ButtonSquareBeige;
+        if (shopCloseBtn != null)
+        {
+            closeImg.sprite = shopCloseBtn;
+            closeImg.type = UnityEngine.UI.Image.Type.Sliced;
+            closeImg.color = Color.white;
+        }
+        else
+        {
+            closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        }
         UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
         closeBtn.onClick.AddListener(() => shopPanel.Hide());
         shopPanel.closeButton = closeBtn;
 
-        // 关闭按钮文字
+        // 关闭按钮图标
         GameObject closeTextGO = new GameObject("Text");
         closeTextGO.transform.SetParent(closeBtnGO.transform, false);
         RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
@@ -2444,12 +2714,25 @@ public class GameSceneSetup : MonoBehaviour
         ctRect.anchorMax = Vector2.one;
         ctRect.offsetMin = Vector2.zero;
         ctRect.offsetMax = Vector2.zero;
-        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
-        closeText.text = "X";
-        closeText.fontSize = 28;
-        closeText.alignment = TextAnchor.MiddleCenter;
-        closeText.color = Color.white;
-        closeText.font = GetDefaultFont();
+        Sprite shopCrossIcon = UIResourceLoader.IconCrossBrown;
+        if (shopCrossIcon != null)
+        {
+            UnityEngine.UI.Image shopCrossImg = closeTextGO.AddComponent<UnityEngine.UI.Image>();
+            shopCrossImg.sprite = shopCrossIcon;
+            shopCrossImg.color = Color.white;
+            shopCrossImg.raycastTarget = false;
+            ctRect.offsetMin = new Vector2(8, 8);
+            ctRect.offsetMax = new Vector2(-8, -8);
+        }
+        else
+        {
+            UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+            closeText.text = "X";
+            closeText.fontSize = 28;
+            closeText.alignment = TextAnchor.MiddleCenter;
+            closeText.color = Color.white;
+            closeText.font = GetDefaultFont();
+        }
 
         // 金币显示
         GameObject goldGO = new GameObject("GoldDisplay");
@@ -2477,13 +2760,18 @@ public class GameSceneSetup : MonoBehaviour
         tabsRect.sizeDelta = new Vector2(0, 45);
         var tabsLayout = tabsGO.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
         tabsLayout.childAlignment = TextAnchor.MiddleCenter;
-        tabsLayout.spacing = 10;
+        tabsLayout.spacing = 5;
         tabsLayout.childForceExpandWidth = false;
+        tabsLayout.padding = new RectOffset(5, 5, 0, 0);
 
-        // 创建分类按钮
-        shopPanel.weaponTab = CreateShopTabButton(tabsGO.transform, "武器");
-        shopPanel.armorTab = CreateShopTabButton(tabsGO.transform, "护甲");
-        shopPanel.consumableTab = CreateShopTabButton(tabsGO.transform, "消耗品");
+        // 创建分类按钮（7个分类）
+        shopPanel.weaponTab = CreateShopTabButton(tabsGO.transform, "武器", 75);
+        shopPanel.armorTab = CreateShopTabButton(tabsGO.transform, "护甲", 75);
+        shopPanel.helmetTab = CreateShopTabButton(tabsGO.transform, "头盔", 75);
+        shopPanel.pantsTab = CreateShopTabButton(tabsGO.transform, "护腿", 75);
+        shopPanel.ringTab = CreateShopTabButton(tabsGO.transform, "戒指", 75);
+        shopPanel.necklaceTab = CreateShopTabButton(tabsGO.transform, "项链", 75);
+        shopPanel.consumableTab = CreateShopTabButton(tabsGO.transform, "消耗品", 90);
 
         // 商品列表容器
         GameObject itemsGO = new GameObject("ItemsContainer");
@@ -2531,12 +2819,12 @@ public class GameSceneSetup : MonoBehaviour
     /// <summary>
     /// 创建商店分类标签按钮
     /// </summary>
-    UnityEngine.UI.Button CreateShopTabButton(Transform parent, string text)
+    UnityEngine.UI.Button CreateShopTabButton(Transform parent, string text, float width = 100)
     {
         GameObject btnGO = new GameObject($"Tab_{text}");
         btnGO.transform.SetParent(parent, false);
         var layout = btnGO.AddComponent<UnityEngine.UI.LayoutElement>();
-        layout.preferredWidth = 100;
+        layout.preferredWidth = width;
         layout.preferredHeight = 40;
 
         UnityEngine.UI.Image btnImg = btnGO.AddComponent<UnityEngine.UI.Image>();
@@ -2554,7 +2842,7 @@ public class GameSceneSetup : MonoBehaviour
         textRect.offsetMax = Vector2.zero;
         UnityEngine.UI.Text btnText = textGO.AddComponent<UnityEngine.UI.Text>();
         btnText.text = text;
-        btnText.fontSize = 18;
+        btnText.fontSize = 16;
         btnText.alignment = TextAnchor.MiddleCenter;
         btnText.color = Color.white;
         btnText.font = GetDefaultFont();
@@ -2591,7 +2879,18 @@ public class GameSceneSetup : MonoBehaviour
         contentRect.offsetMin = Vector2.zero;
         contentRect.offsetMax = Vector2.zero;
         UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
-        contentBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+        // 使用Kenney棕色面板（技能面板）
+        Sprite skillPanelBg = UIResourceLoader.PanelBrown;
+        if (skillPanelBg != null)
+        {
+            contentBg.sprite = skillPanelBg;
+            contentBg.type = UnityEngine.UI.Image.Type.Sliced;
+            contentBg.color = Color.white;
+        }
+        else
+        {
+            contentBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+        }
 
         // 标题
         GameObject titleGO = new GameObject("Title");
@@ -2606,11 +2905,14 @@ public class GameSceneSetup : MonoBehaviour
         titleText.fontSize = 32;
         titleText.fontStyle = FontStyle.Bold;
         titleText.alignment = TextAnchor.MiddleCenter;
-        titleText.color = new Color(0.4f, 0.7f, 1f);
+        titleText.color = new Color(1f, 0.9f, 0.6f); // 暖金色文字
         titleText.font = GetDefaultFont();
+        UnityEngine.UI.Outline skillTitleOutline = titleGO.AddComponent<UnityEngine.UI.Outline>();
+        skillTitleOutline.effectColor = new Color(0, 0, 0, 0.6f);
+        skillTitleOutline.effectDistance = new Vector2(1, -1);
         skillPanel.titleText = titleText;
 
-        // 关闭按钮
+        // 关闭按钮 - 使用Kenney方形按钮
         GameObject closeBtnGO = new GameObject("CloseButton");
         closeBtnGO.transform.SetParent(panelGO.transform, false);
         RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
@@ -2619,12 +2921,22 @@ public class GameSceneSetup : MonoBehaviour
         closeRect.anchoredPosition = new Vector2(-30, -30);
         closeRect.sizeDelta = new Vector2(50, 50);
         UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
-        closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        Sprite skCloseBtnSprite = UIResourceLoader.ButtonSquareBrown;
+        if (skCloseBtnSprite != null)
+        {
+            closeImg.sprite = skCloseBtnSprite;
+            closeImg.type = UnityEngine.UI.Image.Type.Sliced;
+            closeImg.color = Color.white;
+        }
+        else
+        {
+            closeImg.color = new Color(0.8f, 0.2f, 0.2f);
+        }
         UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
         closeBtn.onClick.AddListener(() => skillPanel.Hide());
         skillPanel.closeButton = closeBtn;
 
-        // 关闭按钮文字
+        // 关闭按钮图标
         GameObject closeTextGO = new GameObject("Text");
         closeTextGO.transform.SetParent(closeBtnGO.transform, false);
         RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
@@ -2632,12 +2944,25 @@ public class GameSceneSetup : MonoBehaviour
         ctRect.anchorMax = Vector2.one;
         ctRect.offsetMin = Vector2.zero;
         ctRect.offsetMax = Vector2.zero;
-        UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
-        closeText.text = "X";
-        closeText.fontSize = 28;
-        closeText.alignment = TextAnchor.MiddleCenter;
-        closeText.color = Color.white;
-        closeText.font = GetDefaultFont();
+        Sprite skCrossIcon = UIResourceLoader.IconCrossBrown;
+        if (skCrossIcon != null)
+        {
+            UnityEngine.UI.Image skCrossImg = closeTextGO.AddComponent<UnityEngine.UI.Image>();
+            skCrossImg.sprite = skCrossIcon;
+            skCrossImg.color = Color.white;
+            skCrossImg.raycastTarget = false;
+            ctRect.offsetMin = new Vector2(8, 8);
+            ctRect.offsetMax = new Vector2(-8, -8);
+        }
+        else
+        {
+            UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
+            closeText.text = "X";
+            closeText.fontSize = 28;
+            closeText.alignment = TextAnchor.MiddleCenter;
+            closeText.color = Color.white;
+            closeText.font = GetDefaultFont();
+        }
 
         // 金币显示
         GameObject goldGO = new GameObject("GoldDisplay");

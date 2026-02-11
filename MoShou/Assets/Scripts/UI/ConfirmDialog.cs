@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using System;
 
 namespace MoShou.UI
@@ -52,11 +53,31 @@ namespace MoShou.UI
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
                 CreateDialogUI();
+
+                // 监听场景切换，自动隐藏弹窗
+                SceneManager.sceneLoaded += OnSceneLoaded;
             }
             else if (_instance != this)
             {
                 Destroy(gameObject);
             }
+        }
+
+        void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            if (_instance == this) _instance = null;
+        }
+
+        /// <summary>
+        /// 场景切换时自动隐藏弹窗，避免残留
+        /// </summary>
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            Hide();
+            // 清除回调，防止场景切换后回调失效
+            onConfirm = null;
+            onCancel = null;
         }
 
         /// <summary>

@@ -315,7 +315,16 @@ namespace MoShou.UI
             PlayButtonFeedback(retryButton);
 
             Hide();
-            SceneManager.LoadScene("GameScene");
+            Time.timeScale = 1f;
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.RetryLevel();
+            }
+            else
+            {
+                SceneManager.LoadScene("GameScene");
+            }
         }
 
         private void OnReturnClick()
@@ -323,7 +332,16 @@ namespace MoShou.UI
             PlayButtonFeedback(returnButton);
 
             Hide();
-            SceneManager.LoadScene("StageSelect");
+            Time.timeScale = 1f;
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.ReturnToStageSelect();
+            }
+            else
+            {
+                SceneManager.LoadScene("StageSelect");
+            }
         }
 
         private void OnWatchAdClick()
@@ -403,7 +421,7 @@ namespace MoShou.UI
                 }
             }
 
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSecondsRealtime(0.2f);
 
             // 骷髅图标动画
             if (skullIcon != null && UITween.Instance != null)
@@ -412,7 +430,7 @@ namespace MoShou.UI
                 UITween.Instance.ScaleTo(skullIcon.transform, Vector3.one, 0.4f, null);
             }
 
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSecondsRealtime(0.3f);
 
             // DEFEAT横幅震动
             if (defeatTitleText != null && UITween.Instance != null)

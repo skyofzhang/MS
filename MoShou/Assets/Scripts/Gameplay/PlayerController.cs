@@ -1,6 +1,8 @@
 using UnityEngine;
 using MoShou.UI;
 using MoShou.Effects;
+using MoShou.Systems;
+using MoShou.Data;
 
 /// <summary>
 /// 玩家控制器 - 符合AI开发知识库§4属性规范
@@ -26,12 +28,12 @@ public class PlayerController : MonoBehaviour
     public float currentHealth;
 
     [Header("Skills - 知识库§4技能数据表")]
-    // SK001 多重箭: CD=8s, 倍率=0.8, 箭数=5, 范围=10m, 角度=60°
+    // SK001 多重箭: CD=8s, 倍率=0.8, 箭数=5, 范围=10m, 角度=40°
     public float skill1Cooldown = 8f;
     public float skill1Multiplier = 0.8f;
     public int skill1ArrowCount = 5;
     public float skill1Range = 10f;
-    public float skill1Angle = 60f;
+    public float skill1Angle = 40f; // 收窄散布角度
 
     // SK002 穿透箭: CD=10s, 倍率=2.0, 穿透=true, 范围=15m
     public float skill2Cooldown = 10f;
@@ -97,6 +99,15 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        // 从 GameSettings.json 读取移动/攻击参数（覆盖硬编码默认值）
+        if (ConfigManager.Instance?.IsLoaded == true)
+        {
+            var cfg = ConfigManager.Instance.Settings.playerSettings;
+            moveSpeed = cfg.moveSpeed;
+            attackCooldown = cfg.attackSpeed;
+            Debug.Log($"[PlayerController] 从GameSettings加载: moveSpeed={cfg.moveSpeed}, attackSpeed={cfg.attackSpeed}");
+        }
+
         controller = GetComponent<CharacterController>();
         if (controller == null)
         {
@@ -113,6 +124,11 @@ public class PlayerController : MonoBehaviour
         modelTransform = transform.childCount > 0 ? transform.GetChild(0) : transform;
         originalScale = modelTransform.localScale;
 
+        // 使用装备加成后的总生命值
+        if (SaveSystem.Instance?.CurrentPlayerStats != null)
+        {
+            maxHealth = SaveSystem.Instance.CurrentPlayerStats.GetTotalMaxHp();
+        }
         currentHealth = maxHealth;
 
         // 初始化动画
@@ -432,8 +448,13 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.LookRotation(direction);
         }
 
-        // 判定暴击
-        bool isCritical = Random.value < critChance;
+        // 判定暴击（使用装备加成后的暴击率）
+        float totalCritChance = critChance;
+        if (SaveSystem.Instance?.CurrentPlayerStats != null)
+        {
+            totalCritChance = SaveSystem.Instance.CurrentPlayerStats.GetTotalCritRate();
+        }
+        bool isCritical = Random.value < totalCritChance;
         float finalDamage = GetCurrentAttackDamage();
         if (isCritical)
         {
@@ -563,7 +584,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 获取当前实际攻击力（含BUFF）
+    /// 获取当前实际攻击力（含装备加成+BUFF）
     /// </summary>
     public float GetCurrentAttackDamage()
     {
@@ -572,7 +593,19 @@ public class PlayerController : MonoBehaviour
         {
             attackBuffMultiplier = 1f;
         }
-        return attackDamage * attackBuffMultiplier;
+
+        // 使用PlayerStats的总攻击力（含装备加成）代替硬编码的attackDamage
+        float totalAttack = attackDamage; // 基础值作为fallback
+        if (SaveSystem.Instance != null && SaveSystem.Instance.CurrentPlayerStats != null)
+        {
+            totalAttack = SaveSystem.Instance.CurrentPlayerStats.GetTotalAttack();
+        }
+        else if (EquipmentManager.Instance != null)
+        {
+            totalAttack = attackDamage + EquipmentManager.Instance.TotalAttackBonus;
+        }
+
+        return totalAttack * attackBuffMultiplier;
     }
 
     void PlaySkillVFX(string vfxName)
@@ -612,11 +645,11 @@ public class PlayerController : MonoBehaviour
 
         if (skillName.Contains("Multi"))
         {
-            // 多重箭 - 扇形发射5支箭（橙色）
+            // 多重箭 - 扇形发射5支箭（橙色），收窄散布角度
             Color effectColor = new Color(1f, 0.5f, 0f, 0.9f);
             for (int i = 0; i < 5; i++)
             {
-                float angle = -30f + i * 15f;
+                float angle = -20f + i * 10f; // 从-20°到+20°，每支间隔10°
                 Vector3 dir = Quaternion.Euler(0, angle, 0) * transform.forward;
                 CreateSkillProjectile(firePos, dir, effectColor, skill1Range, 0.12f,
                     MoShou.Combat.ProjectileTrail.TrailPreset.MultiShot);
@@ -859,8 +892,17 @@ public class PlayerController : MonoBehaviour
     
     public void TakeDamage(float damage)
     {
-        // 应用防御减伤
-        float actualDamage = CombatSystem.CalculateDamage(damage, defense);
+        // 应用防御减伤（使用装备加成后的总防御力）
+        float totalDefense = defense;
+        if (SaveSystem.Instance?.CurrentPlayerStats != null)
+        {
+            totalDefense = SaveSystem.Instance.CurrentPlayerStats.GetTotalDefense();
+        }
+        else if (EquipmentManager.Instance != null)
+        {
+            totalDefense = defense + EquipmentManager.Instance.TotalDefenseBonus;
+        }
+        float actualDamage = CombatSystem.CalculateDamage(damage, totalDefense);
 
         // 先消耗护盾
         if (shieldAmount > 0)

@@ -141,15 +141,10 @@ public class MonsterController : MonoBehaviour
             // 攻击玩家
             AttackPlayer();
         }
-        else if (distanceToPlayer <= detectRange)
-        {
-            // 追踪玩家
-            ChasePlayer();
-        }
         else
         {
-            // 待机/巡逻
-            Idle();
+            // 始终追击：只要猎人活着，怪物就朝猎人方向行走
+            ChasePlayer();
         }
 
         // 应用重力

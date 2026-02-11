@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MoShou.Utils;
 using MoShou.UI;
+using MoShou.Data;
 
 /// <summary>
 /// 怪物生成器 - 符合AI开发知识库§2 RULE-RES-002, §4怪物属性表
@@ -47,6 +48,11 @@ public class MonsterSpawner : MonoBehaviour
     private bool isSpawning = false;
     private Dictionary<string, GameObject> cachedPrefabs = new Dictionary<string, GameObject>();
 
+    // 配置驱动的怪物数据（优先于硬编码 MonsterStats）
+    private Dictionary<string, MonsterConfigEntry> configMonsterStats;
+    // 当前关卡的配置数据（驱动波次 enemyIds）
+    private StageConfigEntry currentStageConfig;
+
     /// <summary>
     /// 是否正在生成怪物
     /// </summary>
@@ -71,11 +77,76 @@ public class MonsterSpawner : MonoBehaviour
         // 强制覆盖序列化值，确保使用最新配置
         // Unity场景中保存的旧值会覆盖代码默认值，所以必须在Awake中强制设置
         spawnInterval = 1.0f;      // 性能优化：降低生成频率
-        maxMonsters = 15;          // 性能优化：减少同屏怪物数量
-        monstersPerWave = 10;      // 性能优化：每波10只
+        maxMonsters = 30;          // 同屏怪物上限
+        monstersPerWave = 20;      // 每波20只
         wavesPerLevel = 3;         // 3波
 
         Debug.Log($"[Spawner] 强制配置: monstersPerWave={monstersPerWave}, maxMonsters={maxMonsters}, spawnInterval={spawnInterval}");
+
+        // 加载配置文件（怪物属性 + 关卡波次）
+        LoadConfigs();
+    }
+
+    /// <summary>
+    /// 从配置文件加载怪物属性和关卡波次数据
+    /// 失败时静默降级到硬编码数据
+    /// </summary>
+    void LoadConfigs()
+    {
+        // 加载怪物配置
+        TextAsset monsterConfigFile = Resources.Load<TextAsset>("Configs/MonsterConfigs");
+        if (monsterConfigFile != null)
+        {
+            try
+            {
+                MonsterConfigTable table = JsonUtility.FromJson<MonsterConfigTable>(monsterConfigFile.text);
+                if (table?.monsters != null && table.monsters.Length > 0)
+                {
+                    configMonsterStats = new Dictionary<string, MonsterConfigEntry>();
+                    foreach (var m in table.monsters)
+                    {
+                        configMonsterStats[m.id] = m;
+                    }
+                    Debug.Log($"[Spawner] 从MonsterConfigs加载了 {configMonsterStats.Count} 个怪物配置");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[Spawner] 解析MonsterConfigs失败: {e.Message}，使用硬编码数据");
+            }
+        }
+
+        // 加载关卡配置
+        TextAsset stageConfigFile = Resources.Load<TextAsset>("Configs/StageConfigs");
+        if (stageConfigFile != null)
+        {
+            try
+            {
+                StageConfigTable stageTable = JsonUtility.FromJson<StageConfigTable>(stageConfigFile.text);
+                if (stageTable?.stages != null)
+                {
+                    int currentLevel = GameManager.Instance != null ? GameManager.Instance.CurrentLevel : 1;
+                    foreach (var stage in stageTable.stages)
+                    {
+                        if (stage.id == currentLevel)
+                        {
+                            currentStageConfig = stage;
+                            wavesPerLevel = stage.waveCount;
+                            Debug.Log($"[Spawner] 从StageConfigs加载关卡{currentLevel}配置: {stage.name}, {stage.waveCount}波");
+                            break;
+                        }
+                    }
+                    if (currentStageConfig == null)
+                    {
+                        Debug.LogWarning($"[Spawner] StageConfigs中未找到关卡{currentLevel}，使用默认波次配置");
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[Spawner] 解析StageConfigs失败: {e.Message}，使用默认波次配置");
+            }
+        }
     }
 
     void Start()
@@ -182,12 +253,25 @@ public class MonsterSpawner : MonoBehaviour
         SetupMonsterAnimator(monster, monsterId);
 
         // 添加血条显示
-        if (MonsterStats.TryGetValue(monsterId, out MonsterData statData))
         {
             float waveMultiplier = 1f + (currentWave - 1) * 0.15f;
-            float maxHP = statData.hp * waveMultiplier;
-            EnemyHealthBar.CreateForEnemy(monster, maxHP);
-            Debug.Log($"[Spawner] 为 {monster.name} 添加血条, HP: {maxHP}");
+            float maxHP = 0f;
+
+            // 优先使用配置数据
+            if (configMonsterStats != null && configMonsterStats.TryGetValue(monsterId, out MonsterConfigEntry cfgEntry))
+            {
+                maxHP = cfgEntry.baseHp * waveMultiplier;
+            }
+            else if (MonsterStats.TryGetValue(monsterId, out MonsterData statData))
+            {
+                maxHP = statData.hp * waveMultiplier;
+            }
+
+            if (maxHP > 0)
+            {
+                EnemyHealthBar.CreateForEnemy(monster, maxHP);
+                Debug.Log($"[Spawner] 为 {monster.name} 添加血条, HP: {maxHP}");
+            }
         }
 
         activeMonsters.Add(monster);
@@ -195,6 +279,22 @@ public class MonsterSpawner : MonoBehaviour
 
     string GetMonsterIdByWave(int wave)
     {
+        // 优先从关卡配置读取波次敌人
+        if (currentStageConfig?.waves != null)
+        {
+            int waveIndex = wave - 1; // waves 从1开始，数组从0开始
+            if (waveIndex >= 0 && waveIndex < currentStageConfig.waves.Length)
+            {
+                var waveData = currentStageConfig.waves[waveIndex];
+                if (waveData.enemyIds != null && waveData.enemyIds.Length > 0)
+                {
+                    // 从该波次的敌人列表中随机选一个
+                    return waveData.enemyIds[Random.Range(0, waveData.enemyIds.Length)];
+                }
+            }
+        }
+
+        // Fallback: 硬编码的波次逻辑
         // 普通波次：史莱姆、哥布林、狼轮换
         // 每5波出一次精英
         // BOSS波单独处理
@@ -243,11 +343,27 @@ public class MonsterSpawner : MonoBehaviour
 
     void SetupMonsterById(MonsterController mc, string monsterId)
     {
+        float waveMultiplier = 1f + (currentWave - 1) * 0.15f;
+
+        // 优先使用配置文件数据
+        if (configMonsterStats != null && configMonsterStats.TryGetValue(monsterId, out MonsterConfigEntry configData))
+        {
+            mc.SetupMonster(
+                monsterId,
+                configData.name,
+                configData.baseHp * waveMultiplier,
+                configData.baseAttack * waveMultiplier,
+                configData.baseDefense,
+                configData.moveSpeed,
+                configData.expDrop,
+                configData.goldDrop
+            );
+            return;
+        }
+
+        // Fallback: 硬编码怪物属性表
         if (MonsterStats.TryGetValue(monsterId, out MonsterData data))
         {
-            // 应用波次加成
-            float waveMultiplier = 1f + (currentWave - 1) * 0.15f;
-
             mc.SetupMonster(
                 monsterId,
                 data.name,
@@ -261,7 +377,7 @@ public class MonsterSpawner : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[Spawner] No stats found for {monsterId}");
+            Debug.LogWarning($"[Spawner] No stats found for {monsterId} in config or hardcoded data");
         }
     }
 

@@ -120,15 +120,18 @@ public class SimpleDropBehavior : MonoBehaviour
             if (player != null)
             {
                 Vector3 targetPos = player.position + Vector3.up * 0.8f;
+                float distance = Vector3.Distance(transform.position, targetPos);
+
+                // 加速效果（越近越快）
+                float speedMultiplier = Mathf.Lerp(2f, 1f, distance / magnetRadius);
                 transform.position = Vector3.MoveTowards(
                     transform.position,
                     targetPos,
-                    magnetSpeed * Time.deltaTime
+                    magnetSpeed * speedMultiplier * Time.deltaTime
                 );
 
-                // 加速效果（越近越快）
-                float distance = Vector3.Distance(transform.position, targetPos);
-                if (distance < pickupRadius)
+                // 到达目标点时立刻拾取并销毁
+                if (distance < 0.3f)
                 {
                     Pickup();
                 }

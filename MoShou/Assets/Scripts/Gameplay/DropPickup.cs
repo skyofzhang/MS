@@ -79,14 +79,15 @@ namespace MoShou.Gameplay
             // 吸附到玩家
             if (isBeingPickedUp && playerTransform != null)
             {
+                Vector3 targetPos = playerTransform.position + Vector3.up * 0.5f;
                 transform.position = Vector3.MoveTowards(
                     transform.position,
-                    playerTransform.position + Vector3.up * 0.5f,
+                    targetPos,
                     magnetSpeed * Time.deltaTime
                 );
 
-                // 到达玩家位置时拾取
-                if (Vector3.Distance(transform.position, playerTransform.position) < 0.5f)
+                // 到达目标位置时立刻拾取（与移动目标点一致）
+                if (Vector3.Distance(transform.position, targetPos) < 0.3f)
                 {
                     Pickup();
                 }

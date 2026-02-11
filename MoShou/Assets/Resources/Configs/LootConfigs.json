@@ -1,48 +1,46 @@
 {
-  "lootTables": {
-    "common_enemy": {
-      "goldRange": [5, 15],
-      "expRange": [3, 8],
+  "dropTables": [
+    {
+      "id": "DROP_NORMAL",
+      "goldMin": 5,
+      "goldMax": 15,
+      "expMin": 3,
+      "expMax": 8,
       "drops": [
-        {"itemId": "POTION_HP_SMALL", "chance": 0.10, "countRange": [1, 1]},
-        {"itemId": "MAT_IRON_ORE", "chance": 0.15, "countRange": [1, 2]}
-      ]
+        {"itemId": "POTION_HP_SMALL", "dropRate": 0.10, "minCount": 1, "maxCount": 1},
+        {"itemId": "MAT_IRON_ORE", "dropRate": 0.15, "minCount": 1, "maxCount": 2}
+      ],
+      "equipmentChance": 0.0,
+      "equipmentPool": []
     },
-    "elite_enemy": {
-      "goldRange": [30, 80],
-      "expRange": [20, 50],
+    {
+      "id": "DROP_ELITE",
+      "goldMin": 30,
+      "goldMax": 80,
+      "expMin": 20,
+      "expMax": 50,
       "drops": [
-        {"itemId": "POTION_HP_MEDIUM", "chance": 0.15, "countRange": [1, 1]},
-        {"itemId": "MAT_MAGIC_STONE", "chance": 0.10, "countRange": [1, 2]},
-        {"itemId": "MAT_MONSTER_CORE", "chance": 0.08, "countRange": [1, 1]},
-        {"itemId": "SCROLL_ATK_BUFF", "chance": 0.05, "countRange": [1, 1]}
+        {"itemId": "POTION_HP_MEDIUM", "dropRate": 0.15, "minCount": 1, "maxCount": 1},
+        {"itemId": "MAT_MAGIC_STONE", "dropRate": 0.10, "minCount": 1, "maxCount": 2},
+        {"itemId": "MAT_MONSTER_CORE", "dropRate": 0.08, "minCount": 1, "maxCount": 1},
+        {"itemId": "SCROLL_ATK_BUFF", "dropRate": 0.05, "minCount": 1, "maxCount": 1}
       ],
       "equipmentChance": 0.08,
       "equipmentPool": ["WPN_002", "ARM_002", "HLM_002"]
     },
-    "boss_enemy": {
-      "goldRange": [200, 500],
-      "expRange": [150, 300],
-      "guaranteedDrops": [
-        {"itemId": "MAT_MONSTER_CORE", "countRange": [2, 5]}
-      ],
+    {
+      "id": "DROP_BOSS",
+      "goldMin": 200,
+      "goldMax": 500,
+      "expMin": 150,
+      "expMax": 300,
       "drops": [
-        {"itemId": "POTION_HP_LARGE", "chance": 0.50, "countRange": [1, 2]},
-        {"itemId": "GEM_RUBY", "chance": 0.20, "countRange": [1, 1]},
-        {"itemId": "GEM_SAPPHIRE", "chance": 0.20, "countRange": [1, 1]}
+        {"itemId": "POTION_HP_LARGE", "dropRate": 0.50, "minCount": 1, "maxCount": 2},
+        {"itemId": "GEM_RUBY", "dropRate": 0.20, "minCount": 1, "maxCount": 1},
+        {"itemId": "GEM_SAPPHIRE", "dropRate": 0.20, "minCount": 1, "maxCount": 1}
       ],
       "equipmentChance": 0.25,
       "equipmentPool": ["WPN_003", "WPN_004", "ARM_003"]
     }
-  },
-  "goldPickupValue": {
-    "small": 5,
-    "medium": 20,
-    "large": 50
-  },
-  "expOrbValue": {
-    "small": 5,
-    "medium": 15,
-    "large": 40
-  }
+  ]
 }

@@ -159,8 +159,8 @@ namespace MoShou.UI
             titleRect.anchorMin = new Vector2(0, 1);
             titleRect.anchorMax = new Vector2(1, 1);
             titleRect.pivot = new Vector2(0.5f, 1);
-            titleRect.anchoredPosition = new Vector2(0, -50);
-            titleRect.sizeDelta = new Vector2(0, 100);
+            titleRect.anchoredPosition = new Vector2(0, -10);
+            titleRect.sizeDelta = new Vector2(0, 80);
 
             // 标题背景
             Image titleBg = titleBar.AddComponent<Image>();
@@ -172,7 +172,7 @@ namespace MoShou.UI
             Text titleText = titleTextObj.AddComponent<Text>();
             titleText.text = "SELECT STAGE";
             titleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            titleText.fontSize = 42;
+            titleText.fontSize = 36;
             titleText.fontStyle = FontStyle.Bold;
             titleText.alignment = TextAnchor.MiddleCenter;
             titleText.color = UIStyleHelper.Colors.Gold;
@@ -197,8 +197,8 @@ namespace MoShou.UI
             containerRect.anchorMin = new Vector2(0, 1);
             containerRect.anchorMax = new Vector2(1, 1);
             containerRect.pivot = new Vector2(0.5f, 1);
-            containerRect.anchoredPosition = new Vector2(0, -160);
-            containerRect.sizeDelta = new Vector2(0, 80);
+            containerRect.anchoredPosition = new Vector2(0, -100);
+            containerRect.sizeDelta = new Vector2(0, 60);
 
             // 水平布局
             HorizontalLayoutGroup layout = tabContainer.AddComponent<HorizontalLayoutGroup>();
@@ -207,7 +207,7 @@ namespace MoShou.UI
             layout.childControlHeight = true;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
-            layout.spacing = 20;
+            layout.spacing = 15;
             layout.padding = new RectOffset(50, 50, 5, 5);
 
             // 创建章节标签
@@ -224,7 +224,7 @@ namespace MoShou.UI
             tabObj.transform.SetParent(parent);
 
             RectTransform tabRect = tabObj.AddComponent<RectTransform>();
-            tabRect.sizeDelta = new Vector2(200, 70);
+            tabRect.sizeDelta = new Vector2(180, 50);
 
             // 按钮背景
             Image tabBg = tabObj.AddComponent<Image>();
@@ -268,8 +268,8 @@ namespace MoShou.UI
             GameObject scrollObj = new GameObject("StageScrollView");
             scrollObj.transform.SetParent(transform);
             RectTransform scrollRect = scrollObj.AddComponent<RectTransform>();
-            scrollRect.anchorMin = new Vector2(0, 0.15f);
-            scrollRect.anchorMax = new Vector2(1, 0.75f);
+            scrollRect.anchorMin = new Vector2(0, 0.12f);
+            scrollRect.anchorMax = new Vector2(1, 0.78f);
             scrollRect.offsetMin = new Vector2(30, 0);
             scrollRect.offsetMax = new Vector2(-30, 0);
 
@@ -327,8 +327,8 @@ namespace MoShou.UI
             btnRect.anchorMin = new Vector2(0, 1);
             btnRect.anchorMax = new Vector2(0, 1);
             btnRect.pivot = new Vector2(0, 1);
-            btnRect.anchoredPosition = new Vector2(20, -20);
-            btnRect.sizeDelta = new Vector2(100, 60);
+            btnRect.anchoredPosition = new Vector2(20, -15);
+            btnRect.sizeDelta = new Vector2(90, 50);
 
             Image btnBg = btnObj.AddComponent<Image>();
             btnBg.color = new Color(0.3f, 0.32f, 0.38f, 0.9f);

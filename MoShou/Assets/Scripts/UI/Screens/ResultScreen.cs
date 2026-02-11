@@ -322,13 +322,19 @@ namespace MoShou.UI
 
             Hide();
 
-            // 加载下一关
+            // ★ 关键修复：恢复TimeScale（Victory时为0），否则下一关无法运行
+            Time.timeScale = 1f;
+
+            // 加载下一关 - 使用StartLevel正确重置所有状态（波次、击杀数等）
             int nextStage = (currentData?.stageId ?? 0) + 1;
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.CurrentLevel = nextStage;
+                GameManager.Instance.StartLevel(nextStage);
             }
-            SceneManager.LoadScene("GameScene");
+            else
+            {
+                SceneManager.LoadScene("GameScene");
+            }
         }
 
         private void OnRetryClick()
@@ -336,7 +342,19 @@ namespace MoShou.UI
             PlayButtonFeedback(retryButton);
 
             Hide();
-            SceneManager.LoadScene("GameScene");
+
+            // ★ 恢复TimeScale
+            Time.timeScale = 1f;
+
+            // 使用StartLevel重置状态
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.RetryLevel();
+            }
+            else
+            {
+                SceneManager.LoadScene("GameScene");
+            }
         }
 
         private void OnReturnClick()
@@ -344,7 +362,18 @@ namespace MoShou.UI
             PlayButtonFeedback(returnButton);
 
             Hide();
-            SceneManager.LoadScene("StageSelect");
+
+            // ★ 恢复TimeScale
+            Time.timeScale = 1f;
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.ReturnToStageSelect();
+            }
+            else
+            {
+                SceneManager.LoadScene("StageSelect");
+            }
         }
 
         private void PlayButtonFeedback(Button button)
@@ -392,6 +421,7 @@ namespace MoShou.UI
 
         private IEnumerator PlayShowAnimation(ResultData data)
         {
+            // ★ 关键修复：Victory状态下Time.timeScale=0，必须使用WaitForSecondsRealtime
             // 淡入
             if (canvasGroup != null)
             {
@@ -406,18 +436,24 @@ namespace MoShou.UI
                 }
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSecondsRealtime(0.5f);
+
+            // 立即显示数据（确保可见）
+            if (killCountText != null)
+                killCountText.text = data.killCount.ToString();
+            if (waveInfoText != null)
+                waveInfoText.text = $"{data.wavesCompleted}/{data.totalWaves}";
 
             // 星星动画
             yield return StartCoroutine(AnimateStars(data.starsEarned));
 
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSecondsRealtime(0.3f);
 
             // 数字滚动动画
             AnimateGoldCounter(data.goldReward);
             AnimateExpCounter(data.expReward);
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSecondsRealtime(0.5f);
 
             // 显示物品奖励
             if (data.itemRewards != null)
@@ -458,7 +494,7 @@ namespace MoShou.UI
 
             for (int i = 0; i < Mathf.Min(count, starImages.Length); i++)
             {
-                yield return new WaitForSeconds(starAnimationDelay);
+                yield return new WaitForSecondsRealtime(starAnimationDelay);
 
                 if (starImages[i] != null)
                 {
@@ -550,25 +586,17 @@ namespace MoShou.UI
         {
             if (SaveSystem.Instance == null) return;
 
-            // 添加金币和经验
-            if (SaveSystem.Instance.CurrentPlayerStats != null)
-            {
-                SaveSystem.Instance.CurrentPlayerStats.AddGold(data.goldReward);
-                SaveSystem.Instance.CurrentPlayerStats.AddExperience(data.expReward);
-            }
+            // ★ 注意：金币和经验已在GameManager.HandleVictory中添加，这里不重复添加
+            // 只确保关卡进度和星级被保存
 
-            // 更新关卡进度
+            // 更新关卡进度（安全的重复调用，MarkStageCleared会去重）
             SaveSystem.Instance.MarkStageCleared(data.stageId);
 
-            // 更新星级
-            string stageKey = $"stage_{data.stageId}_stars";
-            int currentStars = PlayerPrefs.GetInt(stageKey, 0);
-            if (data.starsEarned > currentStars)
-            {
-                PlayerPrefs.SetInt(stageKey, data.starsEarned);
-            }
+            // 更新星级 - 使用SaveSystem的方法
+            SaveSystem.Instance.SetStageStars(data.stageId, data.starsEarned);
 
             SaveSystem.Instance.SaveGame();
+            Debug.Log($"[ResultScreen] 已保存关卡 {data.stageId} 进度，星级: {data.starsEarned}");
         }
 
         public void Hide()

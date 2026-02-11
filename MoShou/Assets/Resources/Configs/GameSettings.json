@@ -45,6 +45,10 @@
       "range": 10.0
     }
   },
+  "defeatSettings": {
+    "partialGoldRatio": 0.5,
+    "partialExpRatio": 0.5
+  },
   "uiSettings": {
     "damagePopupDuration": 1.0,
     "damagePopupRiseHeight": 50,

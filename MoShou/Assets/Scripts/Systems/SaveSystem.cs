@@ -31,6 +31,9 @@ namespace MoShou.Systems
 
         // 关卡星级（stageId -> stars）
         public SerializableDictionary<int, int> stageStars = new SerializableDictionary<int, int>();
+
+        // 技能等级（skillId -> level）
+        public SerializableDictionary<string, int> skillLevels = new SerializableDictionary<string, int>();
     }
 
     /// <summary>
@@ -88,6 +91,9 @@ namespace MoShou.Systems
 
         private float playTimeThisSession = 0f;
 
+        // 缓存的技能等级数据（SkillUpgradePanel初始化时读取）
+        private Dictionary<string, int> _cachedSkillLevels;
+
         private void Awake()
         {
             if (Instance == null)
@@ -142,6 +148,22 @@ namespace MoShou.Systems
                     totalPlayTime = GetTotalPlayTime() + (int)playTimeThisSession
                 };
 
+                // ★ 保留已有的关卡进度数据（MarkStageCleared/SetStageStars 已直接写入PlayerPrefs）
+                if (PlayerPrefs.HasKey(SAVE_KEY))
+                {
+                    try
+                    {
+                        SaveData existing = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                        if (existing != null)
+                        {
+                            saveData.highestUnlockedStage = existing.highestUnlockedStage;
+                            saveData.clearedStages = existing.clearedStages ?? new List<int>();
+                            saveData.stageStars = existing.stageStars;
+                        }
+                    }
+                    catch { }
+                }
+
                 // 保存装备数据
                 if (EquipmentManager.Instance != null)
                 {
@@ -154,6 +176,30 @@ namespace MoShou.Systems
                 {
                     var invData = InventoryManager.Instance.GetSaveData();
                     saveData.inventory = SerializableDictionary<string, int>.FromDictionary(invData);
+                }
+
+                // 保存技能等级数据
+                if (MoShou.UI.SkillUpgradePanel.Instance != null)
+                {
+                    var skillData = MoShou.UI.SkillUpgradePanel.Instance.GetSkillLevelSaveData();
+                    if (skillData != null && skillData.Count > 0)
+                    {
+                        saveData.skillLevels = SerializableDictionary<string, int>.FromDictionary(skillData);
+                        // 同步更新缓存
+                        _cachedSkillLevels = skillData;
+                    }
+                    else if (_cachedSkillLevels != null && _cachedSkillLevels.Count > 0)
+                    {
+                        // Panel存在但未初始化完成（返回null），使用缓存数据
+                        saveData.skillLevels = SerializableDictionary<string, int>.FromDictionary(_cachedSkillLevels);
+                        Debug.Log($"[SaveSystem] SkillUpgradePanel未完全初始化，使用缓存的技能数据({_cachedSkillLevels.Count}个技能)");
+                    }
+                }
+                else if (_cachedSkillLevels != null && _cachedSkillLevels.Count > 0)
+                {
+                    // Panel不存在时（如在其他场景），保留缓存的技能数据，避免覆盖为空
+                    saveData.skillLevels = SerializableDictionary<string, int>.FromDictionary(_cachedSkillLevels);
+                    Debug.Log($"[SaveSystem] SkillUpgradePanel不存在，使用缓存的技能数据({_cachedSkillLevels.Count}个技能)");
                 }
 
                 string json = JsonUtility.ToJson(saveData, true);
@@ -196,6 +242,10 @@ namespace MoShou.Systems
                         {
                             InventoryManager.Instance.LoadSaveData(saveData.inventory.ToDictionary());
                         }
+
+                        // 技能等级数据会在SkillUpgradePanel初始化时通过GetSavedSkillLevels()读取
+                        // 这里缓存到内存供后续读取
+                        _cachedSkillLevels = saveData.skillLevels?.ToDictionary();
 
                         Debug.Log($"[SaveSystem] 游戏已加载: 等级{CurrentPlayerStats.level}, 金币{CurrentPlayerStats.gold}");
                         OnLoadCompleted?.Invoke();
@@ -250,6 +300,33 @@ namespace MoShou.Systems
             PlayerPrefs.Save();
             CreateNewSave();
             Debug.Log("[SaveSystem] 存档已删除");
+        }
+
+        /// <summary>
+        /// 获取已保存的技能等级数据
+        /// </summary>
+        public Dictionary<string, int> GetSavedSkillLevels()
+        {
+            if (_cachedSkillLevels != null)
+            {
+                return _cachedSkillLevels;
+            }
+
+            // 尝试从存档读取
+            if (PlayerPrefs.HasKey(SAVE_KEY))
+            {
+                try
+                {
+                    SaveData data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
+                    if (data?.skillLevels != null)
+                    {
+                        _cachedSkillLevels = data.skillLevels.ToDictionary();
+                        return _cachedSkillLevels;
+                    }
+                }
+                catch { }
+            }
+            return null;
         }
 
         /// <summary>
@@ -393,7 +470,11 @@ namespace MoShou.Systems
                 currentData.highestLevel = stageId;
             }
 
-            // Will be persisted on next SaveGame call
+            // ★ 直接持久化到 PlayerPrefs（与 SetStageStars 相同模式）
+            string json = JsonUtility.ToJson(currentData, true);
+            PlayerPrefs.SetString(SAVE_KEY, json);
+            PlayerPrefs.Save();
+            Debug.Log($"[SaveSystem] MarkStageCleared persisted: stage={stageId}, highestUnlockedStage={currentData.highestUnlockedStage}");
         }
 
         /// <summary>

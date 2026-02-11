@@ -33,6 +33,10 @@ namespace MoShou.UI
         [Header("分类按钮")]
         public Button weaponTab;
         public Button armorTab;
+        public Button helmetTab;
+        public Button pantsTab;
+        public Button ringTab;
+        public Button necklaceTab;
         public Button consumableTab;
 
         // 商品数据
@@ -58,6 +62,14 @@ namespace MoShou.UI
                 weaponTab.onClick.AddListener(() => ShowCategory(ShopCategory.Weapon));
             if (armorTab != null)
                 armorTab.onClick.AddListener(() => ShowCategory(ShopCategory.Armor));
+            if (helmetTab != null)
+                helmetTab.onClick.AddListener(() => ShowCategory(ShopCategory.Helmet));
+            if (pantsTab != null)
+                pantsTab.onClick.AddListener(() => ShowCategory(ShopCategory.Pants));
+            if (ringTab != null)
+                ringTab.onClick.AddListener(() => ShowCategory(ShopCategory.Ring));
+            if (necklaceTab != null)
+                necklaceTab.onClick.AddListener(() => ShowCategory(ShopCategory.Necklace));
             if (consumableTab != null)
                 consumableTab.onClick.AddListener(() => ShowCategory(ShopCategory.Consumable));
 
@@ -109,12 +121,41 @@ namespace MoShou.UI
                 new ShopItemData { id = "WPN_002", name = "铁剑", description = "普通铁剑，攻击+15", price = 300, category = ShopCategory.Weapon, iconPath = "Sprites/Items/WPN_002" },
                 new ShopItemData { id = "WPN_003", name = "精钢剑", description = "精锻武器，攻击+30", price = 800, category = ShopCategory.Weapon, iconPath = "Sprites/Items/WPN_003" },
                 new ShopItemData { id = "WPN_004", name = "猎人弓", description = "远程武器，攻击+20", price = 500, category = ShopCategory.Weapon, iconPath = "Sprites/Items/WPN_004" },
+                new ShopItemData { id = "WPN_005", name = "暗影之刃", description = "暗影魔剑，攻击+50，暴击+8%", price = 2000, category = ShopCategory.Weapon, iconPath = "Sprites/Items/WPN_005" },
+                new ShopItemData { id = "WPN_006", name = "龙牙大剑", description = "传说神器，攻击+80，暴击+12%", price = 5000, category = ShopCategory.Weapon, iconPath = "Sprites/Items/WPN_006" },
+                new ShopItemData { id = "WPN_007", name = "雷霆战弓", description = "雷电战弓，攻击+45，暴击+10%", price = 2500, category = ShopCategory.Weapon, iconPath = "Sprites/Items/WPN_007" },
 
                 // 护甲
                 new ShopItemData { id = "ARM_001", name = "布甲", description = "基础护甲，防御+3", price = 80, category = ShopCategory.Armor, iconPath = "Sprites/Items/ARM_001" },
                 new ShopItemData { id = "ARM_002", name = "皮甲", description = "轻型护甲，防御+8", price = 250, category = ShopCategory.Armor, iconPath = "Sprites/Items/ARM_002" },
                 new ShopItemData { id = "ARM_003", name = "锁子甲", description = "中型护甲，防御+15", price = 600, category = ShopCategory.Armor, iconPath = "Sprites/Items/ARM_003" },
                 new ShopItemData { id = "ARM_004", name = "板甲", description = "重型护甲，防御+25", price = 1200, category = ShopCategory.Armor, iconPath = "Sprites/Items/ARM_004" },
+                new ShopItemData { id = "ARM_005", name = "秘银甲", description = "秘银重甲，防御+35，HP+120", price = 3000, category = ShopCategory.Armor, iconPath = "Sprites/Items/ARM_005" },
+                new ShopItemData { id = "ARM_006", name = "龙鳞战甲", description = "传说战甲，防御+50，HP+200", price = 6000, category = ShopCategory.Armor, iconPath = "Sprites/Items/ARM_006" },
+
+                // 头盔
+                new ShopItemData { id = "HLM_001", name = "皮帽", description = "基础头盔，防御+2，HP+5", price = 60, category = ShopCategory.Helmet, iconPath = "Sprites/Items/HLM_001" },
+                new ShopItemData { id = "HLM_002", name = "铁盔", description = "坚固铁盔，防御+5，HP+15", price = 200, category = ShopCategory.Helmet, iconPath = "Sprites/Items/HLM_002" },
+                new ShopItemData { id = "HLM_003", name = "狮鹫头盔", description = "骑士头盔，防御+10，HP+30", price = 600, category = ShopCategory.Helmet, iconPath = "Sprites/Items/HLM_003" },
+                new ShopItemData { id = "HLM_004", name = "暗金王冠", description = "暗金王冠，防御+15，HP+60，暴击+5%", price = 1800, category = ShopCategory.Helmet, iconPath = "Sprites/Items/HLM_004" },
+
+                // 护腿
+                new ShopItemData { id = "PNT_001", name = "布裤", description = "普通布裤，防御+2，HP+5", price = 60, category = ShopCategory.Pants, iconPath = "Sprites/Items/PNT_001" },
+                new ShopItemData { id = "PNT_002", name = "皮裤", description = "结实皮裤，防御+5，HP+12", price = 200, category = ShopCategory.Pants, iconPath = "Sprites/Items/PNT_002" },
+                new ShopItemData { id = "PNT_003", name = "铁甲护腿", description = "铁甲护腿，防御+10，HP+25", price = 500, category = ShopCategory.Pants, iconPath = "Sprites/Items/PNT_003" },
+                new ShopItemData { id = "PNT_004", name = "暗影行者", description = "暗影护腿，防御+18，HP+50，暴击+4%", price = 1500, category = ShopCategory.Pants, iconPath = "Sprites/Items/PNT_004" },
+
+                // 戒指
+                new ShopItemData { id = "RNG_001", name = "铜戒指", description = "攻击+2，暴击+1%", price = 80, category = ShopCategory.Ring, iconPath = "Sprites/Items/RNG_001" },
+                new ShopItemData { id = "RNG_002", name = "银戒指", description = "攻击+5，暴击+3%", price = 300, category = ShopCategory.Ring, iconPath = "Sprites/Items/RNG_002" },
+                new ShopItemData { id = "RNG_003", name = "烈焰戒指", description = "烈焰之力，攻击+12，暴击+5%", price = 800, category = ShopCategory.Ring, iconPath = "Sprites/Items/RNG_003" },
+                new ShopItemData { id = "RNG_004", name = "霜龙之戒", description = "霜龙神戒，攻击+20，暴击+8%", price = 2000, category = ShopCategory.Ring, iconPath = "Sprites/Items/RNG_004" },
+
+                // 项链
+                new ShopItemData { id = "NCK_001", name = "护身符", description = "防御+1，HP+10", price = 70, category = ShopCategory.Necklace, iconPath = "Sprites/Items/NCK_001" },
+                new ShopItemData { id = "NCK_002", name = "生命吊坠", description = "防御+2，HP+30", price = 250, category = ShopCategory.Necklace, iconPath = "Sprites/Items/NCK_002" },
+                new ShopItemData { id = "NCK_003", name = "守护者圣物", description = "守护圣物，防御+8，HP+60", price = 700, category = ShopCategory.Necklace, iconPath = "Sprites/Items/NCK_003" },
+                new ShopItemData { id = "NCK_004", name = "不灭心脏", description = "传说之物，防御+12，HP+120，暴击+5%", price = 2200, category = ShopCategory.Necklace, iconPath = "Sprites/Items/NCK_004" },
 
                 // 消耗品
                 new ShopItemData { id = "CON_001", name = "小型血瓶", description = "恢复50HP", price = 30, category = ShopCategory.Consumable, iconPath = "Sprites/Items/CON_001" },
@@ -318,12 +359,22 @@ namespace MoShou.UI
             Color activeColor = new Color(0.4f, 0.6f, 0.8f);
             Color inactiveColor = new Color(0.3f, 0.3f, 0.35f);
 
-            if (weaponTab != null)
-                weaponTab.GetComponent<Image>().color = currentCategory == ShopCategory.Weapon ? activeColor : inactiveColor;
-            if (armorTab != null)
-                armorTab.GetComponent<Image>().color = currentCategory == ShopCategory.Armor ? activeColor : inactiveColor;
-            if (consumableTab != null)
-                consumableTab.GetComponent<Image>().color = currentCategory == ShopCategory.Consumable ? activeColor : inactiveColor;
+            SetTabColor(weaponTab, currentCategory == ShopCategory.Weapon, activeColor, inactiveColor);
+            SetTabColor(armorTab, currentCategory == ShopCategory.Armor, activeColor, inactiveColor);
+            SetTabColor(helmetTab, currentCategory == ShopCategory.Helmet, activeColor, inactiveColor);
+            SetTabColor(pantsTab, currentCategory == ShopCategory.Pants, activeColor, inactiveColor);
+            SetTabColor(ringTab, currentCategory == ShopCategory.Ring, activeColor, inactiveColor);
+            SetTabColor(necklaceTab, currentCategory == ShopCategory.Necklace, activeColor, inactiveColor);
+            SetTabColor(consumableTab, currentCategory == ShopCategory.Consumable, activeColor, inactiveColor);
+        }
+
+        void SetTabColor(Button tab, bool isActive, Color activeColor, Color inactiveColor)
+        {
+            if (tab != null)
+            {
+                Image img = tab.GetComponent<Image>();
+                if (img != null) img.color = isActive ? activeColor : inactiveColor;
+            }
         }
 
         /// <summary>
@@ -505,6 +556,10 @@ namespace MoShou.UI
     {
         Weapon,
         Armor,
+        Helmet,
+        Pants,
+        Ring,
+        Necklace,
         Consumable,
         Special
     }
@@ -572,8 +627,15 @@ namespace MoShou.UI
             iconRect.sizeDelta = new Vector2(70, 70);
             iconImage = iconGO.AddComponent<Image>();
 
-            // 尝试加载图标
+            // 尝试加载图标（优先PNG文件，回退到运行时生成）
             Sprite itemIcon = Resources.Load<Sprite>(itemData.iconPath);
+            if (itemIcon == null)
+            {
+                // 从iconPath提取物品ID (如 "Sprites/Items/WPN_001" -> "WPN_001")
+                string itemId = System.IO.Path.GetFileName(itemData.iconPath);
+                if (string.IsNullOrEmpty(itemId)) itemId = itemData.id;
+                itemIcon = RuntimeIconGenerator.GetIcon(itemId);
+            }
             if (itemIcon != null)
             {
                 iconImage.sprite = itemIcon;
@@ -665,6 +727,10 @@ namespace MoShou.UI
             {
                 case ShopCategory.Weapon: return new Color(0.8f, 0.4f, 0.2f);
                 case ShopCategory.Armor: return new Color(0.3f, 0.5f, 0.8f);
+                case ShopCategory.Helmet: return new Color(0.5f, 0.5f, 0.7f);
+                case ShopCategory.Pants: return new Color(0.4f, 0.6f, 0.5f);
+                case ShopCategory.Ring: return new Color(0.7f, 0.5f, 0.8f);
+                case ShopCategory.Necklace: return new Color(0.8f, 0.6f, 0.4f);
                 case ShopCategory.Consumable: return new Color(0.3f, 0.8f, 0.3f);
                 default: return Color.gray;
             }

@@ -199,7 +199,7 @@ namespace MoShou.UI
                 nameRect.offsetMin = new Vector2(2, 2);
                 nameRect.offsetMax = new Vector2(-2, -2);
                 nameText = nameGO.AddComponent<Text>();
-                nameText.fontSize = 12;
+                nameText.fontSize = 15;
                 nameText.alignment = TextAnchor.MiddleCenter;
                 nameText.color = Color.white;
                 Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -253,19 +253,40 @@ namespace MoShou.UI
                 {
                     nameText.text = equip.name;
                     nameText.color = GetQualityColor(equip.quality);
-                    nameText.fontSize = 14;
+                    nameText.fontSize = 17;
                 }
                 if (slotIcon != null)
                 {
-                    slotIcon.color = GetSlotColor(slot);
+                    // 优先加载图标Sprite
+                    Sprite icon = LoadEquipmentIcon(equip);
+                    if (icon != null)
+                    {
+                        slotIcon.sprite = icon;
+                        slotIcon.color = Color.white;  // 显示原色
+                    }
+                    else
+                    {
+                        slotIcon.sprite = null;
+                        slotIcon.color = GetSlotColor(slot);  // 回退到颜色块
+                    }
                     slotIcon.gameObject.SetActive(true);
                 }
 
-                // 改变槽位背景色表示已装备
+                // 改变槽位背景 - 优先使用RPGKit装备槽框图片
                 Image bgImage = slotTf.GetComponent<Image>();
                 if (bgImage != null)
                 {
-                    bgImage.color = new Color(0.25f, 0.3f, 0.35f);
+                    Sprite slotFrame = UIResourceLoader.GetSlotFrame(slot);
+                    if (slotFrame != null)
+                    {
+                        bgImage.sprite = slotFrame;
+                        bgImage.type = Image.Type.Simple;
+                        bgImage.color = Color.white;
+                    }
+                    else
+                    {
+                        bgImage.color = new Color(0.25f, 0.3f, 0.35f);
+                    }
                 }
             }
             else
@@ -275,17 +296,29 @@ namespace MoShou.UI
                 {
                     nameText.text = GetSlotDisplayName(slot);
                     nameText.color = new Color(0.5f, 0.5f, 0.5f, 0.6f);
-                    nameText.fontSize = 14;
+                    nameText.fontSize = 17;
                 }
                 if (slotIcon != null)
                 {
+                    slotIcon.sprite = null;
                     slotIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
                 }
 
                 Image bgImage = slotTf.GetComponent<Image>();
                 if (bgImage != null)
                 {
-                    bgImage.color = new Color(0.3f, 0.3f, 0.35f);
+                    // 空槽位也使用RPGKit槽框图片（半透明效果）
+                    Sprite slotFrame = UIResourceLoader.GetSlotFrame(slot);
+                    if (slotFrame != null)
+                    {
+                        bgImage.sprite = slotFrame;
+                        bgImage.type = Image.Type.Simple;
+                        bgImage.color = new Color(0.6f, 0.6f, 0.6f, 0.5f); // 半透明灰色
+                    }
+                    else
+                    {
+                        bgImage.color = new Color(0.3f, 0.3f, 0.35f);
+                    }
                 }
             }
         }
@@ -345,17 +378,26 @@ namespace MoShou.UI
             RectTransform popupRect = detailPopup.AddComponent<RectTransform>();
             popupRect.anchorMin = new Vector2(0.5f, 0.5f);
             popupRect.anchorMax = new Vector2(0.5f, 0.5f);
-            popupRect.sizeDelta = new Vector2(280, 260);
+            popupRect.sizeDelta = new Vector2(340, 320);
             popupRect.anchoredPosition = new Vector2(0, 20);
 
-            // 弹窗背景
+            // 弹窗背景 - 优先使用Kenney面板图片
             Image popupBg = detailPopup.AddComponent<Image>();
-            popupBg.color = new Color(0.12f, 0.12f, 0.18f, 0.97f);
-
-            // 外边框
-            Outline popupOutline = detailPopup.AddComponent<Outline>();
-            popupOutline.effectColor = new Color(0.5f, 0.5f, 0.6f);
-            popupOutline.effectDistance = new Vector2(2, -2);
+            Sprite panelSprite = UIResourceLoader.PanelBrown;
+            if (panelSprite != null)
+            {
+                popupBg.sprite = panelSprite;
+                popupBg.type = Image.Type.Sliced;
+                popupBg.color = Color.white;
+            }
+            else
+            {
+                popupBg.color = new Color(0.12f, 0.12f, 0.18f, 0.97f);
+                // 外边框（只在无图片时使用）
+                Outline popupOutline = detailPopup.AddComponent<Outline>();
+                popupOutline.effectColor = new Color(0.5f, 0.5f, 0.6f);
+                popupOutline.effectDistance = new Vector2(2, -2);
+            }
 
             // 装备品质标签（顶部颜色条）
             GameObject qualityBarGO = new GameObject("QualityBar");
@@ -378,7 +420,7 @@ namespace MoShou.UI
             nameRect.anchoredPosition = new Vector2(0, -25);
             nameRect.sizeDelta = new Vector2(-20, 35);
             detailNameText = nameGO.AddComponent<Text>();
-            detailNameText.fontSize = 22;
+            detailNameText.fontSize = 26;
             detailNameText.alignment = TextAnchor.MiddleCenter;
             detailNameText.color = Color.white;
             if (defaultFont != null) detailNameText.font = defaultFont;
@@ -397,7 +439,7 @@ namespace MoShou.UI
             qualityRect.anchoredPosition = new Vector2(0, -52);
             qualityRect.sizeDelta = new Vector2(-20, 22);
             detailQualityText = qualityGO.AddComponent<Text>();
-            detailQualityText.fontSize = 14;
+            detailQualityText.fontSize = 17;
             detailQualityText.alignment = TextAnchor.MiddleCenter;
             detailQualityText.color = Color.gray;
             if (defaultFont != null) detailQualityText.font = defaultFont;
@@ -422,9 +464,9 @@ namespace MoShou.UI
             statsRect.anchorMin = new Vector2(0, 1);
             statsRect.anchorMax = new Vector2(1, 1);
             statsRect.anchoredPosition = new Vector2(0, -115);
-            statsRect.sizeDelta = new Vector2(-30, 80);
+            statsRect.sizeDelta = new Vector2(-30, 100);
             detailStatsText = statsGO.AddComponent<Text>();
-            detailStatsText.fontSize = 17;
+            detailStatsText.fontSize = 20;
             detailStatsText.alignment = TextAnchor.MiddleLeft;
             detailStatsText.color = new Color(0.85f, 0.85f, 0.85f);
             detailStatsText.lineSpacing = 1.3f;
@@ -440,13 +482,35 @@ namespace MoShou.UI
             ubRect.anchoredPosition = new Vector2(-55, 35);
             ubRect.sizeDelta = new Vector2(100, 38);
             Image ubBg = unequipBtnGO.AddComponent<Image>();
-            ubBg.color = new Color(0.7f, 0.3f, 0.2f);
+            Sprite brownBtn = UIResourceLoader.ButtonBrown;
+            Sprite brownBtnPressed = UIResourceLoader.ButtonBrownPressed;
+            if (brownBtn != null)
+            {
+                ubBg.sprite = brownBtn;
+                ubBg.type = Image.Type.Sliced;
+                ubBg.color = Color.white;
+            }
+            else
+            {
+                ubBg.color = new Color(0.7f, 0.3f, 0.2f);
+            }
             detailUnequipBtn = unequipBtnGO.AddComponent<Button>();
             detailUnequipBtn.targetGraphic = ubBg;
-            var ubColors = detailUnequipBtn.colors;
-            ubColors.highlightedColor = new Color(0.85f, 0.4f, 0.3f);
-            ubColors.pressedColor = new Color(0.55f, 0.2f, 0.15f);
-            detailUnequipBtn.colors = ubColors;
+            if (brownBtn != null && brownBtnPressed != null)
+            {
+                var ubSpriteState = new SpriteState();
+                ubSpriteState.pressedSprite = brownBtnPressed;
+                ubSpriteState.highlightedSprite = brownBtn;
+                detailUnequipBtn.spriteState = ubSpriteState;
+                detailUnequipBtn.transition = Selectable.Transition.SpriteSwap;
+            }
+            else
+            {
+                var ubColors = detailUnequipBtn.colors;
+                ubColors.highlightedColor = new Color(0.85f, 0.4f, 0.3f);
+                ubColors.pressedColor = new Color(0.55f, 0.2f, 0.15f);
+                detailUnequipBtn.colors = ubColors;
+            }
             detailUnequipBtn.onClick.AddListener(OnDetailUnequip);
 
             // 卸下按钮文字
@@ -474,13 +538,35 @@ namespace MoShou.UI
             cbRect.anchoredPosition = new Vector2(55, 35);
             cbRect.sizeDelta = new Vector2(100, 38);
             Image cbBg = closeBtnGO.AddComponent<Image>();
-            cbBg.color = new Color(0.35f, 0.35f, 0.4f);
+            Sprite greyBtn = UIResourceLoader.ButtonGrey;
+            Sprite greyBtnPressed = UIResourceLoader.ButtonGreyPressed;
+            if (greyBtn != null)
+            {
+                cbBg.sprite = greyBtn;
+                cbBg.type = Image.Type.Sliced;
+                cbBg.color = Color.white;
+            }
+            else
+            {
+                cbBg.color = new Color(0.35f, 0.35f, 0.4f);
+            }
             detailCloseBtn = closeBtnGO.AddComponent<Button>();
             detailCloseBtn.targetGraphic = cbBg;
-            var cbColors = detailCloseBtn.colors;
-            cbColors.highlightedColor = new Color(0.5f, 0.5f, 0.55f);
-            cbColors.pressedColor = new Color(0.25f, 0.25f, 0.3f);
-            detailCloseBtn.colors = cbColors;
+            if (greyBtn != null && greyBtnPressed != null)
+            {
+                var cbSpriteState = new SpriteState();
+                cbSpriteState.pressedSprite = greyBtnPressed;
+                cbSpriteState.highlightedSprite = greyBtn;
+                detailCloseBtn.spriteState = cbSpriteState;
+                detailCloseBtn.transition = Selectable.Transition.SpriteSwap;
+            }
+            else
+            {
+                var cbColors = detailCloseBtn.colors;
+                cbColors.highlightedColor = new Color(0.5f, 0.5f, 0.55f);
+                cbColors.pressedColor = new Color(0.25f, 0.25f, 0.3f);
+                detailCloseBtn.colors = cbColors;
+            }
             detailCloseBtn.onClick.AddListener(HideDetailPopup);
 
             // 关闭按钮文字
@@ -603,6 +689,16 @@ namespace MoShou.UI
         }
 
         // ===== 辅助方法 =====
+
+        /// <summary>
+        /// 加载装备图标Sprite
+        /// 统一使用RuntimeIconGenerator内存生成，确保风格一致
+        /// </summary>
+        Sprite LoadEquipmentIcon(Equipment equip)
+        {
+            if (equip == null) return null;
+            return RuntimeIconGenerator.GetIcon(equip.id);
+        }
 
         string GetQualityName(EquipmentQuality quality)
         {

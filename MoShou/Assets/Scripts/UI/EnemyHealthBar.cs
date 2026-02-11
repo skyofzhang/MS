@@ -12,8 +12,8 @@ namespace MoShou.UI
     {
         [Header("设置")]
         public float heightOffset = 2.0f;   // 头顶偏移高度
-        public float barWidth = 1.2f;       // 世界空间中的宽度
-        public float barHeight = 0.15f;     // 世界空间中的高度
+        public float barWidth = 1.5f;       // 世界空间中的宽度（加宽）
+        public float barHeight = 0.22f;     // 世界空间中的高度（加高，更醒目）
         public bool hideWhenFull = false;
         public float hideDelay = 2f;
         public bool showHealthText = true;  // 是否显示血量数字
@@ -82,12 +82,12 @@ namespace MoShou.UI
             }
 
             // 根据目标高度调整血条参数（适配1倍模型大小）
-            // 血条宽度约为目标高度的120%，确保清晰可见
-            barWidth = Mathf.Clamp(targetHeight * 1.2f, 0.8f, 2.5f);
-            // 血条高度约为宽度的12%
-            barHeight = barWidth * 0.12f;
-            // 头顶偏移：高于目标顶部0.3米
-            heightOffset = targetHeight + 0.3f;
+            // 血条宽度约为目标高度的150%，确保清晰可见
+            barWidth = Mathf.Clamp(targetHeight * 1.5f, 1.0f, 3.0f);
+            // 血条高度约为宽度的15%（更粗，更醒目）
+            barHeight = barWidth * 0.15f;
+            // 头顶偏移：高于目标顶部0.4米
+            heightOffset = targetHeight + 0.4f;
 
             Debug.Log($"[EnemyHealthBar] AutoAdjust: targetHeight={targetHeight:F2}, barWidth={barWidth:F2}, barHeight={barHeight:F2}, heightOffset={heightOffset:F2}");
         }
@@ -120,7 +120,7 @@ namespace MoShou.UI
             bgRect.offsetMin = Vector2.zero;
             bgRect.offsetMax = Vector2.zero;
             bgImage = bgGO.AddComponent<Image>();
-            bgImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+            bgImage.color = new Color(0.1f, 0.1f, 0.1f, 0.95f); // 更深的背景，增强对比度
 
             // 填充
             GameObject fillGO = new GameObject("Fill");
@@ -143,10 +143,10 @@ namespace MoShou.UI
             RectTransform borderRect = borderGO.AddComponent<RectTransform>();
             borderRect.anchorMin = Vector2.zero;
             borderRect.anchorMax = Vector2.one;
-            borderRect.offsetMin = new Vector2(-1f, -1f);  // 更小边框
-            borderRect.offsetMax = new Vector2(1f, 1f);
+            borderRect.offsetMin = new Vector2(-2f, -2f);  // 加粗边框更醒目
+            borderRect.offsetMax = new Vector2(2f, 2f);
             var borderImage = borderGO.AddComponent<Image>();
-            borderImage.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            borderImage.color = new Color(0.05f, 0.05f, 0.05f, 1f); // 纯黑边框
             borderGO.transform.SetAsFirstSibling(); // 放到最底层
 
             // 血量数字
@@ -230,11 +230,11 @@ namespace MoShou.UI
             float ratio = maxHealth > 0 ? currentHealth / maxHealth : 0;
             fillImage.fillAmount = ratio;
 
-            // 根据血量比例改变颜色
+            // 根据血量比例改变颜色（更鲜艳的颜色）
             if (ratio > 0.5f)
-                fillImage.color = Color.Lerp(Color.yellow, Color.green, (ratio - 0.5f) * 2);
+                fillImage.color = Color.Lerp(new Color(1f, 0.9f, 0f), new Color(0.1f, 0.9f, 0.1f), (ratio - 0.5f) * 2);
             else
-                fillImage.color = Color.Lerp(Color.red, Color.yellow, ratio * 2);
+                fillImage.color = Color.Lerp(new Color(1f, 0.1f, 0.1f), new Color(1f, 0.9f, 0f), ratio * 2);
 
             // 更新血量数字
             if (healthText != null)

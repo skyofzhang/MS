@@ -85,11 +85,28 @@ public class StageSelectSceneSetup : MonoBehaviour
         }
 
         // 销毁旧的StageSelectManager（如果存在）
+        // ★ 必须用DestroyImmediate，否则其Start()会在Destroy生效前执行并创建残留UI
         var oldManager = FindObjectOfType<MoShou.Core.StageSelectManager>();
         if (oldManager != null)
         {
-            Debug.Log("[StageSelectSetup] 销毁旧的StageSelectManager");
-            Destroy(oldManager.gameObject);
+            Debug.Log("[StageSelectSetup] 立即销毁旧的StageSelectManager");
+            DestroyImmediate(oldManager.gameObject);
+        }
+
+        // 销毁旧的StageSelectScreen（避免重复UI）
+        var oldScreen = FindObjectOfType<MoShou.UI.StageSelectScreen>();
+        if (oldScreen != null)
+        {
+            Debug.Log("[StageSelectSetup] 立即销毁旧的StageSelectScreen，使用SceneSetup版本");
+            DestroyImmediate(oldScreen.gameObject);
+        }
+
+        // 清理 StageSelectManager 可能已创建的残留UI（"StageButtonsParent" 竖排按钮列表）
+        var stageButtonsParent = GameObject.Find("StageButtonsParent");
+        if (stageButtonsParent != null)
+        {
+            Debug.Log("[StageSelectSetup] 销毁残留的StageButtonsParent");
+            DestroyImmediate(stageButtonsParent);
         }
 
         // 创建新的效果图风格UI
@@ -232,7 +249,7 @@ public class StageSelectSceneSetup : MonoBehaviour
         topRect.anchorMax = new Vector2(1, 1);
         topRect.pivot = new Vector2(0.5f, 1);
         topRect.anchoredPosition = Vector2.zero;
-        topRect.sizeDelta = new Vector2(0, 200);
+        topRect.sizeDelta = new Vector2(0, 160);
 
         // 半透明背景
         Image topBg = topBarGO.AddComponent<Image>();
@@ -483,8 +500,8 @@ public class StageSelectSceneSetup : MonoBehaviour
         GameObject tabsGO = new GameObject("ChapterTabs");
         tabsGO.transform.SetParent(parent, false);
         RectTransform tabsRect = tabsGO.AddComponent<RectTransform>();
-        tabsRect.anchorMin = new Vector2(0.05f, 0.82f);
-        tabsRect.anchorMax = new Vector2(0.95f, 0.88f);
+        tabsRect.anchorMin = new Vector2(0.05f, 0.855f);
+        tabsRect.anchorMax = new Vector2(0.95f, 0.905f);
         tabsRect.offsetMin = Vector2.zero;
         tabsRect.offsetMax = Vector2.zero;
 
@@ -603,8 +620,8 @@ public class StageSelectSceneSetup : MonoBehaviour
         RectTransform scrollRect = scrollGO.AddComponent<RectTransform>();
         scrollRect.anchorMin = new Vector2(0, 0);
         scrollRect.anchorMax = new Vector2(1, 1);
-        scrollRect.offsetMin = new Vector2(30, 180);
-        scrollRect.offsetMax = new Vector2(-30, -280);
+        scrollRect.offsetMin = new Vector2(30, 160);
+        scrollRect.offsetMax = new Vector2(-30, -300);
 
         ScrollRect scroll = scrollGO.AddComponent<ScrollRect>();
         scroll.horizontal = false;
@@ -788,7 +805,10 @@ public class StageSelectSceneSetup : MonoBehaviour
         // 星星评级
         if (isCleared)
         {
-            int starCount = Random.Range(1, 4);
+            int starCount = SaveSystem.Instance != null
+                ? SaveSystem.Instance.GetStageStars(stageNum)
+                : 1;
+            if (starCount < 1) starCount = 1; // 已通关至少1星
             CreateNodeStars(nodeGO.transform, starCount);
         }
 

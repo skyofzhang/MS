@@ -35,9 +35,11 @@ namespace MoShou.UI
         private List<SkillSlotUI> skillUIs = new List<SkillSlotUI>();
         private SkillData selectedSkill;
 
+        private bool isFullyInitialized = false;
+
         void Awake()
         {
-            Instance = this;
+            // 注意：不在Awake设置Instance，避免SaveGame()在Start前读取未初始化的数据
         }
 
         void Start()
@@ -51,6 +53,14 @@ namespace MoShou.UI
 
             // 加载技能数据
             LoadSkillData();
+
+            // 从存档恢复技能等级
+            ApplySavedSkillLevels();
+
+            // ★ 关键：只有在技能数据完全加载并恢复后才设置Instance
+            // 这样SaveGame()在初始化完成前不会读取到默认的level=1数据
+            Instance = this;
+            isFullyInitialized = true;
 
             // 创建技能列表
             CreateSkillList();
@@ -87,6 +97,79 @@ namespace MoShou.UI
 
             // 使用默认技能数据（符合知识库技能表）
             CreateDefaultSkills();
+        }
+
+        /// <summary>
+        /// 从存档恢复技能等级
+        /// </summary>
+        void ApplySavedSkillLevels()
+        {
+            if (SaveSystem.Instance == null)
+            {
+                Debug.LogWarning("[SkillUpgradePanel] SaveSystem未初始化，无法恢复技能等级");
+                return;
+            }
+
+            var savedLevels = SaveSystem.Instance.GetSavedSkillLevels();
+            if (savedLevels == null || savedLevels.Count == 0)
+            {
+                Debug.Log("[SkillUpgradePanel] 没有找到保存的技能等级数据");
+                return;
+            }
+
+            int restoredCount = 0;
+            foreach (var skill in allSkills)
+            {
+                if (savedLevels.TryGetValue(skill.id, out int savedLevel))
+                {
+                    if (savedLevel > 0 && savedLevel <= skill.maxLevel)
+                    {
+                        Debug.Log($"[SkillUpgradePanel] 恢复技能 {skill.id}({skill.name}): Lv.{skill.currentLevel} -> Lv.{savedLevel}");
+                        skill.currentLevel = savedLevel;
+                        restoredCount++;
+                    }
+                }
+            }
+
+            if (restoredCount > 0)
+            {
+                Debug.Log($"[SkillUpgradePanel] 从存档恢复了 {restoredCount} 个技能等级");
+            }
+            else
+            {
+                Debug.LogWarning($"[SkillUpgradePanel] 存档中有{savedLevels.Count}个技能数据，但没有成功恢复任何技能");
+            }
+        }
+
+        void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
+        /// <summary>
+        /// 获取技能等级数据（供SaveSystem保存用）
+        /// </summary>
+        public Dictionary<string, int> GetSkillLevelSaveData()
+        {
+            // 如果尚未完全初始化，返回null让SaveSystem使用缓存数据
+            if (!isFullyInitialized)
+            {
+                Debug.LogWarning("[SkillUpgradePanel] GetSkillLevelSaveData被调用但尚未初始化完成，返回null");
+                return null;
+            }
+
+            var data = new Dictionary<string, int>();
+            foreach (var skill in allSkills)
+            {
+                if (skill.currentLevel > 0)
+                {
+                    data[skill.id] = skill.currentLevel;
+                }
+            }
+            return data;
         }
 
         /// <summary>
@@ -259,7 +342,7 @@ namespace MoShou.UI
 
             Text titleText = titleGO.AddComponent<Text>();
             titleText.text = title;
-            titleText.fontSize = 24;
+            titleText.fontSize = 28;
             titleText.fontStyle = FontStyle.Bold;
             titleText.alignment = TextAnchor.MiddleLeft;
             titleText.color = new Color(0.8f, 0.7f, 0.4f);
@@ -278,7 +361,7 @@ namespace MoShou.UI
 
             // 添加LayoutElement
             var layoutElement = slotGO.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 90;
+            layoutElement.preferredHeight = 100;
             layoutElement.flexibleWidth = 1;
 
             // 背景
@@ -400,8 +483,8 @@ namespace MoShou.UI
             RectTransform iconRect = iconGO.AddComponent<RectTransform>();
             iconRect.anchorMin = new Vector2(0.5f, 1);
             iconRect.anchorMax = new Vector2(0.5f, 1);
-            iconRect.anchoredPosition = new Vector2(0, -60);
-            iconRect.sizeDelta = new Vector2(80, 80);
+            iconRect.anchoredPosition = new Vector2(0, -70);
+            iconRect.sizeDelta = new Vector2(100, 100);
             detailIcon = iconGO.AddComponent<Image>();
             detailIcon.color = Color.gray;
 
@@ -411,10 +494,10 @@ namespace MoShou.UI
             RectTransform nameRect = nameGO.AddComponent<RectTransform>();
             nameRect.anchorMin = new Vector2(0, 1);
             nameRect.anchorMax = new Vector2(1, 1);
-            nameRect.anchoredPosition = new Vector2(0, -120);
-            nameRect.sizeDelta = new Vector2(0, 40);
+            nameRect.anchoredPosition = new Vector2(0, -140);
+            nameRect.sizeDelta = new Vector2(0, 45);
             detailName = nameGO.AddComponent<Text>();
-            detailName.fontSize = 28;
+            detailName.fontSize = 32;
             detailName.fontStyle = FontStyle.Bold;
             detailName.alignment = TextAnchor.MiddleCenter;
             detailName.color = Color.white;
@@ -426,10 +509,10 @@ namespace MoShou.UI
             RectTransform levelRect = levelGO.AddComponent<RectTransform>();
             levelRect.anchorMin = new Vector2(0, 1);
             levelRect.anchorMax = new Vector2(1, 1);
-            levelRect.anchoredPosition = new Vector2(0, -160);
-            levelRect.sizeDelta = new Vector2(0, 30);
+            levelRect.anchoredPosition = new Vector2(0, -185);
+            levelRect.sizeDelta = new Vector2(0, 35);
             detailLevel = levelGO.AddComponent<Text>();
-            detailLevel.fontSize = 20;
+            detailLevel.fontSize = 24;
             detailLevel.alignment = TextAnchor.MiddleCenter;
             detailLevel.color = new Color(0.8f, 0.7f, 0.4f);
             detailLevel.font = GetDefaultFont();
@@ -443,7 +526,7 @@ namespace MoShou.UI
             descRect.offsetMin = Vector2.zero;
             descRect.offsetMax = Vector2.zero;
             detailDescription = descGO.AddComponent<Text>();
-            detailDescription.fontSize = 18;
+            detailDescription.fontSize = 22;
             detailDescription.alignment = TextAnchor.UpperLeft;
             detailDescription.color = new Color(0.8f, 0.8f, 0.8f);
             detailDescription.font = GetDefaultFont();
@@ -457,7 +540,7 @@ namespace MoShou.UI
             costRect.anchoredPosition = new Vector2(0, 90);
             costRect.sizeDelta = new Vector2(0, 30);
             detailCost = costGO.AddComponent<Text>();
-            detailCost.fontSize = 20;
+            detailCost.fontSize = 24;
             detailCost.alignment = TextAnchor.MiddleCenter;
             detailCost.color = new Color(1f, 0.85f, 0.2f);
             detailCost.font = GetDefaultFont();
@@ -526,6 +609,12 @@ namespace MoShou.UI
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX("SFX_UI_LevelUp");
+            }
+
+            // 保存技能等级到存档
+            if (SaveSystem.Instance != null)
+            {
+                SaveSystem.Instance.SaveGame();
             }
 
             // 刷新UI
@@ -723,14 +812,14 @@ namespace MoShou.UI
         {
             bgImage = GetComponent<Image>();
 
-            // 图标
+            // 图标 - 放大到80x80
             GameObject iconGO = new GameObject("Icon");
             iconGO.transform.SetParent(transform, false);
             RectTransform iconRect = iconGO.AddComponent<RectTransform>();
             iconRect.anchorMin = new Vector2(0, 0.5f);
             iconRect.anchorMax = new Vector2(0, 0.5f);
             iconRect.anchoredPosition = new Vector2(50, 0);
-            iconRect.sizeDelta = new Vector2(60, 60);
+            iconRect.sizeDelta = new Vector2(80, 80);
             iconImage = iconGO.AddComponent<Image>();
 
             // 尝试加载图标
@@ -741,8 +830,31 @@ namespace MoShou.UI
             }
             else
             {
+                // 无图标时显示彩色方块 + 技能首字符
                 iconImage.color = skillData.skillType == SkillType.Active ?
                     new Color(0.8f, 0.4f, 0.2f) : new Color(0.2f, 0.6f, 0.8f);
+
+                // 添加圆角效果（描边模拟）
+                Outline iconOutline = iconGO.AddComponent<Outline>();
+                iconOutline.effectColor = new Color(1f, 1f, 1f, 0.3f);
+                iconOutline.effectDistance = new Vector2(2, -2);
+
+                // 在图标上显示技能首字符
+                GameObject iconLabelGO = new GameObject("IconLabel");
+                iconLabelGO.transform.SetParent(iconGO.transform, false);
+                RectTransform ilRect = iconLabelGO.AddComponent<RectTransform>();
+                ilRect.anchorMin = Vector2.zero;
+                ilRect.anchorMax = Vector2.one;
+                ilRect.offsetMin = Vector2.zero;
+                ilRect.offsetMax = Vector2.zero;
+                Text iconLabel = iconLabelGO.AddComponent<Text>();
+                iconLabel.text = skillData.name.Length > 0 ? skillData.name.Substring(0, 1) : "?";
+                iconLabel.fontSize = 36;
+                iconLabel.fontStyle = FontStyle.Bold;
+                iconLabel.alignment = TextAnchor.MiddleCenter;
+                iconLabel.color = Color.white;
+                iconLabel.font = GetDefaultFont();
+                iconLabel.raycastTarget = false;
             }
 
             // 名称
@@ -755,7 +867,7 @@ namespace MoShou.UI
             nameRect.sizeDelta = new Vector2(200, 30);
             nameText = nameGO.AddComponent<Text>();
             nameText.text = skillData.name;
-            nameText.fontSize = 20;
+            nameText.fontSize = 24;
             nameText.fontStyle = FontStyle.Bold;
             nameText.alignment = TextAnchor.MiddleLeft;
             nameText.color = Color.white;
@@ -770,7 +882,7 @@ namespace MoShou.UI
             levelRect.anchoredPosition = new Vector2(150, -15);
             levelRect.sizeDelta = new Vector2(150, 25);
             levelText = levelGO.AddComponent<Text>();
-            levelText.fontSize = 16;
+            levelText.fontSize = 20;
             levelText.alignment = TextAnchor.MiddleLeft;
             levelText.color = new Color(0.7f, 0.7f, 0.7f);
             levelText.font = GetDefaultFont();
@@ -798,7 +910,7 @@ namespace MoShou.UI
                 lockTextRect.offsetMax = Vector2.zero;
                 Text lockText = lockTextGO.AddComponent<Text>();
                 lockText.text = $"需要等级 {skillData.unlockLevel}";
-                lockText.fontSize = 18;
+                lockText.fontSize = 22;
                 lockText.alignment = TextAnchor.MiddleCenter;
                 lockText.color = Color.red;
                 lockText.font = GetDefaultFont();

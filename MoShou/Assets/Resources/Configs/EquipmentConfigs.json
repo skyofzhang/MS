@@ -10,7 +10,7 @@
       "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.01,
-      "iconPath": "Icons/Weapons/wooden_sword",
+      "iconPath": "Sprites/Items/WPN_001",
       "description": "一把简陋的木剑，适合新手使用。"
     },
     {
@@ -23,7 +23,7 @@
       "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.03,
-      "iconPath": "Icons/Weapons/iron_sword",
+      "iconPath": "Sprites/Items/WPN_002",
       "description": "锋利的铁剑，战场上的可靠伙伴。"
     },
     {
@@ -36,7 +36,7 @@
       "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.05,
-      "iconPath": "Icons/Weapons/steel_sword",
+      "iconPath": "Sprites/Items/WPN_003",
       "description": "精钢锻造的利剑，攻击+30。"
     },
     {
@@ -49,7 +49,7 @@
       "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.04,
-      "iconPath": "Icons/Weapons/hunter_bow",
+      "iconPath": "Sprites/Items/WPN_004",
       "description": "远程武器，攻击+20。"
     },
     {
@@ -62,7 +62,7 @@
       "defenseBonus": 3,
       "hpBonus": 10,
       "critRateBonus": 0,
-      "iconPath": "Icons/Armor/cloth_armor",
+      "iconPath": "Sprites/Items/ARM_001",
       "description": "基础护甲，防御+3。"
     },
     {
@@ -75,7 +75,7 @@
       "defenseBonus": 8,
       "hpBonus": 25,
       "critRateBonus": 0,
-      "iconPath": "Icons/Armor/leather_armor",
+      "iconPath": "Sprites/Items/ARM_002",
       "description": "轻型护甲，防御+8。"
     },
     {
@@ -88,7 +88,7 @@
       "defenseBonus": 15,
       "hpBonus": 50,
       "critRateBonus": 0,
-      "iconPath": "Icons/Armor/chainmail",
+      "iconPath": "Sprites/Items/ARM_003",
       "description": "中型护甲，防御+15。"
     },
     {
@@ -101,7 +101,7 @@
       "defenseBonus": 25,
       "hpBonus": 80,
       "critRateBonus": 0,
-      "iconPath": "Icons/Armor/plate_armor",
+      "iconPath": "Sprites/Items/ARM_004",
       "description": "重型护甲，防御+25。"
     },
     {
@@ -114,7 +114,7 @@
       "defenseBonus": 2,
       "hpBonus": 5,
       "critRateBonus": 0,
-      "iconPath": "Icons/Helmets/leather_cap",
+      "iconPath": "Sprites/Items/HLM_001",
       "description": "简单的皮帽，能挡住风沙。"
     },
     {
@@ -127,7 +127,7 @@
       "defenseBonus": 5,
       "hpBonus": 15,
       "critRateBonus": 0,
-      "iconPath": "Icons/Helmets/iron_helm",
+      "iconPath": "Sprites/Items/HLM_002",
       "description": "坚固的铁盔，保护头部要害。"
     },
     {
@@ -140,7 +140,7 @@
       "defenseBonus": 2,
       "hpBonus": 5,
       "critRateBonus": 0,
-      "iconPath": "Icons/Pants/cloth_pants",
+      "iconPath": "Sprites/Items/PNT_001",
       "description": "普通的布裤。"
     },
     {
@@ -153,7 +153,7 @@
       "defenseBonus": 5,
       "hpBonus": 12,
       "critRateBonus": 0,
-      "iconPath": "Icons/Pants/leather_pants",
+      "iconPath": "Sprites/Items/PNT_002",
       "description": "结实的皮裤，适合长途跋涉。"
     },
     {
@@ -166,7 +166,7 @@
       "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.01,
-      "iconPath": "Icons/Rings/copper_ring",
+      "iconPath": "Sprites/Items/RNG_001",
       "description": "普通的铜戒指，略微增强力量。"
     },
     {
@@ -179,7 +179,7 @@
       "defenseBonus": 0,
       "hpBonus": 0,
       "critRateBonus": 0.03,
-      "iconPath": "Icons/Rings/silver_ring",
+      "iconPath": "Sprites/Items/RNG_002",
       "description": "精美的银戒指，蕴含魔力。"
     },
     {
@@ -192,7 +192,7 @@
       "defenseBonus": 1,
       "hpBonus": 10,
       "critRateBonus": 0,
-      "iconPath": "Icons/Necklaces/talisman",
+      "iconPath": "Sprites/Items/NCK_001",
       "description": "带来好运的护身符。"
     },
     {
@@ -205,8 +205,183 @@
       "defenseBonus": 2,
       "hpBonus": 30,
       "critRateBonus": 0,
-      "iconPath": "Icons/Necklaces/life_pendant",
+      "iconPath": "Sprites/Items/NCK_002",
       "description": "增强生命力的神奇吊坠。"
+    },
+
+    {
+      "id": "WPN_005",
+      "name": "暗影之刃",
+      "slot": 0,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 50,
+      "defenseBonus": 0,
+      "hpBonus": 0,
+      "critRateBonus": 0.08,
+      "iconPath": "Sprites/Items/WPN_005",
+      "description": "暗影锻造的魔剑，攻击+50，暴击+8%。"
+    },
+    {
+      "id": "WPN_006",
+      "name": "龙牙大剑",
+      "slot": 0,
+      "quality": 4,
+      "level": 20,
+      "attackBonus": 80,
+      "defenseBonus": 5,
+      "hpBonus": 50,
+      "critRateBonus": 0.12,
+      "iconPath": "Sprites/Items/WPN_006",
+      "description": "传说中用龙牙打造的神器，攻击+80，暴击+12%。"
+    },
+    {
+      "id": "WPN_007",
+      "name": "雷霆战弓",
+      "slot": 0,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 45,
+      "defenseBonus": 0,
+      "hpBonus": 20,
+      "critRateBonus": 0.10,
+      "iconPath": "Sprites/Items/WPN_007",
+      "description": "蕴含雷电之力的战弓，攻击+45，暴击+10%。"
+    },
+
+    {
+      "id": "ARM_005",
+      "name": "秘银甲",
+      "slot": 2,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 0,
+      "defenseBonus": 35,
+      "hpBonus": 120,
+      "critRateBonus": 0,
+      "iconPath": "Sprites/Items/ARM_005",
+      "description": "秘银锻造的轻便重甲，防御+35，HP+120。"
+    },
+    {
+      "id": "ARM_006",
+      "name": "龙鳞战甲",
+      "slot": 2,
+      "quality": 4,
+      "level": 20,
+      "attackBonus": 10,
+      "defenseBonus": 50,
+      "hpBonus": 200,
+      "critRateBonus": 0.03,
+      "iconPath": "Sprites/Items/ARM_006",
+      "description": "龙鳞编织的传说战甲，防御+50，HP+200。"
+    },
+
+    {
+      "id": "HLM_003",
+      "name": "狮鹫头盔",
+      "slot": 1,
+      "quality": 2,
+      "level": 10,
+      "attackBonus": 5,
+      "defenseBonus": 10,
+      "hpBonus": 30,
+      "critRateBonus": 0.02,
+      "iconPath": "Sprites/Items/HLM_003",
+      "description": "狮鹫骑士的头盔，防御+10，HP+30。"
+    },
+    {
+      "id": "HLM_004",
+      "name": "暗金王冠",
+      "slot": 1,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 10,
+      "defenseBonus": 15,
+      "hpBonus": 60,
+      "critRateBonus": 0.05,
+      "iconPath": "Sprites/Items/HLM_004",
+      "description": "暗金打造的王冠，防御+15，HP+60，暴击+5%。"
+    },
+
+    {
+      "id": "PNT_003",
+      "name": "铁甲护腿",
+      "slot": 3,
+      "quality": 2,
+      "level": 10,
+      "attackBonus": 0,
+      "defenseBonus": 10,
+      "hpBonus": 25,
+      "critRateBonus": 0,
+      "iconPath": "Sprites/Items/PNT_003",
+      "description": "铁甲护腿，防御+10，HP+25。"
+    },
+    {
+      "id": "PNT_004",
+      "name": "暗影行者",
+      "slot": 3,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 8,
+      "defenseBonus": 18,
+      "hpBonus": 50,
+      "critRateBonus": 0.04,
+      "iconPath": "Sprites/Items/PNT_004",
+      "description": "暗影行者护腿，防御+18，HP+50，暴击+4%。"
+    },
+
+    {
+      "id": "RNG_003",
+      "name": "烈焰戒指",
+      "slot": 4,
+      "quality": 2,
+      "level": 10,
+      "attackBonus": 12,
+      "defenseBonus": 0,
+      "hpBonus": 10,
+      "critRateBonus": 0.05,
+      "iconPath": "Sprites/Items/RNG_003",
+      "description": "蕴含烈焰之力的戒指，攻击+12，暴击+5%。"
+    },
+    {
+      "id": "RNG_004",
+      "name": "霜龙之戒",
+      "slot": 4,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 20,
+      "defenseBonus": 5,
+      "hpBonus": 30,
+      "critRateBonus": 0.08,
+      "iconPath": "Sprites/Items/RNG_004",
+      "description": "封印霜龙之力的神戒，攻击+20，暴击+8%。"
+    },
+
+    {
+      "id": "NCK_003",
+      "name": "守护者圣物",
+      "slot": 5,
+      "quality": 2,
+      "level": 10,
+      "attackBonus": 3,
+      "defenseBonus": 8,
+      "hpBonus": 60,
+      "critRateBonus": 0.02,
+      "iconPath": "Sprites/Items/NCK_003",
+      "description": "守护者的圣物，防御+8，HP+60。"
+    },
+    {
+      "id": "NCK_004",
+      "name": "不灭心脏",
+      "slot": 5,
+      "quality": 3,
+      "level": 15,
+      "attackBonus": 8,
+      "defenseBonus": 12,
+      "hpBonus": 120,
+      "critRateBonus": 0.05,
+      "iconPath": "Sprites/Items/NCK_004",
+      "description": "传说之物，防御+12，HP+120，暴击+5%。"
     }
   ]
 }

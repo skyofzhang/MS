@@ -26,6 +26,10 @@ public class UIManager : MonoBehaviour
     public SimpleHealthBar simpleHealthBar; // 新的简单血条
     public Text goldText;
     public Text levelText;
+    public Text healthText;     // 生命值文字 (如 "150/200")
+    public Text attackText;     // 攻击力文字
+    public Text defenseText;    // 防御力文字
+    public Text playerLevelText; // 玩家等级文字
 
     [Header("Skill Buttons")]
     public Button skill1Button;  // 多重箭
@@ -88,6 +92,12 @@ public class UIManager : MonoBehaviour
             {
                 simpleHealthBar.SetValue(healthPercent);
             }
+
+            // 更新生命值文字
+            if (healthText != null)
+            {
+                healthText.text = $"{Mathf.CeilToInt(player.currentHealth)}/{Mathf.CeilToInt(player.maxHealth)}";
+            }
         }
 
         if (GameManager.Instance != null)
@@ -96,6 +106,18 @@ public class UIManager : MonoBehaviour
                 goldText.text = $"{GameManager.Instance.SessionGold}";
             if (levelText != null)
                 levelText.text = $"波次 {GameManager.Instance.CurrentWave}/{GameManager.Instance.TotalWaves}  击杀: {GameManager.Instance.KillCount}";
+        }
+
+        // 更新ATK/DEF/Level（从PlayerStats获取）
+        if (MoShou.Systems.SaveSystem.Instance != null && MoShou.Systems.SaveSystem.Instance.CurrentPlayerStats != null)
+        {
+            var stats = MoShou.Systems.SaveSystem.Instance.CurrentPlayerStats;
+            if (attackText != null)
+                attackText.text = $"攻击: {stats.GetTotalAttack()}";
+            if (defenseText != null)
+                defenseText.text = $"防御: {stats.GetTotalDefense()}";
+            if (playerLevelText != null)
+                playerLevelText.text = $"Lv.{stats.level}";
         }
     }
     

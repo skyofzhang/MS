@@ -38,6 +38,10 @@ namespace MoShou.UI
         [SerializeField] private Text killCountText;
         [SerializeField] private Text waveText;
 
+        [Header("属性显示")]
+        [SerializeField] private Text attackText;
+        [SerializeField] private Text defenseText;
+
         private PlayerStats playerStats;
         private int killCount = 0;
         private int currentWave = 1;
@@ -63,6 +67,9 @@ namespace MoShou.UI
             {
                 playerStats = SaveSystem.Instance.CurrentPlayerStats;
             }
+
+            // 动态创建ATK/DEF显示（如果未在Inspector中绑定）
+            CreateCombatStatsDisplay();
 
             // 订阅事件
             SubscribeEvents();
@@ -108,6 +115,7 @@ namespace MoShou.UI
         {
             RefreshPlayerStats();
             RefreshCombatInfo();
+            RefreshCombatStats();
         }
 
         /// <summary>
@@ -153,6 +161,9 @@ namespace MoShou.UI
             // 金币
             if (goldText != null)
                 goldText.text = playerStats.gold.ToString();
+
+            // 属性
+            RefreshCombatStats();
         }
 
         /// <summary>
@@ -164,6 +175,89 @@ namespace MoShou.UI
                 killCountText.text = $"击杀: {killCount}";
             if (waveText != null)
                 waveText.text = $"波次: {currentWave}";
+        }
+
+        /// <summary>
+        /// 动态创建ATK/DEF属性显示区域（如未在Inspector中绑定）
+        /// </summary>
+        private void CreateCombatStatsDisplay()
+        {
+            if (attackText != null && defenseText != null) return;
+
+            // 在HUD区域内创建属性显示 - 血条下方左侧
+            // 寻找HUD容器
+            Transform parent = transform;
+
+            // 查找HUD容器
+            Transform hudTf = transform.Find("HUD");
+            if (hudTf != null)
+                parent = hudTf;
+            else if (waveText != null)
+                parent = waveText.transform.parent.parent; // WaveText -> WaveBG -> HUD
+
+            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+            if (attackText == null)
+            {
+                GameObject atkGO = new GameObject("AttackText");
+                atkGO.transform.SetParent(parent, false);
+                RectTransform atkRect = atkGO.AddComponent<RectTransform>();
+                // 放在HUD左侧，血条下方位置
+                atkRect.anchorMin = new Vector2(0, 0);
+                atkRect.anchorMax = new Vector2(0, 0);
+                atkRect.anchoredPosition = new Vector2(120, 12);
+                atkRect.sizeDelta = new Vector2(130, 22);
+                attackText = atkGO.AddComponent<Text>();
+                attackText.fontSize = 16;
+                attackText.color = new Color(1f, 0.5f, 0.3f); // 橙色 - 攻击力
+                attackText.alignment = TextAnchor.MiddleLeft;
+                if (font != null) attackText.font = font;
+                attackText.raycastTarget = false;
+
+                Outline outline = atkGO.AddComponent<Outline>();
+                outline.effectColor = Color.black;
+                outline.effectDistance = new Vector2(1, -1);
+            }
+
+            if (defenseText == null)
+            {
+                GameObject defGO = new GameObject("DefenseText");
+                defGO.transform.SetParent(parent, false);
+                RectTransform defRect = defGO.AddComponent<RectTransform>();
+                // 紧挨ATK右侧
+                defRect.anchorMin = new Vector2(0, 0);
+                defRect.anchorMax = new Vector2(0, 0);
+                defRect.anchoredPosition = new Vector2(260, 12);
+                defRect.sizeDelta = new Vector2(130, 22);
+                defenseText = defGO.AddComponent<Text>();
+                defenseText.fontSize = 16;
+                defenseText.color = new Color(0.3f, 0.7f, 1f); // 蓝色 - 防御力
+                defenseText.alignment = TextAnchor.MiddleLeft;
+                if (font != null) defenseText.font = font;
+                defenseText.raycastTarget = false;
+
+                Outline outline = defGO.AddComponent<Outline>();
+                outline.effectColor = Color.black;
+                outline.effectDistance = new Vector2(1, -1);
+            }
+        }
+
+        /// <summary>
+        /// 刷新ATK/DEF属性显示
+        /// </summary>
+        private void RefreshCombatStats()
+        {
+            if (playerStats == null)
+            {
+                if (SaveSystem.Instance != null)
+                    playerStats = SaveSystem.Instance.CurrentPlayerStats;
+                if (playerStats == null) return;
+            }
+
+            if (attackText != null)
+                attackText.text = $"攻击: {playerStats.GetTotalAttack()}";
+            if (defenseText != null)
+                defenseText.text = $"防御: {playerStats.GetTotalDefense()}";
         }
 
         /// <summary>

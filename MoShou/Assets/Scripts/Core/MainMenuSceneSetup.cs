@@ -101,7 +101,26 @@ public class MainMenuSceneSetup : MonoBehaviour
         Sprite menuBg = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_MainMenu_BG");
         Sprite logoSprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_MainMenu_Logo");
 
-        Debug.Log($"[MainMenuSetup] 资源: Mockup={mockupBg != null}, BG={menuBg != null}, Logo={logoSprite != null}");
+        // 面板框架精灵
+        Sprite frameSprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_MainMenu_Frame");
+
+        // 按钮精灵
+        Sprite btnPlaySprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Play");
+        Sprite btnContinueSprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Continue");
+        Sprite btnRoleSprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Role");
+        Sprite btnSettingsSprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Settings");
+        Sprite btnQuitSprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Quit");
+
+        // 按钮状态精灵（SpriteSwap过渡用）
+        Sprite btnStartNormal = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Start_Normal");
+        Sprite btnStartPressed = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Start_Pressed");
+        Sprite btnContinueNormal = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Continue_Normal");
+        Sprite btnContinueDisabled = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Continue_Disabled");
+        Sprite btnSettingsNormal = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Settings_Normal");
+        Sprite btnQuitNormal = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_Btn_Quit_Normal");
+
+        Debug.Log($"[MainMenuSetup] 资源: Mockup={mockupBg != null}, BG={menuBg != null}, Logo={logoSprite != null}, Frame={frameSprite != null}");
+        Debug.Log($"[MainMenuSetup] 按钮精灵: Play={btnPlaySprite != null}, Continue={btnContinueSprite != null}, Role={btnRoleSprite != null}, Settings={btnSettingsSprite != null}, Quit={btnQuitSprite != null}");
 
         // 创建Canvas
         GameObject canvasGO = new GameObject("MainMenuCanvas");
@@ -123,10 +142,15 @@ public class MainMenuSceneSetup : MonoBehaviour
         CreateLogoArea(canvasGO.transform, logoSprite);
 
         // === 角色预览区域（左侧） ===
-        CreateCharacterPreview(canvasGO.transform);
+        // CreateCharacterPreview(canvasGO.transform);
 
         // === 中央按钮面板 ===
-        CreateButtonPanel(canvasGO.transform);
+        CreateButtonPanel(canvasGO.transform, frameSprite,
+            btnPlaySprite ?? btnStartNormal, btnStartPressed,
+            btnContinueSprite ?? btnContinueNormal, btnContinueDisabled,
+            btnRoleSprite,
+            btnSettingsSprite ?? btnSettingsNormal,
+            btnQuitSprite ?? btnQuitNormal);
 
         // === 底部状态栏 ===
         CreateBottomStatusBar(canvasGO.transform);
@@ -202,19 +226,22 @@ public class MainMenuSceneSetup : MonoBehaviour
         containerRect.anchorMax = new Vector2(0.5f, 0.78f);
         containerRect.sizeDelta = new Vector2(900, 200);
 
-        // 装饰背景框
-        GameObject logoBg = new GameObject("LogoBG");
-        logoBg.transform.SetParent(logoContainer.transform, false);
-        RectTransform bgRect = logoBg.AddComponent<RectTransform>();
-        bgRect.anchorMin = Vector2.zero;
-        bgRect.anchorMax = Vector2.one;
-        bgRect.offsetMin = Vector2.zero;
-        bgRect.offsetMax = Vector2.zero;
-        Image bgImg = logoBg.AddComponent<Image>();
-        bgImg.color = new Color(0.15f, 0.1f, 0.08f, 0.6f);
+        if (logoSprite == null)
+        {
+            // 仅在无Logo精灵时才创建装饰背景框
+            GameObject logoBg = new GameObject("LogoBG");
+            logoBg.transform.SetParent(logoContainer.transform, false);
+            RectTransform bgRect = logoBg.AddComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
+            Image bgImg = logoBg.AddComponent<Image>();
+            bgImg.color = new Color(0.15f, 0.1f, 0.08f, 0.6f);
 
-        // 金色边框
-        CreateBorder(logoBg.transform, new Color(0.85f, 0.65f, 0.2f, 0.8f), 4);
+            // 金色边框
+            CreateBorder(logoBg.transform, new Color(0.85f, 0.65f, 0.2f, 0.8f), 4);
+        }
 
         // Logo图片或文字
         GameObject logoGO = new GameObject("Logo");
@@ -290,7 +317,10 @@ public class MainMenuSceneSetup : MonoBehaviour
         }
     }
 
-    void CreateButtonPanel(Transform parent)
+    void CreateButtonPanel(Transform parent, Sprite frameSprite = null,
+        Sprite playSprite = null, Sprite playPressedSprite = null,
+        Sprite continueSprite = null, Sprite continueDisabledSprite = null,
+        Sprite roleSprite = null, Sprite settingsSprite = null, Sprite quitSprite = null)
     {
         // 按钮面板容器（居中）
         GameObject panelGO = new GameObject("ButtonPanel");
@@ -299,38 +329,33 @@ public class MainMenuSceneSetup : MonoBehaviour
         panelRect.anchorMin = new Vector2(0.5f, 0.32f);
         panelRect.anchorMax = new Vector2(0.5f, 0.32f);
         panelRect.anchoredPosition = new Vector2(0, 0);  // 居中
-        panelRect.sizeDelta = new Vector2(480, 420);
+        panelRect.sizeDelta = new Vector2(480, 700); // 扩大容纳原始尺寸按钮
 
-        // 半透明玻璃背景
-        Image panelBg = panelGO.AddComponent<Image>();
-        panelBg.color = new Color(0.08f, 0.1f, 0.15f, 0.85f);
-
-        // 金色边框
-        CreateBorder(panelGO.transform, new Color(0.7f, 0.55f, 0.25f, 0.7f), 3);
-
-        // 按钮布局
-        GameObject buttonsGO = new GameObject("Buttons");
-        buttonsGO.transform.SetParent(panelGO.transform, false);
-        RectTransform buttonsRect = buttonsGO.AddComponent<RectTransform>();
-        buttonsRect.anchorMin = Vector2.zero;
-        buttonsRect.anchorMax = Vector2.one;
-        buttonsRect.offsetMin = new Vector2(30, 30);
-        buttonsRect.offsetMax = new Vector2(-30, -30);
-
-        VerticalLayoutGroup vlg = buttonsGO.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing = 18;
+        // 按钮布局（直接在面板上，不需要背景层）
+        VerticalLayoutGroup vlg = panelGO.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 12;
         vlg.childAlignment = TextAnchor.MiddleCenter;
         vlg.childControlWidth = false;
         vlg.childControlHeight = false;
         vlg.childForceExpandWidth = false;
         vlg.childForceExpandHeight = false;
+        vlg.padding = new RectOffset(0, 0, 10, 10);
+
+        // 自动适配内容大小
+        ContentSizeFitter csf = panelGO.AddComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        // 简化：按钮直接挂在面板下，无需中间Buttons层
+        GameObject buttonsGO = panelGO; // 指向面板本身
 
         // === 创建按钮 ===
 
         // 开始游戏 - 大按钮，橙金渐变
         CreateMenuButton(buttonsGO.transform, "PlayButton", "开始游戏", 85,
             new Color(1f, 0.6f, 0.15f), new Color(0.9f, 0.4f, 0.1f),
-            () => SceneManager.LoadScene("StageSelect"));
+            () => SceneManager.LoadScene("StageSelect"),
+            false, playSprite, playPressedSprite, null);
 
         // 继续游戏 - 绿色
         bool hasSaveData = SaveSystem.Instance != null && SaveSystem.Instance.HasSaveData();
@@ -340,7 +365,7 @@ public class MainMenuSceneSetup : MonoBehaviour
             () => {
                 if (hasSaveData) SceneManager.LoadScene("GameScene");
             },
-            !hasSaveData);
+            !hasSaveData, continueSprite, null, continueDisabledSprite);
 
         // 角色 - 蓝色
         CreateMenuButton(buttonsGO.transform, "CharacterButton", "角色", 55,
@@ -366,7 +391,8 @@ public class MainMenuSceneSetup : MonoBehaviour
                         ShowSimpleCharacterInfo();
                     }
                 }
-            });
+            },
+            false, roleSprite, null, null);
 
         // 设置 - 灰色
         CreateMenuButton(buttonsGO.transform, "SettingsButton", "设置", 55,
@@ -394,7 +420,8 @@ public class MainMenuSceneSetup : MonoBehaviour
                         ShowSimpleSettings();
                     }
                 }
-            });
+            },
+            false, settingsSprite, null, null);
 
         // 退出 - 暗红色
         CreateMenuButton(buttonsGO.transform, "QuitButton", "退出", 50,
@@ -418,12 +445,16 @@ public class MainMenuSceneSetup : MonoBehaviour
                     Application.Quit();
 #endif
                 }
-            });
+            },
+            false, quitSprite, null, null);
     }
 
     void CreateMenuButton(Transform parent, string name, string text, float height,
-        Color colorTop, Color colorBottom, UnityAction onClick, bool disabled = false)
+        Color colorTop, Color colorBottom, UnityAction onClick, bool disabled = false,
+        Sprite btnSprite = null, Sprite pressedSprite = null, Sprite disabledSprite = null)
     {
+        bool useSprite = (btnSprite != null);
+
         GameObject btnGO = new GameObject(name);
         btnGO.transform.SetParent(parent, false);
 
@@ -433,39 +464,65 @@ public class MainMenuSceneSetup : MonoBehaviour
 
         // 按钮背景
         Image btnImg = btnGO.AddComponent<Image>();
-        btnImg.color = disabled ? new Color(0.35f, 0.35f, 0.35f, 0.6f) : colorTop;
 
-        // 渐变层
-        if (!disabled)
+        if (useSprite)
         {
-            GameObject gradient = new GameObject("Gradient");
-            gradient.transform.SetParent(btnGO.transform, false);
-            RectTransform gradRect = gradient.AddComponent<RectTransform>();
-            gradRect.anchorMin = new Vector2(0, 0);
-            gradRect.anchorMax = new Vector2(1, 0.5f);
-            gradRect.offsetMin = Vector2.zero;
-            gradRect.offsetMax = Vector2.zero;
-            Image gradImg = gradient.AddComponent<Image>();
-            gradImg.color = new Color(colorBottom.r, colorBottom.g, colorBottom.b, 0.7f);
-            gradImg.raycastTarget = false;
+            // ★ 使用精灵图片作为按钮背景
+            if (disabled && disabledSprite != null)
+            {
+                btnImg.sprite = disabledSprite;
+            }
+            else
+            {
+                btnImg.sprite = btnSprite;
+            }
+            btnImg.type = Image.Type.Simple;
+            btnImg.color = disabled && disabledSprite == null
+                ? new Color(0.5f, 0.5f, 0.5f, 0.8f)  // 无disabled精灵时变暗
+                : Color.white;
+            btnImg.SetNativeSize(); // 使用精灵原始尺寸
+            // 更新LayoutElement为精灵原始尺寸
+            layout.preferredWidth = btnImg.rectTransform.sizeDelta.x;
+            layout.preferredHeight = btnImg.rectTransform.sizeDelta.y;
+            // 精灵自带渐变/边框/高光效果，不需要创建子层
         }
-
-        // 边框
-        CreateBorder(btnGO.transform, new Color(0.9f, 0.8f, 0.5f, disabled ? 0.3f : 0.6f), 2);
-
-        // 高光
-        if (!disabled)
+        else
         {
-            GameObject highlight = new GameObject("Highlight");
-            highlight.transform.SetParent(btnGO.transform, false);
-            RectTransform hlRect = highlight.AddComponent<RectTransform>();
-            hlRect.anchorMin = new Vector2(0.05f, 0.55f);
-            hlRect.anchorMax = new Vector2(0.95f, 0.92f);
-            hlRect.offsetMin = Vector2.zero;
-            hlRect.offsetMax = Vector2.zero;
-            Image hlImg = highlight.AddComponent<Image>();
-            hlImg.color = new Color(1, 1, 1, 0.12f);
-            hlImg.raycastTarget = false;
+            // ★ 降级：程序化纯色按钮（原逻辑）
+            btnImg.color = disabled ? new Color(0.35f, 0.35f, 0.35f, 0.6f) : colorTop;
+
+            // 渐变层
+            if (!disabled)
+            {
+                GameObject gradient = new GameObject("Gradient");
+                gradient.transform.SetParent(btnGO.transform, false);
+                RectTransform gradRect = gradient.AddComponent<RectTransform>();
+                gradRect.anchorMin = new Vector2(0, 0);
+                gradRect.anchorMax = new Vector2(1, 0.5f);
+                gradRect.offsetMin = Vector2.zero;
+                gradRect.offsetMax = Vector2.zero;
+                Image gradImg = gradient.AddComponent<Image>();
+                gradImg.color = new Color(colorBottom.r, colorBottom.g, colorBottom.b, 0.7f);
+                gradImg.raycastTarget = false;
+            }
+
+            // 边框
+            CreateBorder(btnGO.transform, new Color(0.9f, 0.8f, 0.5f, disabled ? 0.3f : 0.6f), 2);
+
+            // 高光
+            if (!disabled)
+            {
+                GameObject highlight = new GameObject("Highlight");
+                highlight.transform.SetParent(btnGO.transform, false);
+                RectTransform hlRect = highlight.AddComponent<RectTransform>();
+                hlRect.anchorMin = new Vector2(0.05f, 0.55f);
+                hlRect.anchorMax = new Vector2(0.95f, 0.92f);
+                hlRect.offsetMin = Vector2.zero;
+                hlRect.offsetMax = Vector2.zero;
+                Image hlImg = highlight.AddComponent<Image>();
+                hlImg.color = new Color(1, 1, 1, 0.12f);
+                hlImg.raycastTarget = false;
+            }
         }
 
         // Button组件
@@ -474,14 +531,30 @@ public class MainMenuSceneSetup : MonoBehaviour
         btn.interactable = !disabled;
         if (!disabled) btn.onClick.AddListener(onClick);
 
-        ColorBlock colors = btn.colors;
-        colors.normalColor = Color.white;
-        colors.highlightedColor = new Color(1.08f, 1.08f, 1.08f);
-        colors.pressedColor = new Color(0.88f, 0.88f, 0.88f);
-        colors.disabledColor = new Color(0.6f, 0.6f, 0.6f);
-        btn.colors = colors;
+        if (useSprite && pressedSprite != null)
+        {
+            // 有按下状态精灵时，使用SpriteSwap过渡
+            btn.transition = Selectable.Transition.SpriteSwap;
+            SpriteState spriteState = new SpriteState();
+            spriteState.pressedSprite = pressedSprite;
+            spriteState.highlightedSprite = btnSprite; // 高亮时保持原图
+            if (disabledSprite != null)
+                spriteState.disabledSprite = disabledSprite;
+            btn.spriteState = spriteState;
+        }
+        else
+        {
+            // ColorTint过渡
+            btn.transition = Selectable.Transition.ColorTint;
+            ColorBlock colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.08f, 1.08f, 1.08f);
+            colors.pressedColor = new Color(0.88f, 0.88f, 0.88f);
+            colors.disabledColor = new Color(0.6f, 0.6f, 0.6f);
+            btn.colors = colors;
+        }
 
-        // 文字
+        // 文字（始终保留）
         GameObject textGO = new GameObject("Text");
         textGO.transform.SetParent(btnGO.transform, false);
         RectTransform textRect = textGO.AddComponent<RectTransform>();
@@ -675,10 +748,17 @@ public class MainMenuSceneSetup : MonoBehaviour
         panelRect.anchorMax = new Vector2(0.5f, 0.5f);
         panelRect.sizeDelta = new Vector2(800, 900);
         Image panelImg = panel.AddComponent<Image>();
-        panelImg.color = new Color(0.1f, 0.12f, 0.18f, 0.95f);
-
-        // 边框
-        CreateBorder(panel.transform, new Color(0.7f, 0.55f, 0.25f), 4);
+        Sprite panelBgSprite = Resources.Load<Sprite>("Sprites/UI/MainMenu/UI_MainMenu_BG2");
+        if (panelBgSprite != null)
+        {
+            panelImg.sprite = panelBgSprite;
+            panelImg.type = Image.Type.Simple;
+            panelImg.color = Color.white;
+        }
+        else
+        {
+            panelImg.color = new Color(0.1f, 0.12f, 0.18f, 0.95f);
+        }
 
         // 标题
         GameObject titleGO = new GameObject("Title");
@@ -687,7 +767,7 @@ public class MainMenuSceneSetup : MonoBehaviour
         titleRect.anchorMin = new Vector2(0, 1);
         titleRect.anchorMax = new Vector2(1, 1);
         titleRect.pivot = new Vector2(0.5f, 1);
-        titleRect.anchoredPosition = new Vector2(0, -20);
+        titleRect.anchoredPosition = new Vector2(0, -40);
         titleRect.sizeDelta = new Vector2(0, 80);
 
         Text titleText = titleGO.AddComponent<Text>();
@@ -718,8 +798,8 @@ public class MainMenuSceneSetup : MonoBehaviour
             GameObject statGO = new GameObject($"Stat_{i}");
             statGO.transform.SetParent(panel.transform, false);
             RectTransform statRect = statGO.AddComponent<RectTransform>();
-            statRect.anchorMin = new Vector2(0.1f, 0);
-            statRect.anchorMax = new Vector2(0.9f, 0);
+            statRect.anchorMin = new Vector2(0.18f, 0);
+            statRect.anchorMax = new Vector2(0.82f, 0);
             statRect.pivot = new Vector2(0.5f, 0);
             statRect.anchoredPosition = new Vector2(0, 650 - i * 90);
             statRect.sizeDelta = new Vector2(0, 70);
@@ -748,7 +828,7 @@ public class MainMenuSceneSetup : MonoBehaviour
         closeBtnRect.anchorMin = new Vector2(0.5f, 0);
         closeBtnRect.anchorMax = new Vector2(0.5f, 0);
         closeBtnRect.pivot = new Vector2(0.5f, 0);
-        closeBtnRect.anchoredPosition = new Vector2(0, 50);
+        closeBtnRect.anchoredPosition = new Vector2(0, 80);
         closeBtnRect.sizeDelta = new Vector2(300, 80);
 
         Image closeBtnImg = closeBtn.AddComponent<Image>();
@@ -844,7 +924,7 @@ public class MainMenuSceneSetup : MonoBehaviour
         volumeRect.sizeDelta = new Vector2(0, 200);
 
         Text volumeText = volumeGO.AddComponent<Text>();
-        volumeText.text = "🔊 音量控制\n\n音乐和音效设置将在完整版本中提供";
+        volumeText.text = "🔊 音量控制\n\n音乐: 100%\n音效: 100%\n\n（滑动调节功能开发中）";
         volumeText.fontSize = 28;
         volumeText.alignment = TextAnchor.MiddleCenter;
         volumeText.color = new Color(0.8f, 0.8f, 0.8f);

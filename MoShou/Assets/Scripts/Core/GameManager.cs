@@ -353,9 +353,16 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log($"[GameManager] Defeat at Level {CurrentLevel}, Wave {CurrentWave}");
 
-            // Give partial rewards (50%)
-            int partialGold = SessionGold / 2;
-            int partialExp = SessionExp / 2;
+            // Give partial rewards (configurable ratio, default 50%)
+            float goldRatio = 0.5f;
+            float expRatio = 0.5f;
+            if (MoShou.Systems.ConfigManager.Instance?.IsLoaded == true)
+            {
+                goldRatio = MoShou.Systems.ConfigManager.Instance.Settings.defeatSettings.partialGoldRatio;
+                expRatio = MoShou.Systems.ConfigManager.Instance.Settings.defeatSettings.partialExpRatio;
+            }
+            int partialGold = Mathf.RoundToInt(SessionGold * goldRatio);
+            int partialExp = Mathf.RoundToInt(SessionExp * expRatio);
 
             // DefeatScreen 会保存奖励，这里不重复保存
             Debug.Log($"[GameManager] Partial rewards: {partialGold} Gold, {partialExp} EXP");

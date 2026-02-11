@@ -80,7 +80,7 @@ namespace MoShou.Systems
         /// </summary>
         private void LoadDropTables()
         {
-            TextAsset configFile = Resources.Load<TextAsset>("Configs/DropTableConfigs");
+            TextAsset configFile = Resources.Load<TextAsset>("Configs/LootConfigs");
             if (configFile != null)
             {
                 try

@@ -14,7 +14,7 @@ namespace MoShou.UI
 
         [Header("Minimap Settings")]
         public float mapWorldSize = 50f;       // 地图世界尺寸（对应地形大小）
-        public float minimapSize = 120f;       // 小地图UI尺寸（像素）
+        public float minimapSize = 180f;       // 小地图UI尺寸（像素）- 放大至180
         public float iconSize = 8f;            // 图标大小
 
         [Header("Colors")]
@@ -40,6 +40,9 @@ namespace MoShou.UI
         private float enemyUpdateInterval = 0.5f;  // 每0.5秒更新一次敌人图标
         private float lastEnemyUpdateTime;
 
+        // 角色详情面板
+        private GameObject characterDetailPanel;
+
         void Awake()
         {
             if (Instance == null)
@@ -55,8 +58,31 @@ namespace MoShou.UI
 
         void Start()
         {
+            // 自动匹配地图世界尺寸到实际地形大小
+            AutoDetectMapWorldSize();
+
             // 延迟创建，确保Canvas已经存在
             Invoke("CreateMinimapUI", 0.1f);
+        }
+
+        /// <summary>
+        /// 自动检测地形尺寸，同步小地图的mapWorldSize
+        /// </summary>
+        void AutoDetectMapWorldSize()
+        {
+            Terrain terrain = Terrain.activeTerrain;
+            if (terrain != null && terrain.terrainData != null)
+            {
+                // 取地形X和Z中较大的值作为小地图世界尺寸
+                float terrainX = terrain.terrainData.size.x;
+                float terrainZ = terrain.terrainData.size.z;
+                mapWorldSize = Mathf.Max(terrainX, terrainZ);
+                Debug.Log($"[Minimap] 自动检测地形尺寸: {terrainX}x{terrainZ}, mapWorldSize={mapWorldSize}");
+            }
+            else
+            {
+                Debug.Log($"[Minimap] 未找到地形，使用默认mapWorldSize={mapWorldSize}");
+            }
         }
 
         void Update()
@@ -154,8 +180,12 @@ namespace MoShou.UI
             minimapContainer.anchorMin = new Vector2(0, 1);
             minimapContainer.anchorMax = new Vector2(0, 1);
             minimapContainer.pivot = new Vector2(0, 1);
-            minimapContainer.anchoredPosition = new Vector2(10, -100); // 左上角，HUD下方
+            minimapContainer.anchoredPosition = new Vector2(10, -210); // 左上角，HUD下方（往下移避免重叠）
             minimapContainer.sizeDelta = new Vector2(minimapSize, minimapSize);
+
+            // 添加CanvasGroup实现整体半透明
+            CanvasGroup minimapCanvasGroup = containerObj.AddComponent<CanvasGroup>();
+            minimapCanvasGroup.alpha = 0.75f; // 75%不透明度，让小地图稍微透明
 
             // 创建背景和边框
             CreateMinimapBackground();
@@ -166,7 +196,12 @@ namespace MoShou.UI
             // 创建玩家图标
             CreatePlayerIcon();
 
-            Debug.Log($"[Minimap] 小地图初始化完成，父Canvas: {uiCanvas.name}");
+            // 添加点击事件 - 点击小地图打开角色详情
+            Button minimapBtn = containerObj.AddComponent<Button>();
+            minimapBtn.transition = Selectable.Transition.None; // 无视觉变化
+            minimapBtn.onClick.AddListener(OnMinimapClicked);
+
+            Debug.Log($"[Minimap] 小地图初始化完成，父Canvas: {uiCanvas.name}, mapWorldSize={mapWorldSize}");
         }
 
         void CreateMinimapBackground()
@@ -417,6 +452,262 @@ namespace MoShou.UI
             if (minimapContainer != null)
             {
                 minimapContainer.gameObject.SetActive(visible);
+            }
+        }
+
+        /// <summary>
+        /// 小地图点击回调 - 打开角色详情面板
+        /// </summary>
+        void OnMinimapClicked()
+        {
+            // 已有面板则切换显示
+            if (characterDetailPanel != null)
+            {
+                bool isActive = characterDetailPanel.activeSelf;
+                characterDetailPanel.SetActive(!isActive);
+                if (!isActive)
+                {
+                    RefreshCharacterDetail();
+                    // 重置滚动位置到顶部
+                    var scrollRect = characterDetailPanel.GetComponentInChildren<ScrollRect>();
+                    if (scrollRect != null) scrollRect.verticalNormalizedPosition = 1f;
+                }
+                return;
+            }
+
+            // 创建角色详情面板
+            CreateCharacterDetailPanel();
+        }
+
+        /// <summary>
+        /// 创建简易角色详情面板
+        /// </summary>
+        void CreateCharacterDetailPanel()
+        {
+            if (uiCanvas == null) return;
+
+            Font defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (defaultFont == null) defaultFont = Font.CreateDynamicFontFromOSFont("Arial", 14);
+
+            // 全屏遮罩
+            characterDetailPanel = new GameObject("CharacterDetailPanel");
+            characterDetailPanel.transform.SetParent(uiCanvas.transform, false);
+            RectTransform panelRect = characterDetailPanel.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            Image overlay = characterDetailPanel.AddComponent<Image>();
+            overlay.color = new Color(0, 0, 0, 0.6f);
+
+            // 内容框
+            GameObject contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(characterDetailPanel.transform, false);
+            RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            contentRect.sizeDelta = new Vector2(400, 620);
+            contentRect.anchoredPosition = Vector2.zero;
+
+            Image contentBg = contentGO.AddComponent<Image>();
+            contentBg.color = new Color(0.15f, 0.15f, 0.22f, 0.98f);
+
+            // 标题
+            GameObject titleGO = new GameObject("Title");
+            titleGO.transform.SetParent(contentGO.transform, false);
+            RectTransform titleRect = titleGO.AddComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0, 1);
+            titleRect.anchorMax = new Vector2(1, 1);
+            titleRect.anchoredPosition = new Vector2(0, -30);
+            titleRect.sizeDelta = new Vector2(0, 50);
+            Text titleText = titleGO.AddComponent<Text>();
+            titleText.text = "角色信息";
+            titleText.fontSize = 30;
+            titleText.fontStyle = FontStyle.Bold;
+            titleText.alignment = TextAnchor.MiddleCenter;
+            titleText.color = new Color(1f, 0.85f, 0.4f);
+            titleText.font = defaultFont;
+
+            // 关闭按钮
+            GameObject closeBtnGO = new GameObject("CloseBtn");
+            closeBtnGO.transform.SetParent(contentGO.transform, false);
+            RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
+            closeRect.anchorMin = new Vector2(1, 1);
+            closeRect.anchorMax = new Vector2(1, 1);
+            closeRect.anchoredPosition = new Vector2(-25, -25);
+            closeRect.sizeDelta = new Vector2(40, 40);
+            Image closeBg = closeBtnGO.AddComponent<Image>();
+            closeBg.color = new Color(0.7f, 0.2f, 0.2f);
+            Button closeBtn = closeBtnGO.AddComponent<Button>();
+            closeBtn.targetGraphic = closeBg;
+            closeBtn.onClick.AddListener(() => characterDetailPanel.SetActive(false));
+
+            GameObject closeTextGO = new GameObject("X");
+            closeTextGO.transform.SetParent(closeBtnGO.transform, false);
+            RectTransform cxRect = closeTextGO.AddComponent<RectTransform>();
+            cxRect.anchorMin = Vector2.zero;
+            cxRect.anchorMax = Vector2.one;
+            cxRect.offsetMin = Vector2.zero;
+            cxRect.offsetMax = Vector2.zero;
+            Text closeText = closeTextGO.AddComponent<Text>();
+            closeText.text = "X";
+            closeText.fontSize = 22;
+            closeText.alignment = TextAnchor.MiddleCenter;
+            closeText.color = Color.white;
+            closeText.font = defaultFont;
+
+            // 角色属性区域 - 使用ScrollRect实现滚动
+            // 1. 滚动视口（带Mask裁剪）
+            GameObject scrollViewGO = new GameObject("ScrollView");
+            scrollViewGO.transform.SetParent(contentGO.transform, false);
+            RectTransform scrollViewRect = scrollViewGO.AddComponent<RectTransform>();
+            scrollViewRect.anchorMin = new Vector2(0.05f, 0.12f);
+            scrollViewRect.anchorMax = new Vector2(0.95f, 0.88f);
+            scrollViewRect.offsetMin = Vector2.zero;
+            scrollViewRect.offsetMax = Vector2.zero;
+            Image scrollViewBg = scrollViewGO.AddComponent<Image>();
+            scrollViewBg.color = new Color(0, 0, 0, 0.01f); // 几乎透明，仅用于Mask
+            Mask scrollMask = scrollViewGO.AddComponent<Mask>();
+            scrollMask.showMaskGraphic = false;
+
+            // 2. 内容容器（高度会根据文本自动扩展）
+            GameObject statsGO = new GameObject("Stats");
+            statsGO.transform.SetParent(scrollViewGO.transform, false);
+            RectTransform statsRect = statsGO.AddComponent<RectTransform>();
+            statsRect.anchorMin = new Vector2(0, 1); // 顶部对齐
+            statsRect.anchorMax = new Vector2(1, 1);
+            statsRect.pivot = new Vector2(0.5f, 1);
+            statsRect.anchoredPosition = Vector2.zero;
+            statsRect.sizeDelta = new Vector2(0, 800); // 初始高度，会被ContentSizeFitter覆盖
+            Text statsText = statsGO.AddComponent<Text>();
+            statsText.fontSize = 20;
+            statsText.alignment = TextAnchor.UpperLeft;
+            statsText.color = Color.white;
+            statsText.font = defaultFont;
+            statsText.supportRichText = true;
+            statsText.lineSpacing = 1.5f;
+            // ContentSizeFitter让文本高度自适应
+            ContentSizeFitter fitter = statsGO.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            // 3. 添加ScrollRect组件
+            ScrollRect scrollRect = scrollViewGO.AddComponent<ScrollRect>();
+            scrollRect.content = statsRect;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.elasticity = 0.1f;
+            scrollRect.scrollSensitivity = 30f;
+
+            RefreshCharacterDetail();
+        }
+
+        /// <summary>
+        /// 刷新角色详情数据
+        /// </summary>
+        void RefreshCharacterDetail()
+        {
+            if (characterDetailPanel == null) return;
+
+            Text statsText = characterDetailPanel.GetComponentInChildren<Text>();
+            // 通过name查找statsText
+            foreach (var t in characterDetailPanel.GetComponentsInChildren<Text>())
+            {
+                if (t.gameObject.name == "Stats")
+                {
+                    statsText = t;
+                    break;
+                }
+            }
+            if (statsText == null || statsText.gameObject.name != "Stats") return;
+
+            // 获取玩家数据
+            string info = "";
+
+            // 基本信息
+            int level = 1;
+            int gold = 0;
+            int exp = 0;
+            if (MoShou.Systems.SaveSystem.Instance != null && MoShou.Systems.SaveSystem.Instance.CurrentPlayerStats != null)
+            {
+                var stats = MoShou.Systems.SaveSystem.Instance.CurrentPlayerStats;
+                level = stats.level;
+                gold = stats.gold;
+                exp = stats.experience;
+            }
+            if (GameManager.Instance != null)
+            {
+                gold = GameManager.Instance.SessionGold;
+            }
+
+            info += $"<color=#FFD700><b>等级:</b></color>  {level}\n";
+            info += $"<color=#FFD700><b>金币:</b></color>  {gold}\n";
+            info += $"<color=#FFD700><b>经验:</b></color>  {exp}\n\n";
+
+            // 角色总属性（基础 + 装备加成）
+            int charAtk = 10, charDef = 5, charMaxHp = 100;
+            float charCritRate = 5f;
+            if (MoShou.Systems.SaveSystem.Instance?.CurrentPlayerStats != null)
+            {
+                var ps = MoShou.Systems.SaveSystem.Instance.CurrentPlayerStats;
+                charAtk = ps.GetTotalAttack();
+                charDef = ps.GetTotalDefense();
+                charMaxHp = ps.GetTotalMaxHp();
+                charCritRate = ps.GetTotalCritRate();
+            }
+            info += "<color=#AAAAFF><b>── 角色属性 ──</b></color>\n";
+            info += $"  <color=#6BFF6B>生命值:</color>  {charMaxHp}\n";
+            info += $"  <color=#FF6B6B>攻击力:</color>  {charAtk}\n";
+            info += $"  <color=#6BB5FF>防御力:</color>  {charDef}\n";
+            info += $"  <color=#FFD700>暴击率:</color>  {charCritRate:F1}%\n\n";
+
+            // 装备属性
+            int totalAtk = 0, totalDef = 0, totalHp = 0;
+            float totalCrit = 0f;
+
+            if (MoShou.Systems.EquipmentManager.Instance != null)
+            {
+                var equipped = MoShou.Systems.EquipmentManager.Instance.GetAllEquipments();
+                if (equipped != null)
+                {
+                    info += "<color=#AAAAFF><b>── 已穿戴装备 ──</b></color>\n";
+                    foreach (var kvp in equipped)
+                    {
+                        if (kvp.Value != null)
+                        {
+                            string slotName = GetSlotName(kvp.Key);
+                            info += $"  <color=#888>{slotName}:</color> <color=#FFFFFF>{kvp.Value.name}</color>\n";
+                            totalAtk += kvp.Value.attackBonus;
+                            totalDef += kvp.Value.defenseBonus;
+                            totalHp += kvp.Value.hpBonus;
+                            totalCrit += kvp.Value.critRateBonus;
+                        }
+                    }
+                    info += "\n";
+                }
+            }
+
+            info += "<color=#AAAAFF><b>── 装备加成 ──</b></color>\n";
+            info += $"  <color=#FF6B6B>攻击力:</color>  +{totalAtk}\n";
+            info += $"  <color=#6BB5FF>防御力:</color>  +{totalDef}\n";
+            info += $"  <color=#6BFF6B>生命值:</color>  +{totalHp}\n";
+            info += $"  <color=#FFD700>暴击率:</color>  +{totalCrit:P1}\n";
+
+            statsText.text = info;
+        }
+
+        string GetSlotName(MoShou.Data.EquipmentSlot slot)
+        {
+            switch (slot)
+            {
+                case MoShou.Data.EquipmentSlot.Weapon: return "武器";
+                case MoShou.Data.EquipmentSlot.Helmet: return "头盔";
+                case MoShou.Data.EquipmentSlot.Armor: return "护甲";
+                case MoShou.Data.EquipmentSlot.Pants: return "护腿";
+                case MoShou.Data.EquipmentSlot.Ring: return "戒指";
+                case MoShou.Data.EquipmentSlot.Necklace: return "项链";
+                default: return "未知";
             }
         }
     }

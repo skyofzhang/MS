@@ -633,12 +633,25 @@ namespace MoShou.UI
                     // 显示已装备的装备
                     slot.Value.color = GetQualityColor(equip.quality);
 
-                    // 尝试加载装备图标
-                    string iconPath = $"Sprites/UI/Equipment/{equip.id}";
-                    Sprite icon = Resources.Load<Sprite>(iconPath);
+                    // 尝试加载装备图标（优先用iconPath，回退到ID构造路径）
+                    Sprite icon = null;
+                    if (!string.IsNullOrEmpty(equip.iconPath))
+                    {
+                        icon = Resources.Load<Sprite>(equip.iconPath);
+                    }
+                    if (icon == null)
+                    {
+                        icon = Resources.Load<Sprite>($"Sprites/Items/{equip.id}");
+                    }
+                    // 最终回退：运行时内存生成图标
+                    if (icon == null)
+                    {
+                        icon = MoShou.Systems.RuntimeIconGenerator.GetIcon(equip.id);
+                    }
                     if (icon != null)
                     {
                         slot.Value.sprite = icon;
+                        slot.Value.color = Color.white; // 显示图标原色
                     }
                     else
                     {
