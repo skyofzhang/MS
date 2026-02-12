@@ -76,7 +76,10 @@ public class BattleHUDPrefabCreator
         {
             iconFrameImg.color = new Color(0.4f, 0.4f, 0.4f);
         }
-        iconFrameImg.raycastTarget = false;
+        iconFrameImg.raycastTarget = true; // 可点击，用于打开角色详情
+        Button portraitBtn = iconFrameGO.AddComponent<Button>();
+        portraitBtn.targetGraphic = iconFrameImg;
+        portraitBtn.transition = Selectable.Transition.ColorTint;
 
         // --- 血条背景 ---
         GameObject healthBgGO = CreateChild(hudGO, "HealthBarBG");
@@ -598,6 +601,9 @@ public class BattleHUDPrefabCreator
         // 属性显示
         so.FindProperty("attackText").objectReferenceValue = atkText;
         so.FindProperty("defenseText").objectReferenceValue = defText;
+
+        // 角色头像按钮
+        so.FindProperty("portraitButton").objectReferenceValue = portraitBtn;
 
         // 左侧快捷按钮 (5个)
         so.FindProperty("shopButton").objectReferenceValue = sideButtons[0];

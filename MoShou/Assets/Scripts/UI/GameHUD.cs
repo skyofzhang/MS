@@ -30,6 +30,9 @@ namespace MoShou.UI
         [SerializeField] private Button equipmentButton;
         [SerializeField] private Button settingsButton;
 
+        [Header("角色头像")]
+        [SerializeField] private Button portraitButton;
+
         [Header("面板引用")]
         [SerializeField] private InventoryPanel inventoryPanel;
         [SerializeField] private EquipmentPanel equipmentPanel;
@@ -78,6 +81,10 @@ namespace MoShou.UI
                 equipmentButton.onClick.AddListener(OnEquipmentClick);
             if (settingsButton != null)
                 settingsButton.onClick.AddListener(OnSettingsClick);
+
+            // 绑定角色头像按钮 — 点击打开角色详情
+            if (portraitButton != null)
+                portraitButton.onClick.AddListener(OnPortraitClick);
 
             // 绑定左侧快捷按钮
             if (shopButton != null)
@@ -463,6 +470,25 @@ namespace MoShou.UI
         }
 
         /// <summary>
+        /// 角色头像点击 — 打开角色详情面板
+        /// </summary>
+        private void OnPortraitClick()
+        {
+            Debug.Log("[GameHUD] 角色头像点击");
+            // 优先使用 CharacterInfoScreen
+            if (CharacterInfoScreen.Instance != null)
+            {
+                CharacterInfoScreen.Instance.Toggle();
+                return;
+            }
+            // 回退：通过MinimapSystem的角色详情面板
+            if (MinimapSystem.Instance != null)
+            {
+                MinimapSystem.Instance.ShowCharacterDetail();
+            }
+        }
+
+        /// <summary>
         /// 重置战斗统计
         /// </summary>
         public void ResetCombatStats()
@@ -484,8 +510,12 @@ namespace MoShou.UI
                         ShopPanel.Instance.Toggle();
                     break;
                 case 1: // 背包
-                    if (InventoryPanel.Instance != null)
+                    if (SimpleInventoryPanel.Instance != null)
+                        SimpleInventoryPanel.Instance.Toggle();
+                    else if (InventoryPanel.Instance != null)
                         InventoryPanel.Instance.Toggle();
+                    else
+                        Debug.LogWarning("[GameHUD] 背包面板Instance为null");
                     break;
                 case 2: // 技能
                     if (SkillUpgradePanel.Instance != null)
@@ -497,8 +527,15 @@ namespace MoShou.UI
                     else
                         Debug.LogWarning("[GameHUD] SimpleEquipmentPanel.Instance为null");
                     break;
-                case 4: // 地图
-                    Debug.Log("[GameHUD] 地图按钮点击");
+                case 4: // 地图 — 切换小地图显示/隐藏
+                    if (MinimapSystem.Instance != null)
+                    {
+                        MinimapSystem.Instance.ToggleVisible();
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[GameHUD] MinimapSystem.Instance为null");
+                    }
                     break;
             }
         }

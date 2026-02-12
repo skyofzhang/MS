@@ -269,6 +269,24 @@ ShopPanel、CharacterInfoScreen、ConfirmDialog、SkillUpgradePanel 等均使用
 - 圆形Sprite资源自动生成: `Assets/Resources/Sprites/UI/HUD/UI_Circle_64.png`
 - 小地图保持动态创建（MinimapSystem 720行自建UI，不适合Prefab化）
 
+### Phase 15: 小地图优化 + 角色详情入口调整
+- `MinimapSystem.cs`: 小地图位置从左上角→右上角 (anchor=1,1, pivot=1,1, pos=-10,-20)
+- `MinimapSystem.cs`: 背景改用 `UI_HUD_Map_Bg.png` 图片替代纯色
+- `MinimapSystem.cs`: 不再创建独立Canvas，挂载到GameCanvas下（与战斗HUD同层级）
+- `MinimapSystem.cs`: 新增 `ToggleVisible()` 方法控制minimapContainer显隐
+- `MinimapSystem.cs`: 点击小地图不再弹出角色详情，改为空操作
+- `MinimapSystem.cs`: 新增 `ShowCharacterDetail()` 公开方法供外部调用
+- `GameHUD.cs`: 地图按钮(case 4)改为调用 `MinimapSystem.Instance.ToggleVisible()`
+- `GameHUD.cs`: 背包按钮(case 1)改为优先使用 `SimpleInventoryPanel.Instance`
+- `GameHUD.cs`: 新增 `portraitButton` 字段 + `OnPortraitClick()` 回调（点击头像→角色详情）
+- `BattleHUDPrefabCreator.cs`: PlayerIconFrame 添加 Button 组件 + 绑定 portraitButton
+- `MinimapSystem.cs`: minimapContainer 创建后调用 `SetAsFirstSibling()` 确保层级最低
+- `MinimapSystem.cs`: 地图区域填充色 alpha 降至 0.25，网格线 alpha 降至 0.2
+- **用户手动调整 BattleHUD.prefab**（⚠️ 勿覆盖！重新生成Prefab前需备份）:
+  - 精简了 Prefab 层级结构，删除多余节点
+  - 调整了各 UI 元素的位置和尺寸
+  - 战斗主界面布局已由用户在 Unity Inspector 中手动优化完成
+
 ### StageSelectCanvas Prefab 层级结构（需手动创建）
 ```
 StageSelectCanvas (Canvas, CanvasScaler 1080x1920 matchWH=0.5, ScreenSpaceOverlay, sortOrder=100)

@@ -115,6 +115,7 @@ namespace MoShou.UI
 
         /// <summary>
         /// 查找正确的UI Canvas（Screen Space Overlay）
+        /// 优先使用GameCanvas，不再创建独立Canvas，保持与战斗主界面同层级
         /// </summary>
         Canvas FindUICanvas()
         {
@@ -125,7 +126,7 @@ namespace MoShou.UI
                 Canvas canvas = canvasObj.GetComponent<Canvas>();
                 if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
                 {
-                    Debug.Log("[Minimap] 找到GameCanvas");
+                    Debug.Log("[Minimap] 找到GameCanvas，小地图挂载到GameCanvas下");
                     return canvas;
                 }
             }
@@ -141,12 +142,12 @@ namespace MoShou.UI
                 }
             }
 
-            // 如果没有找到，创建一个新的
+            // 最终回退：创建新Canvas，与GameCanvas同层级
             Debug.Log("[Minimap] 创建新的MinimapCanvas");
             GameObject newCanvasObj = new GameObject("MinimapCanvas");
             Canvas newCanvas = newCanvasObj.AddComponent<Canvas>();
             newCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            newCanvas.sortingOrder = 95; // 在其他UI之上
+            newCanvas.sortingOrder = 100; // 与GameCanvas相同层级
 
             var scaler = newCanvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -176,12 +177,15 @@ namespace MoShou.UI
             containerObj.transform.SetParent(uiCanvas.transform, false);
             minimapContainer = containerObj.AddComponent<RectTransform>();
 
-            // 定位到左上角（在HUD下方）
-            minimapContainer.anchorMin = new Vector2(0, 1);
-            minimapContainer.anchorMax = new Vector2(0, 1);
-            minimapContainer.pivot = new Vector2(0, 1);
-            minimapContainer.anchoredPosition = new Vector2(10, -210); // 左上角，HUD下方（往下移避免重叠）
+            // 定位到右上角（在HUD下方）
+            minimapContainer.anchorMin = new Vector2(1, 1);
+            minimapContainer.anchorMax = new Vector2(1, 1);
+            minimapContainer.pivot = new Vector2(1, 1);
+            minimapContainer.anchoredPosition = new Vector2(-10, -20); // 右上角
             minimapContainer.sizeDelta = new Vector2(minimapSize, minimapSize);
+
+            // 将小地图排到Canvas子物体的最前面，避免遮挡其他面板
+            minimapContainer.SetAsFirstSibling();
 
             // 添加CanvasGroup实现整体半透明
             CanvasGroup minimapCanvasGroup = containerObj.AddComponent<CanvasGroup>();
@@ -206,7 +210,7 @@ namespace MoShou.UI
 
         void CreateMinimapBackground()
         {
-            // 外边框
+            // 外边框/背景 — 使用UI_HUD_Map_Bg图片
             GameObject borderObj = new GameObject("MinimapBorder");
             borderObj.transform.SetParent(minimapContainer, false);
             RectTransform borderRect = borderObj.AddComponent<RectTransform>();
@@ -216,35 +220,36 @@ namespace MoShou.UI
             borderRect.offsetMax = Vector2.zero;
 
             Image borderImage = borderObj.AddComponent<Image>();
-            borderImage.color = borderColor;
-
-            // 内部背景
-            GameObject bgObj = new GameObject("MinimapBG");
-            bgObj.transform.SetParent(minimapContainer, false);
-            RectTransform bgRect = bgObj.AddComponent<RectTransform>();
-            bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = Vector2.one;
-            bgRect.offsetMin = new Vector2(3, 3);
-            bgRect.offsetMax = new Vector2(-3, -3);
-
-            Image bgImage = bgObj.AddComponent<Image>();
-            bgImage.color = backgroundColor;
+            Sprite mapBgSprite = Resources.Load<Sprite>("Sprites/UI/HUD/UI_HUD_Map_Bg");
+            if (mapBgSprite != null)
+            {
+                borderImage.sprite = mapBgSprite;
+                borderImage.type = Image.Type.Simple;
+                borderImage.preserveAspect = false;
+                borderImage.color = Color.white;
+                Debug.Log("[Minimap] 已加载地图背景图: UI_HUD_Map_Bg");
+            }
+            else
+            {
+                borderImage.color = borderColor;
+                Debug.LogWarning("[Minimap] 未找到UI_HUD_Map_Bg，使用默认颜色");
+            }
         }
 
         void CreateMapArea()
         {
-            // 地图显示区域
+            // 地图显示区域（内嵌于背景图内部）
             GameObject mapObj = new GameObject("MapArea");
             mapObj.transform.SetParent(minimapContainer, false);
             mapArea = mapObj.AddComponent<RectTransform>();
             mapArea.anchorMin = Vector2.zero;
             mapArea.anchorMax = Vector2.one;
-            mapArea.offsetMin = new Vector2(6, 6);
-            mapArea.offsetMax = new Vector2(-6, -6);
+            mapArea.offsetMin = new Vector2(10, 10);
+            mapArea.offsetMax = new Vector2(-10, -10);
 
-            // 地形颜色
+            // 地形颜色（低透明度，让背景图清晰透出）
             Image mapImage = mapObj.AddComponent<Image>();
-            mapImage.color = terrainColor;
+            mapImage.color = new Color(terrainColor.r, terrainColor.g, terrainColor.b, 0.25f);
 
             // 添加遮罩，让图标不超出地图区域
             mapObj.AddComponent<Mask>().showMaskGraphic = true;
@@ -258,7 +263,7 @@ namespace MoShou.UI
             if (mapArea == null) return;
 
             int gridCount = 4;
-            Color gridColor = new Color(0.3f, 0.5f, 0.3f, 0.4f);
+            Color gridColor = new Color(0.4f, 0.6f, 0.4f, 0.2f);
 
             for (int i = 1; i < gridCount; i++)
             {
@@ -456,18 +461,37 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 小地图点击回调 - 打开角色详情面板（使用CharacterInfoScreen新版布局）
+        /// 切换小地图显示/隐藏
+        /// </summary>
+        public void ToggleVisible()
+        {
+            if (minimapContainer != null)
+            {
+                bool newState = !minimapContainer.gameObject.activeSelf;
+                minimapContainer.gameObject.SetActive(newState);
+                Debug.Log($"[Minimap] 小地图 {(newState ? "显示" : "隐藏")}");
+            }
+            else
+            {
+                Debug.LogWarning("[Minimap] minimapContainer尚未创建");
+            }
+        }
+
+        /// <summary>
+        /// 小地图点击回调 - 不再弹出角色详情（改由GameHUD角色头像触发）
         /// </summary>
         void OnMinimapClicked()
         {
-            // 优先使用新版 CharacterInfoScreen
-            if (CharacterInfoScreen.Instance != null)
-            {
-                CharacterInfoScreen.Instance.Toggle();
-                return;
-            }
+            // 小地图点击现在不做任何操作
+            // 角色详情改由左上角头像按钮触发
+            Debug.Log("[Minimap] 小地图被点击");
+        }
 
-            // 回退: 如果CharacterInfoScreen未创建，使用旧版面板
+        /// <summary>
+        /// 显示角色详情面板（供外部调用，如GameHUD头像按钮）
+        /// </summary>
+        public void ShowCharacterDetail()
+        {
             if (characterDetailPanel != null)
             {
                 bool isActive = characterDetailPanel.activeSelf;
@@ -481,7 +505,7 @@ namespace MoShou.UI
                 return;
             }
 
-            // 最终回退: 创建旧版面板
+            // 首次调用：创建面板
             CreateCharacterDetailPanel();
         }
 
