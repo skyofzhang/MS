@@ -34,6 +34,23 @@ namespace MoShou.UI
         [SerializeField] private InventoryPanel inventoryPanel;
         [SerializeField] private EquipmentPanel equipmentPanel;
 
+        [Header("左侧快捷按钮")]
+        [SerializeField] private Button shopButton;
+        [SerializeField] private Button bagButton;
+        [SerializeField] private Button skillButton;
+        [SerializeField] private Button equipSideButton;  // 装备（侧边栏）
+        [SerializeField] private Button mapButton;
+
+        [Header("技能动作按钮")]
+        [SerializeField] private Button attackButton;
+        [SerializeField] private Button skill1Button;
+        [SerializeField] private Button skill2Button;
+        [SerializeField] private Button skill3Button;
+
+        [Header("暂停")]
+        [SerializeField] private Button pauseButton;
+        [SerializeField] private GameObject pausePanel;
+
         [Header("战斗信息")]
         [SerializeField] private Text killCountText;
         [SerializeField] private Text waveText;
@@ -61,6 +78,32 @@ namespace MoShou.UI
                 equipmentButton.onClick.AddListener(OnEquipmentClick);
             if (settingsButton != null)
                 settingsButton.onClick.AddListener(OnSettingsClick);
+
+            // 绑定左侧快捷按钮
+            if (shopButton != null)
+                shopButton.onClick.AddListener(() => OnSideButtonClick(0));
+            if (bagButton != null)
+                bagButton.onClick.AddListener(() => OnSideButtonClick(1));
+            if (skillButton != null)
+                skillButton.onClick.AddListener(() => OnSideButtonClick(2));
+            if (equipSideButton != null)
+                equipSideButton.onClick.AddListener(() => OnSideButtonClick(3));
+            if (mapButton != null)
+                mapButton.onClick.AddListener(() => OnSideButtonClick(4));
+
+            // 绑定技能动作按钮
+            if (attackButton != null)
+                attackButton.onClick.AddListener(OnAttackClick);
+            if (skill1Button != null)
+                skill1Button.onClick.AddListener(OnSkill1Click);
+            if (skill2Button != null)
+                skill2Button.onClick.AddListener(OnSkill2Click);
+            if (skill3Button != null)
+                skill3Button.onClick.AddListener(OnSkill3Click);
+
+            // 绑定暂停按钮
+            if (pauseButton != null)
+                pauseButton.onClick.AddListener(OnPauseClick);
 
             // 获取玩家状态
             if (SaveSystem.Instance != null)
@@ -427,6 +470,116 @@ namespace MoShou.UI
             killCount = 0;
             currentWave = 1;
             RefreshCombatInfo();
+        }
+
+        /// <summary>
+        /// 左侧快捷按钮点击回调（从Prefab绑定）
+        /// </summary>
+        private void OnSideButtonClick(int index)
+        {
+            switch (index)
+            {
+                case 0: // 商店
+                    if (ShopPanel.Instance != null)
+                        ShopPanel.Instance.Toggle();
+                    break;
+                case 1: // 背包
+                    if (InventoryPanel.Instance != null)
+                        InventoryPanel.Instance.Toggle();
+                    break;
+                case 2: // 技能
+                    if (SkillUpgradePanel.Instance != null)
+                        SkillUpgradePanel.Instance.Toggle();
+                    break;
+                case 3: // 装备
+                    if (SimpleEquipmentPanel.Instance != null)
+                        SimpleEquipmentPanel.Instance.Toggle();
+                    else
+                        Debug.LogWarning("[GameHUD] SimpleEquipmentPanel.Instance为null");
+                    break;
+                case 4: // 地图
+                    Debug.Log("[GameHUD] 地图按钮点击");
+                    break;
+            }
+        }
+
+        // ====== 技能动作按钮回调 ======
+
+        private void OnAttackClick()
+        {
+            // 普通攻击由PlayerController自动处理
+            Debug.Log("[GameHUD] 攻击按钮点击");
+        }
+
+        private void OnSkill1Click()
+        {
+            var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerController>();
+            if (player != null) player.UseSkill1();
+            else Debug.LogWarning("[GameHUD] Skill1: 找不到Player!");
+        }
+
+        private void OnSkill2Click()
+        {
+            var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerController>();
+            if (player != null) player.UseSkill2();
+            else Debug.LogWarning("[GameHUD] Skill2: 找不到Player!");
+        }
+
+        private void OnSkill3Click()
+        {
+            var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerController>();
+            if (player != null) player.UseSkill3();
+            else Debug.LogWarning("[GameHUD] Skill3: 找不到Player!");
+        }
+
+        // ====== 暂停按钮回调 ======
+
+        private void OnPauseClick()
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.TogglePause();
+        }
+
+        /// <summary>
+        /// 将Prefab中的引用传递给UIManager（由GameSceneSetup调用）
+        /// </summary>
+        public void WireUIManager(UIManager uiManager)
+        {
+            if (uiManager == null) return;
+
+            // 波次文字 → UIManager.levelText
+            if (waveText != null)
+                uiManager.levelText = waveText;
+
+            // 金币文字
+            if (goldText != null)
+                uiManager.goldText = goldText;
+
+            // 生命值文字
+            if (healthText != null)
+                uiManager.healthText = healthText;
+
+            // 攻击/防御文字
+            if (attackText != null)
+                uiManager.attackText = attackText;
+            if (defenseText != null)
+                uiManager.defenseText = defenseText;
+
+            // 玩家等级文字
+            if (levelText != null)
+                uiManager.playerLevelText = levelText;
+
+            // 暂停面板
+            if (pausePanel != null)
+                uiManager.pausePanel = pausePanel;
+
+            // 技能按钮
+            if (skill1Button != null)
+                uiManager.skill1Button = skill1Button;
+            if (skill2Button != null)
+                uiManager.skill2Button = skill2Button;
+
+            Debug.Log("[GameHUD] UIManager字段已绑定");
         }
     }
 }

@@ -456,11 +456,18 @@ namespace MoShou.UI
         }
 
         /// <summary>
-        /// 小地图点击回调 - 打开角色详情面板
+        /// 小地图点击回调 - 打开角色详情面板（使用CharacterInfoScreen新版布局）
         /// </summary>
         void OnMinimapClicked()
         {
-            // 已有面板则切换显示
+            // 优先使用新版 CharacterInfoScreen
+            if (CharacterInfoScreen.Instance != null)
+            {
+                CharacterInfoScreen.Instance.Toggle();
+                return;
+            }
+
+            // 回退: 如果CharacterInfoScreen未创建，使用旧版面板
             if (characterDetailPanel != null)
             {
                 bool isActive = characterDetailPanel.activeSelf;
@@ -468,14 +475,13 @@ namespace MoShou.UI
                 if (!isActive)
                 {
                     RefreshCharacterDetail();
-                    // 重置滚动位置到顶部
                     var scrollRect = characterDetailPanel.GetComponentInChildren<ScrollRect>();
                     if (scrollRect != null) scrollRect.verticalNormalizedPosition = 1f;
                 }
                 return;
             }
 
-            // 创建角色详情面板
+            // 最终回退: 创建旧版面板
             CreateCharacterDetailPanel();
         }
 

@@ -155,8 +155,8 @@ public class MainMenuSceneSetup : MonoBehaviour
         // === 底部状态栏 ===
         CreateBottomStatusBar(canvasGO.transform);
 
-        // === 版本号 ===
-        CreateVersionText(canvasGO.transform);
+        // === 版本号 === (已移除，效果图中无版本号)
+        // CreateVersionText(canvasGO.transform);
 
         Debug.Log("[MainMenuSetup] 主菜单UI创建完成 (效果图风格)");
     }
@@ -222,8 +222,8 @@ public class MainMenuSceneSetup : MonoBehaviour
         GameObject logoContainer = new GameObject("LogoContainer");
         logoContainer.transform.SetParent(parent, false);
         RectTransform containerRect = logoContainer.AddComponent<RectTransform>();
-        containerRect.anchorMin = new Vector2(0.5f, 0.78f);
-        containerRect.anchorMax = new Vector2(0.5f, 0.78f);
+        containerRect.anchorMin = new Vector2(0.5f, 0.9f);
+        containerRect.anchorMax = new Vector2(0.5f, 0.9f);
         containerRect.sizeDelta = new Vector2(900, 200);
 
         if (logoSprite == null)
@@ -262,7 +262,7 @@ public class MainMenuSceneSetup : MonoBehaviour
         {
             // 创建文字Logo
             Text logoText = logoGO.AddComponent<Text>();
-            logoText.text = "MOSHOU\nREBORN";
+            logoText.text = "我是MT\n魔兽归来";
             logoText.fontSize = 56;
             logoText.fontStyle = FontStyle.Bold;
             logoText.alignment = TextAnchor.MiddleCenter;
@@ -326,14 +326,14 @@ public class MainMenuSceneSetup : MonoBehaviour
         GameObject panelGO = new GameObject("ButtonPanel");
         panelGO.transform.SetParent(parent, false);
         RectTransform panelRect = panelGO.AddComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.5f, 0.32f);
-        panelRect.anchorMax = new Vector2(0.5f, 0.32f);
+        panelRect.anchorMin = new Vector2(0.5f, 0.38f);
+        panelRect.anchorMax = new Vector2(0.5f, 0.38f);
         panelRect.anchoredPosition = new Vector2(0, 0);  // 居中
-        panelRect.sizeDelta = new Vector2(480, 700); // 扩大容纳原始尺寸按钮
+        panelRect.sizeDelta = new Vector2(600, 550); // 效果图按钮更宽
 
         // 按钮布局（直接在面板上，不需要背景层）
         VerticalLayoutGroup vlg = panelGO.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing = 12;
+        vlg.spacing = 8;
         vlg.childAlignment = TextAnchor.MiddleCenter;
         vlg.childControlWidth = false;
         vlg.childControlHeight = false;
@@ -352,14 +352,14 @@ public class MainMenuSceneSetup : MonoBehaviour
         // === 创建按钮 ===
 
         // 开始游戏 - 大按钮，橙金渐变
-        CreateMenuButton(buttonsGO.transform, "PlayButton", "开始游戏", 85,
+        CreateMenuButton(buttonsGO.transform, "PlayButton", "开始游戏", 90,
             new Color(1f, 0.6f, 0.15f), new Color(0.9f, 0.4f, 0.1f),
             () => SceneManager.LoadScene("StageSelect"),
             false, playSprite, playPressedSprite, null);
 
         // 继续游戏 - 绿色
         bool hasSaveData = SaveSystem.Instance != null && SaveSystem.Instance.HasSaveData();
-        CreateMenuButton(buttonsGO.transform, "ContinueButton", "继续游戏", 65,
+        CreateMenuButton(buttonsGO.transform, "ContinueButton", "继续游戏", 80,
             hasSaveData ? new Color(0.3f, 0.7f, 0.4f) : new Color(0.4f, 0.4f, 0.4f),
             hasSaveData ? new Color(0.2f, 0.55f, 0.3f) : new Color(0.3f, 0.3f, 0.3f),
             () => {
@@ -368,7 +368,7 @@ public class MainMenuSceneSetup : MonoBehaviour
             !hasSaveData, continueSprite, null, continueDisabledSprite);
 
         // 角色 - 蓝色
-        CreateMenuButton(buttonsGO.transform, "CharacterButton", "角色", 55,
+        CreateMenuButton(buttonsGO.transform, "CharacterButton", "角色", 70,
             new Color(0.3f, 0.5f, 0.8f), new Color(0.2f, 0.35f, 0.6f),
             () => {
                 Debug.Log("[MainMenu] 角色按钮点击");
@@ -395,7 +395,7 @@ public class MainMenuSceneSetup : MonoBehaviour
             false, roleSprite, null, null);
 
         // 设置 - 灰色
-        CreateMenuButton(buttonsGO.transform, "SettingsButton", "设置", 55,
+        CreateMenuButton(buttonsGO.transform, "SettingsButton", "设置", 70,
             new Color(0.45f, 0.48f, 0.55f), new Color(0.35f, 0.38f, 0.42f),
             () => {
                 Debug.Log("[MainMenu] 设置按钮点击");
@@ -424,7 +424,7 @@ public class MainMenuSceneSetup : MonoBehaviour
             false, settingsSprite, null, null);
 
         // 退出 - 暗红色
-        CreateMenuButton(buttonsGO.transform, "QuitButton", "退出", 50,
+        CreateMenuButton(buttonsGO.transform, "QuitButton", "退出", 65,
             new Color(0.6f, 0.35f, 0.3f), new Color(0.45f, 0.25f, 0.2f),
             () => {
                 if (ConfirmDialog.Instance != null)
@@ -459,7 +459,7 @@ public class MainMenuSceneSetup : MonoBehaviour
         btnGO.transform.SetParent(parent, false);
 
         LayoutElement layout = btnGO.AddComponent<LayoutElement>();
-        layout.preferredWidth = 420;
+        layout.preferredWidth = 560;
         layout.preferredHeight = height;
 
         // 按钮背景
@@ -554,32 +554,35 @@ public class MainMenuSceneSetup : MonoBehaviour
             btn.colors = colors;
         }
 
-        // 文字（始终保留）
-        GameObject textGO = new GameObject("Text");
-        textGO.transform.SetParent(btnGO.transform, false);
-        RectTransform textRect = textGO.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(15, 5);
-        textRect.offsetMax = new Vector2(-15, -5);
+        // 文字 — 仅在无sprite时创建（sprite按钮自带文字，不需要叠加Text）
+        if (!useSprite)
+        {
+            GameObject textGO = new GameObject("Text");
+            textGO.transform.SetParent(btnGO.transform, false);
+            RectTransform textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(15, 5);
+            textRect.offsetMax = new Vector2(-15, -5);
 
-        Text btnText = textGO.AddComponent<Text>();
-        btnText.text = text;
-        btnText.fontSize = (int)(height * 0.42f);
-        btnText.fontStyle = FontStyle.Bold;
-        btnText.alignment = TextAnchor.MiddleCenter;
-        btnText.color = disabled ? new Color(0.6f, 0.6f, 0.6f) : Color.white;
-        btnText.font = GetDefaultFont();
+            Text btnText = textGO.AddComponent<Text>();
+            btnText.text = text;
+            btnText.fontSize = (int)(height * 0.38f);
+            btnText.fontStyle = FontStyle.Bold;
+            btnText.alignment = TextAnchor.MiddleCenter;
+            btnText.color = disabled ? new Color(0.6f, 0.6f, 0.6f) : Color.white;
+            btnText.font = GetDefaultFont();
 
-        // 描边
-        Outline outline = textGO.AddComponent<Outline>();
-        outline.effectColor = new Color(0.15f, 0.08f, 0f, 0.8f);
-        outline.effectDistance = new Vector2(1.5f, -1.5f);
+            // 描边
+            Outline outline = textGO.AddComponent<Outline>();
+            outline.effectColor = new Color(0.15f, 0.08f, 0f, 0.8f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
 
-        // 阴影
-        Shadow shadow = textGO.AddComponent<Shadow>();
-        shadow.effectColor = new Color(0, 0, 0, 0.5f);
-        shadow.effectDistance = new Vector2(2, -2);
+            // 阴影
+            Shadow shadow = textGO.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0, 0, 0, 0.5f);
+            shadow.effectDistance = new Vector2(2, -2);
+        }
     }
 
     void CreateBottomStatusBar(Transform parent)
@@ -592,23 +595,11 @@ public class MainMenuSceneSetup : MonoBehaviour
         barRect.anchorMax = new Vector2(1, 0);
         barRect.pivot = new Vector2(0.5f, 0);
         barRect.anchoredPosition = Vector2.zero;
-        barRect.sizeDelta = new Vector2(0, 120);
+        barRect.sizeDelta = new Vector2(0, 80);
 
-        // 背景
+        // 背景（半透明，效果图中底部状态栏不遮挡背景）
         Image barBg = statusBar.AddComponent<Image>();
-        barBg.color = new Color(0.06f, 0.08f, 0.12f, 0.9f);
-
-        // 顶部边框
-        GameObject topBorder = new GameObject("TopBorder");
-        topBorder.transform.SetParent(statusBar.transform, false);
-        RectTransform borderRect = topBorder.AddComponent<RectTransform>();
-        borderRect.anchorMin = new Vector2(0, 1);
-        borderRect.anchorMax = new Vector2(1, 1);
-        borderRect.pivot = new Vector2(0.5f, 1);
-        borderRect.anchoredPosition = Vector2.zero;
-        borderRect.sizeDelta = new Vector2(0, 3);
-        Image borderImg = topBorder.AddComponent<Image>();
-        borderImg.color = new Color(0.7f, 0.55f, 0.25f, 0.7f);
+        barBg.color = new Color(0.06f, 0.08f, 0.12f, 0.5f);
 
         // 玩家信息
         CreatePlayerInfo(statusBar.transform);
@@ -623,7 +614,7 @@ public class MainMenuSceneSetup : MonoBehaviour
         levelRect.anchorMin = new Vector2(0, 0.5f);
         levelRect.anchorMax = new Vector2(0, 0.5f);
         levelRect.pivot = new Vector2(0, 0.5f);
-        levelRect.anchoredPosition = new Vector2(30, 0);
+        levelRect.anchoredPosition = new Vector2(100, 0);
         levelRect.sizeDelta = new Vector2(150, 60);
 
         Text levelText = levelContainer.AddComponent<Text>();
@@ -646,21 +637,59 @@ public class MainMenuSceneSetup : MonoBehaviour
         goldRect.anchorMin = new Vector2(1, 0.5f);
         goldRect.anchorMax = new Vector2(1, 0.5f);
         goldRect.pivot = new Vector2(1, 0.5f);
-        goldRect.anchoredPosition = new Vector2(-30, 0);
+        goldRect.anchoredPosition = new Vector2(-100, 0);
         goldRect.sizeDelta = new Vector2(180, 60);
 
-        Text goldText = goldContainer.AddComponent<Text>();
         int gold = 0;
         if (SaveSystem.Instance?.CurrentPlayerStats != null)
         {
             gold = SaveSystem.Instance.CurrentPlayerStats.gold;
         }
-        goldText.text = $"💰 {gold}";
-        goldText.fontSize = 26;
-        goldText.fontStyle = FontStyle.Bold;
-        goldText.alignment = TextAnchor.MiddleRight;
-        goldText.color = new Color(1f, 0.85f, 0.2f);
-        goldText.font = GetDefaultFont();
+
+        // 尝试加载金币icon
+        Sprite coinSprite = Resources.Load<Sprite>("Sprites/UI/Common/UI_Icon_Coin_Stack");
+        if (coinSprite != null)
+        {
+            // 有icon sprite时：icon + 纯数字
+            GameObject coinIcon = new GameObject("CoinIcon");
+            coinIcon.transform.SetParent(goldContainer.transform, false);
+            RectTransform coinRect = coinIcon.AddComponent<RectTransform>();
+            coinRect.anchorMin = new Vector2(0, 0.5f);
+            coinRect.anchorMax = new Vector2(0, 0.5f);
+            coinRect.pivot = new Vector2(0, 0.5f);
+            coinRect.anchoredPosition = new Vector2(0, 0);
+            coinRect.sizeDelta = new Vector2(40, 40);
+            Image coinImg = coinIcon.AddComponent<Image>();
+            coinImg.sprite = coinSprite;
+            coinImg.preserveAspect = true;
+            coinImg.raycastTarget = false;
+
+            GameObject goldTextGO = new GameObject("GoldText");
+            goldTextGO.transform.SetParent(goldContainer.transform, false);
+            RectTransform gtRect = goldTextGO.AddComponent<RectTransform>();
+            gtRect.anchorMin = new Vector2(0, 0);
+            gtRect.anchorMax = new Vector2(1, 1);
+            gtRect.offsetMin = new Vector2(45, 0);
+            gtRect.offsetMax = Vector2.zero;
+            Text goldText = goldTextGO.AddComponent<Text>();
+            goldText.text = $"{gold}";
+            goldText.fontSize = 26;
+            goldText.fontStyle = FontStyle.Bold;
+            goldText.alignment = TextAnchor.MiddleRight;
+            goldText.color = new Color(1f, 0.85f, 0.2f);
+            goldText.font = GetDefaultFont();
+        }
+        else
+        {
+            // fallback：原emoji方案
+            Text goldText = goldContainer.AddComponent<Text>();
+            goldText.text = $"💰 {gold}";
+            goldText.fontSize = 26;
+            goldText.fontStyle = FontStyle.Bold;
+            goldText.alignment = TextAnchor.MiddleRight;
+            goldText.color = new Color(1f, 0.85f, 0.2f);
+            goldText.font = GetDefaultFont();
+        }
     }
 
     void CreateVersionText(Transform parent)

@@ -104,10 +104,7 @@ namespace MoShou.UI
                 closeButton.onClick.AddListener(OnCloseButtonClick);
             }
 
-            if (upgradeButton != null)
-            {
-                upgradeButton.onClick.AddListener(OnUpgradeButtonClick);
-            }
+            // 升级按钮已移除（效果图不含）
 
             isInitialized = true;
         }
@@ -136,41 +133,43 @@ namespace MoShou.UI
             overlayRect.offsetMin = Vector2.zero;
             overlayRect.offsetMax = Vector2.zero;
 
-            // 面板容器
+            // 面板容器 - 效果图尺寸
             GameObject panelObj = new GameObject("Panel");
             panelObj.transform.SetParent(transform);
             RectTransform panelRect = panelObj.AddComponent<RectTransform>();
             panelRect.anchorMin = new Vector2(0.5f, 0.5f);
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRect.sizeDelta = new Vector2(900, 1400);
+            panelRect.sizeDelta = new Vector2(960, 1700);
             panelRect.anchoredPosition = Vector2.zero;
 
             // 面板背景
             backgroundImage = panelObj.AddComponent<Image>();
-            backgroundImage.color = new Color(0.12f, 0.14f, 0.18f, 0.98f);
-
-            // 尝试加载效果图
-            Sprite bgSprite = Resources.Load<Sprite>("UI_Mockups/Screens/UI_CharacterInfo");
-            if (bgSprite != null)
+            Sprite panelBgSprite = Resources.Load<Sprite>("Sprites/UI/CharInfo/UI_CharInfo_BG");
+            if (panelBgSprite != null)
             {
-                backgroundImage.sprite = bgSprite;
-                backgroundImage.type = Image.Type.Simple;
+                backgroundImage.sprite = panelBgSprite;
+                backgroundImage.type = Image.Type.Sliced;
+                backgroundImage.color = Color.white;
+            }
+            else
+            {
+                backgroundImage.color = new Color(0.12f, 0.14f, 0.18f, 0.98f);
             }
 
             // 关闭按钮
             CreateCloseButton(panelObj.transform);
 
-            // 标题
+            // 标题 - 卷轴banner "角色信息"
             CreateTitle(panelObj.transform);
 
-            // 角色区域（头像+装备槽环绕）
-            CreateCharacterArea(panelObj.transform);
+            // 角色展示区（头像+名字+等级+经验+金币）
+            CreateCharacterPortrait(panelObj.transform);
 
-            // 属性面板
+            // 角色属性面板（2列网格）
             CreateStatsPanel(panelObj.transform);
 
-            // 升级按钮
-            CreateUpgradeButton(panelObj.transform);
+            // 已穿戴装备（3列网格）
+            CreateEquipmentGrid(panelObj.transform);
 
             // 金色装饰边框
             CreateDecorations(panelObj.transform);
@@ -204,46 +203,53 @@ namespace MoShou.UI
             titleObj.transform.SetParent(parent);
 
             RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0, 1);
-            titleRect.anchorMax = new Vector2(1, 1);
+            titleRect.anchorMin = new Vector2(0.5f, 1);
+            titleRect.anchorMax = new Vector2(0.5f, 1);
             titleRect.pivot = new Vector2(0.5f, 1);
-            titleRect.anchoredPosition = new Vector2(0, -20);
-            titleRect.sizeDelta = new Vector2(0, 80);
+            titleRect.anchoredPosition = new Vector2(0, -10);
+            titleRect.sizeDelta = new Vector2(500, 90);
 
-            characterNameText = CreateText(titleObj.transform, "CharacterName", "MT (哀木涕)", 36, TextAnchor.MiddleCenter, UIStyleHelper.Colors.Gold);
-            characterNameText.fontStyle = FontStyle.Bold;
+            // 卷轴banner背景
+            Sprite bannerSprite = Resources.Load<Sprite>("Sprites/UI/Common/UI_Banner_Scroll_Gold");
+            if (bannerSprite != null)
+            {
+                Image bannerImg = titleObj.AddComponent<Image>();
+                bannerImg.sprite = bannerSprite;
+                bannerImg.type = Image.Type.Sliced;
+                bannerImg.color = Color.white;
+                bannerImg.raycastTarget = false;
+            }
+
+            // "角色信息" 标题文字
+            Text titleText = CreateText(titleObj.transform, "TitleText", "角色信息", 38, TextAnchor.MiddleCenter, UIStyleHelper.Colors.Gold);
+            titleText.fontStyle = FontStyle.Bold;
+            Outline titleOutline = titleText.gameObject.AddComponent<Outline>();
+            titleOutline.effectColor = new Color(0.3f, 0.2f, 0.1f);
+            titleOutline.effectDistance = new Vector2(2, -2);
         }
 
-        private void CreateCharacterArea(Transform parent)
+        /// <summary>
+        /// 创建角色展示区 — 效果图纵向布局: 头像+名字+等级+经验+金币
+        /// </summary>
+        private void CreateCharacterPortrait(Transform parent)
         {
-            GameObject areaObj = new GameObject("CharacterArea");
+            GameObject areaObj = new GameObject("CharacterPortrait");
             areaObj.transform.SetParent(parent);
 
             RectTransform areaRect = areaObj.AddComponent<RectTransform>();
-            areaRect.anchorMin = new Vector2(0, 0.45f);
-            areaRect.anchorMax = new Vector2(1, 0.9f);
-            areaRect.offsetMin = new Vector2(30, 0);
-            areaRect.offsetMax = new Vector2(-30, 0);
+            areaRect.anchorMin = new Vector2(0, 0.62f);
+            areaRect.anchorMax = new Vector2(1, 0.93f);
+            areaRect.offsetMin = new Vector2(40, 0);
+            areaRect.offsetMax = new Vector2(-40, 0);
 
-            // 中心头像
-            CreateCharacterAvatar(areaObj.transform);
-
-            // 环绕的装备槽
-            CreateEquipmentSlots(areaObj.transform);
-
-            // 等级和经验条
-            CreateLevelDisplay(areaObj.transform);
-        }
-
-        private void CreateCharacterAvatar(Transform parent)
-        {
+            // === 中心头像 300×300 ===
             GameObject avatarObj = new GameObject("Avatar");
-            avatarObj.transform.SetParent(parent);
+            avatarObj.transform.SetParent(areaObj.transform);
 
             RectTransform avatarRect = avatarObj.AddComponent<RectTransform>();
-            avatarRect.anchorMin = new Vector2(0.5f, 0.5f);
-            avatarRect.anchorMax = new Vector2(0.5f, 0.5f);
-            avatarRect.sizeDelta = new Vector2(250, 250);
+            avatarRect.anchorMin = new Vector2(0.5f, 0.55f);
+            avatarRect.anchorMax = new Vector2(0.5f, 0.55f);
+            avatarRect.sizeDelta = new Vector2(300, 300);
             avatarRect.anchoredPosition = Vector2.zero;
 
             // 头像背景
@@ -255,6 +261,7 @@ namespace MoShou.UI
             if (avatarSprite != null)
             {
                 avatarBg.sprite = avatarSprite;
+                avatarBg.color = Color.white;
             }
 
             // 头像内框
@@ -269,131 +276,69 @@ namespace MoShou.UI
             innerRect.offsetMin = Vector2.zero;
             innerRect.offsetMax = Vector2.zero;
 
-            // 金色边框
-            GameObject borderObj = new GameObject("Border");
-            borderObj.transform.SetParent(avatarObj.transform);
-            Image borderImg = borderObj.AddComponent<Image>();
-            borderImg.color = UIStyleHelper.Colors.Gold;
-
-            RectTransform borderRect = borderObj.GetComponent<RectTransform>();
-            borderRect.anchorMin = Vector2.zero;
-            borderRect.anchorMax = Vector2.one;
-            borderRect.offsetMin = new Vector2(-5, -5);
-            borderRect.offsetMax = new Vector2(5, 5);
-            borderObj.transform.SetAsFirstSibling();
-        }
-
-        private void CreateEquipmentSlots(Transform parent)
-        {
-            // 装备槽位置配置 (相对于中心)
-            var slotConfigs = new List<(EquipmentSlotType type, Vector2 position, string label)>
+            // 金色肖像帧sprite
+            Sprite portraitFrame = Resources.Load<Sprite>("Sprites/UI/CharInfo/UI_CharInfo_Portrait_Frame");
+            if (portraitFrame != null)
             {
-                (EquipmentSlotType.Weapon, new Vector2(-200, 100), "武器"),
-                (EquipmentSlotType.Helmet, new Vector2(0, 200), "头盔"),
-                (EquipmentSlotType.Armor, new Vector2(200, 100), "护甲"),
-                (EquipmentSlotType.Accessory1, new Vector2(-200, -100), "饰品"),
-                (EquipmentSlotType.Boots, new Vector2(0, -200), "鞋子"),
-                (EquipmentSlotType.Accessory2, new Vector2(200, -100), "饰品"),
-            };
+                GameObject frameObj = new GameObject("PortraitFrame");
+                frameObj.transform.SetParent(avatarObj.transform);
+                Image frameImg = frameObj.AddComponent<Image>();
+                frameImg.sprite = portraitFrame;
+                frameImg.type = Image.Type.Sliced;
+                frameImg.color = Color.white;
+                frameImg.raycastTarget = false;
 
-            foreach (var config in slotConfigs)
-            {
-                CreateEquipmentSlot(parent, config.type, config.position, config.label);
+                RectTransform frameRect = frameObj.GetComponent<RectTransform>();
+                frameRect.anchorMin = Vector2.zero;
+                frameRect.anchorMax = Vector2.one;
+                frameRect.offsetMin = new Vector2(-10, -10);
+                frameRect.offsetMax = new Vector2(10, 10);
             }
-        }
-
-        private void CreateEquipmentSlot(Transform parent, EquipmentSlotType slotType, Vector2 position, string label)
-        {
-            GameObject slotObj = new GameObject($"Slot_{slotType}");
-            slotObj.transform.SetParent(parent);
-
-            RectTransform slotRect = slotObj.AddComponent<RectTransform>();
-            slotRect.anchorMin = new Vector2(0.5f, 0.5f);
-            slotRect.anchorMax = new Vector2(0.5f, 0.5f);
-            slotRect.sizeDelta = new Vector2(100, 100);
-            slotRect.anchoredPosition = position;
-
-            // 槽背景
-            Image slotBg = slotObj.AddComponent<Image>();
-            slotBg.color = new Color(0.15f, 0.18f, 0.22f, 1f);
-
-            // 尝试加载槽位图标
-            Sprite slotSprite = Resources.Load<Sprite>($"Sprites/UI/Equipment/Slot_{slotType}");
-            if (slotSprite != null)
+            else
             {
-                slotBg.sprite = slotSprite;
+                // fallback: 金色边框
+                GameObject borderObj = new GameObject("Border");
+                borderObj.transform.SetParent(avatarObj.transform);
+                Image borderImg = borderObj.AddComponent<Image>();
+                borderImg.color = UIStyleHelper.Colors.Gold;
+                borderImg.raycastTarget = false;
+
+                RectTransform borderRect = borderObj.GetComponent<RectTransform>();
+                borderRect.anchorMin = Vector2.zero;
+                borderRect.anchorMax = Vector2.one;
+                borderRect.offsetMin = new Vector2(-5, -5);
+                borderRect.offsetMax = new Vector2(5, 5);
+                borderObj.transform.SetAsFirstSibling();
             }
 
-            // 槽内图标区域
-            GameObject iconObj = new GameObject("Icon");
-            iconObj.transform.SetParent(slotObj.transform);
-            Image iconImg = iconObj.AddComponent<Image>();
-            iconImg.color = new Color(0.4f, 0.4f, 0.4f, 0.5f);
+            // === 头像下方信息 ===
+            // 角色职业+名字 (金色, 30pt)
+            characterNameText = CreateText(areaObj.transform, "CharacterName", "战士·艾瑞克", 30, TextAnchor.MiddleCenter, UIStyleHelper.Colors.Gold);
+            characterNameText.fontStyle = FontStyle.Bold;
+            RectTransform nameRect = characterNameText.GetComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0.1f, 0.22f);
+            nameRect.anchorMax = new Vector2(0.9f, 0.32f);
+            nameRect.offsetMin = Vector2.zero;
+            nameRect.offsetMax = Vector2.zero;
+            characterNameText.gameObject.AddComponent<Outline>().effectColor = new Color(0, 0, 0, 0.5f);
 
-            RectTransform iconRect = iconObj.GetComponent<RectTransform>();
-            iconRect.anchorMin = new Vector2(0.1f, 0.1f);
-            iconRect.anchorMax = new Vector2(0.9f, 0.9f);
-            iconRect.offsetMin = Vector2.zero;
-            iconRect.offsetMax = Vector2.zero;
-
-            // 按钮交互
-            Button slotBtn = slotObj.AddComponent<Button>();
-            EquipmentSlotType capturedType = slotType;
-            slotBtn.onClick.AddListener(() => OnEquipmentSlotClick(capturedType));
-
-            // 标签
-            Text labelText = CreateText(slotObj.transform, "Label", label, 14, TextAnchor.UpperCenter, new Color(0.7f, 0.7f, 0.7f, 1f));
-            RectTransform labelRect = labelText.GetComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0, 1);
-            labelRect.anchorMax = new Vector2(1, 1.3f);
-            labelRect.offsetMin = Vector2.zero;
-            labelRect.offsetMax = Vector2.zero;
-
-            // 存储引用
-            equipmentSlots[slotType] = iconImg;
-
-            // 根据类型存储到对应字段
-            switch (slotType)
-            {
-                case EquipmentSlotType.Weapon: weaponSlot = iconImg; break;
-                case EquipmentSlotType.Armor: armorSlot = iconImg; break;
-                case EquipmentSlotType.Helmet: helmetSlot = iconImg; break;
-                case EquipmentSlotType.Boots: bootsSlot = iconImg; break;
-                case EquipmentSlotType.Accessory1: accessory1Slot = iconImg; break;
-                case EquipmentSlotType.Accessory2: accessory2Slot = iconImg; break;
-            }
-        }
-
-        private void CreateLevelDisplay(Transform parent)
-        {
-            GameObject levelObj = new GameObject("LevelDisplay");
-            levelObj.transform.SetParent(parent);
-
-            RectTransform levelRect = levelObj.AddComponent<RectTransform>();
-            levelRect.anchorMin = new Vector2(0.5f, 0);
-            levelRect.anchorMax = new Vector2(0.5f, 0);
-            levelRect.pivot = new Vector2(0.5f, 0);
-            levelRect.sizeDelta = new Vector2(400, 80);
-            levelRect.anchoredPosition = new Vector2(0, 30);
-
-            // 等级文字
-            levelText = CreateText(levelObj.transform, "Level", "Lv. 1", 28, TextAnchor.MiddleCenter, UIStyleHelper.Colors.Gold);
-            levelText.fontStyle = FontStyle.Bold;
+            // 等级 (24pt)
+            levelText = CreateText(areaObj.transform, "Level", "Lv.11", 24, TextAnchor.MiddleCenter, new Color(0.8f, 0.85f, 0.9f));
             RectTransform lvRect = levelText.GetComponent<RectTransform>();
-            lvRect.anchorMin = new Vector2(0, 0.5f);
-            lvRect.anchorMax = new Vector2(1, 1);
+            lvRect.anchorMin = new Vector2(0.3f, 0.14f);
+            lvRect.anchorMax = new Vector2(0.7f, 0.22f);
             lvRect.offsetMin = Vector2.zero;
             lvRect.offsetMax = Vector2.zero;
 
-            // 经验条背景
+            // 经验条
             GameObject expBarBg = new GameObject("ExpBarBG");
-            expBarBg.transform.SetParent(levelObj.transform);
+            expBarBg.transform.SetParent(areaObj.transform);
             Image expBgImg = expBarBg.AddComponent<Image>();
             expBgImg.color = new Color(0.2f, 0.2f, 0.2f, 1f);
 
             RectTransform expBgRect = expBarBg.GetComponent<RectTransform>();
-            expBgRect.anchorMin = new Vector2(0.1f, 0);
-            expBgRect.anchorMax = new Vector2(0.9f, 0.4f);
+            expBgRect.anchorMin = new Vector2(0.15f, 0.08f);
+            expBgRect.anchorMax = new Vector2(0.85f, 0.13f);
             expBgRect.offsetMin = Vector2.zero;
             expBgRect.offsetMax = Vector2.zero;
 
@@ -405,108 +350,276 @@ namespace MoShou.UI
 
             RectTransform expFillRect = expFillObj.GetComponent<RectTransform>();
             expFillRect.anchorMin = Vector2.zero;
-            expFillRect.anchorMax = new Vector2(0.5f, 1f);
+            expFillRect.anchorMax = new Vector2(0.6f, 1f);
             expFillRect.offsetMin = new Vector2(2, 2);
             expFillRect.offsetMax = new Vector2(-2, -2);
 
-            // 创建Slider
             expSlider = expBarBg.AddComponent<Slider>();
             expSlider.fillRect = expFillRect;
             expSlider.interactable = false;
             expSlider.minValue = 0;
             expSlider.maxValue = 1;
-            expSlider.value = 0.5f;
+            expSlider.value = 0.6f;
+
+            // 经验值文字
+            expText = CreateText(expBarBg.transform, "ExpText", "120/200 EXP", 16, TextAnchor.MiddleCenter, Color.white);
+
+            // 金币行
+            GameObject goldRow = new GameObject("GoldRow");
+            goldRow.transform.SetParent(areaObj.transform);
+            RectTransform goldRect = goldRow.AddComponent<RectTransform>();
+            goldRect.anchorMin = new Vector2(0.3f, 0.0f);
+            goldRect.anchorMax = new Vector2(0.7f, 0.07f);
+            goldRect.offsetMin = Vector2.zero;
+            goldRect.offsetMax = Vector2.zero;
+
+            // coin icon
+            GameObject coinGO = new GameObject("CoinIcon");
+            coinGO.transform.SetParent(goldRow.transform);
+            Image coinImg = coinGO.AddComponent<Image>();
+            Sprite coinSprite = Resources.Load<Sprite>("Sprites/UI/Common/UI_Icon_Coin_Stack");
+            if (coinSprite != null)
+            {
+                coinImg.sprite = coinSprite;
+                coinImg.color = Color.white;
+            }
+            else
+            {
+                coinImg.color = UIStyleHelper.Colors.Gold;
+            }
+            coinImg.raycastTarget = false;
+            RectTransform coinRect = coinGO.GetComponent<RectTransform>();
+            coinRect.anchorMin = new Vector2(0, 0.5f);
+            coinRect.anchorMax = new Vector2(0, 0.5f);
+            coinRect.anchoredPosition = new Vector2(20, 0);
+            coinRect.sizeDelta = new Vector2(28, 28);
+
+            // 金币数字
+            Text goldText = CreateText(goldRow.transform, "GoldText", "4300 金币", 22, TextAnchor.MiddleLeft, UIStyleHelper.Colors.Gold);
+            RectTransform gtRect = goldText.GetComponent<RectTransform>();
+            gtRect.anchorMin = new Vector2(0.2f, 0);
+            gtRect.anchorMax = new Vector2(1, 1);
+            gtRect.offsetMin = Vector2.zero;
+            gtRect.offsetMax = Vector2.zero;
         }
 
+        /// <summary>
+        /// 创建装备网格 — 效果图3列布局
+        /// </summary>
+        private void CreateEquipmentGrid(Transform parent)
+        {
+            // "已穿戴装备" 标题
+            GameObject eqTitleObj = new GameObject("EquipmentTitle");
+            eqTitleObj.transform.SetParent(parent);
+            RectTransform eqTitleRect = eqTitleObj.AddComponent<RectTransform>();
+            eqTitleRect.anchorMin = new Vector2(0, 0.18f);
+            eqTitleRect.anchorMax = new Vector2(1, 0.22f);
+            eqTitleRect.offsetMin = Vector2.zero;
+            eqTitleRect.offsetMax = Vector2.zero;
+
+            // 分割线
+            Image divider = eqTitleObj.AddComponent<Image>();
+            divider.color = new Color(0.4f, 0.35f, 0.25f, 0.3f);
+
+            Text eqTitle = CreateText(eqTitleObj.transform, "Text", "已穿戴装备", 26, TextAnchor.MiddleCenter, UIStyleHelper.Colors.Gold);
+            eqTitle.fontStyle = FontStyle.Bold;
+
+            // 装备网格容器
+            GameObject gridObj = new GameObject("EquipmentGrid");
+            gridObj.transform.SetParent(parent);
+
+            RectTransform gridRect = gridObj.AddComponent<RectTransform>();
+            gridRect.anchorMin = new Vector2(0, 0.02f);
+            gridRect.anchorMax = new Vector2(1, 0.18f);
+            gridRect.offsetMin = new Vector2(60, 10);
+            gridRect.offsetMax = new Vector2(-60, -10);
+
+            GridLayoutGroup grid = gridObj.AddComponent<GridLayoutGroup>();
+            grid.cellSize = new Vector2(140, 160);
+            grid.spacing = new Vector2(20, 10);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 3;
+            grid.childAlignment = TextAnchor.UpperCenter;
+            grid.padding = new RectOffset(30, 30, 5, 5);
+
+            // 创建6个装备格
+            var slotConfigs = new List<(EquipmentSlotType type, string label)>
+            {
+                (EquipmentSlotType.Helmet, "头盔"),
+                (EquipmentSlotType.Weapon, "武器"),
+                (EquipmentSlotType.Accessory1, "饰品"),
+                (EquipmentSlotType.Accessory2, "项链"),
+                (EquipmentSlotType.Armor, "护甲"),
+                (EquipmentSlotType.Boots, "鞋子"),
+            };
+
+            foreach (var config in slotConfigs)
+            {
+                CreateEquipmentGridSlot(gridObj.transform, config.type, config.label);
+            }
+        }
+
+        /// <summary>
+        /// 创建装备网格单格
+        /// </summary>
+        private void CreateEquipmentGridSlot(Transform parent, EquipmentSlotType slotType, string label)
+        {
+            GameObject slotObj = new GameObject($"Slot_{slotType}");
+            slotObj.transform.SetParent(parent);
+
+            // 槽背景
+            Image slotBg = slotObj.AddComponent<Image>();
+
+            // 尝试加载帧sprite
+            Sprite filledFrame = Resources.Load<Sprite>("Sprites/UI/CharInfo/UI_Equip_Slot_Filled");
+            Sprite emptyFrame = Resources.Load<Sprite>("Sprites/UI/CharInfo/UI_Equip_Slot_Empty");
+            // 默认使用空帧，RefreshEquipment会更新
+            if (emptyFrame != null)
+            {
+                slotBg.sprite = emptyFrame;
+                slotBg.type = Image.Type.Sliced;
+                slotBg.color = Color.white;
+            }
+            else
+            {
+                slotBg.color = new Color(0.15f, 0.18f, 0.22f, 1f);
+            }
+
+            // 图标区域 100×100
+            GameObject iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(slotObj.transform);
+            Image iconImg = iconObj.AddComponent<Image>();
+            iconImg.color = new Color(0.4f, 0.4f, 0.4f, 0.5f);
+
+            RectTransform iconRect = iconObj.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.5f, 0.55f);
+            iconRect.anchorMax = new Vector2(0.5f, 0.55f);
+            iconRect.sizeDelta = new Vector2(100, 100);
+            iconRect.anchoredPosition = Vector2.zero;
+
+            // 按钮交互
+            Button slotBtn = slotObj.AddComponent<Button>();
+            slotBtn.targetGraphic = slotBg;
+            EquipmentSlotType capturedType = slotType;
+            slotBtn.onClick.AddListener(() => OnEquipmentSlotClick(capturedType));
+
+            // 名称标签（底部）
+            Text labelText = CreateText(slotObj.transform, "Label", label, 18, TextAnchor.MiddleCenter, new Color(0.8f, 0.8f, 0.8f));
+            RectTransform labelRect = labelText.GetComponent<RectTransform>();
+            labelRect.anchorMin = new Vector2(0, 0);
+            labelRect.anchorMax = new Vector2(1, 0);
+            labelRect.pivot = new Vector2(0.5f, 0);
+            labelRect.anchoredPosition = new Vector2(0, 5);
+            labelRect.sizeDelta = new Vector2(0, 30);
+
+            // 存储引用
+            equipmentSlots[slotType] = iconImg;
+
+            switch (slotType)
+            {
+                case EquipmentSlotType.Weapon: weaponSlot = iconImg; break;
+                case EquipmentSlotType.Armor: armorSlot = iconImg; break;
+                case EquipmentSlotType.Helmet: helmetSlot = iconImg; break;
+                case EquipmentSlotType.Boots: bootsSlot = iconImg; break;
+                case EquipmentSlotType.Accessory1: accessory1Slot = iconImg; break;
+                case EquipmentSlotType.Accessory2: accessory2Slot = iconImg; break;
+            }
+        }
+
+        /// <summary>
+        /// 创建属性面板 — 效果图2列网格，中文标签+icon
+        /// </summary>
         private void CreateStatsPanel(Transform parent)
         {
-            GameObject statsObj = new GameObject("StatsPanel");
+            // "角色属性" 标题
+            GameObject statsTitleObj = new GameObject("StatsTitle");
+            statsTitleObj.transform.SetParent(parent);
+            RectTransform stsTitleRect = statsTitleObj.AddComponent<RectTransform>();
+            stsTitleRect.anchorMin = new Vector2(0, 0.55f);
+            stsTitleRect.anchorMax = new Vector2(1, 0.59f);
+            stsTitleRect.offsetMin = Vector2.zero;
+            stsTitleRect.offsetMax = Vector2.zero;
+
+            Image stsDivider = statsTitleObj.AddComponent<Image>();
+            stsDivider.color = new Color(0.4f, 0.35f, 0.25f, 0.3f);
+
+            Text statsTitle = CreateText(statsTitleObj.transform, "Text", "角色属性", 26, TextAnchor.MiddleCenter, UIStyleHelper.Colors.Gold);
+            statsTitle.fontStyle = FontStyle.Bold;
+
+            // 属性网格容器
+            GameObject statsObj = new GameObject("StatsGrid");
             statsObj.transform.SetParent(parent);
 
             RectTransform statsRect = statsObj.AddComponent<RectTransform>();
-            statsRect.anchorMin = new Vector2(0, 0.12f);
-            statsRect.anchorMax = new Vector2(1, 0.42f);
-            statsRect.offsetMin = new Vector2(40, 0);
-            statsRect.offsetMax = new Vector2(-40, 0);
+            statsRect.anchorMin = new Vector2(0, 0.23f);
+            statsRect.anchorMax = new Vector2(1, 0.55f);
+            statsRect.offsetMin = new Vector2(30, 0);
+            statsRect.offsetMax = new Vector2(-30, -5);
 
-            // 面板背景
-            Image statsBg = statsObj.AddComponent<Image>();
-            statsBg.color = new Color(0.1f, 0.12f, 0.15f, 0.8f);
+            GridLayoutGroup statsGrid = statsObj.AddComponent<GridLayoutGroup>();
+            statsGrid.cellSize = new Vector2(400, 50);
+            statsGrid.spacing = new Vector2(10, 8);
+            statsGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            statsGrid.constraintCount = 2;
+            statsGrid.childAlignment = TextAnchor.UpperCenter;
+            statsGrid.padding = new RectOffset(10, 10, 10, 10);
 
-            // 标题
-            Text statsTitle = CreateText(statsObj.transform, "Title", "ATTRIBUTES", 24, TextAnchor.UpperCenter, UIStyleHelper.Colors.Gold);
-            statsTitle.fontStyle = FontStyle.Bold;
-            RectTransform titleRect = statsTitle.GetComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0, 0.85f);
-            titleRect.anchorMax = new Vector2(1, 1);
-            titleRect.offsetMin = Vector2.zero;
-            titleRect.offsetMax = Vector2.zero;
+            // 属性行: icon路径, 标签, 引用, 颜色
+            CreateStatGridItem(statsObj.transform, "UI_Icon_Stat_HP", "生命值:", out healthText, new Color(0.9f, 0.3f, 0.3f));
+            CreateStatGridItem(statsObj.transform, "UI_Icon_Stat_ATK", "攻击力:", out attackText, new Color(0.9f, 0.7f, 0.3f));
+            CreateStatGridItem(statsObj.transform, "UI_Icon_Stat_DEF", "防御力:", out defenseText, new Color(0.3f, 0.6f, 0.9f));
+            CreateStatGridItem(statsObj.transform, "UI_Icon_Stat_CRIT", "暴击率:", out critRateText, new Color(0.9f, 0.8f, 0.2f));
 
-            // 属性列表
-            CreateStatRow(statsObj.transform, "ATK", out attackText, 0.7f, new Color(1f, 0.5f, 0.3f, 1f));
-            CreateStatRow(statsObj.transform, "DEF", out defenseText, 0.5f, new Color(0.3f, 0.7f, 1f, 1f));
-            CreateStatRow(statsObj.transform, "HP", out healthText, 0.3f, new Color(0.3f, 1f, 0.5f, 1f));
-            CreateStatRow(statsObj.transform, "CRIT", out critRateText, 0.1f, new Color(1f, 0.8f, 0.2f, 1f));
+            // 待扩展项 (空位)
+            for (int i = 0; i < 4; i++)
+            {
+                Text dummy;
+                CreateStatGridItem(statsObj.transform, null, "待扩展", out dummy, new Color(0.4f, 0.4f, 0.4f, 0.5f));
+            }
         }
 
-        private void CreateStatRow(Transform parent, string label, out Text valueText, float yPos, Color labelColor)
+        private void CreateStatGridItem(Transform parent, string iconName, string label, out Text valueText, Color labelColor)
         {
             GameObject rowObj = new GameObject($"Stat_{label}");
             rowObj.transform.SetParent(parent);
 
-            RectTransform rowRect = rowObj.AddComponent<RectTransform>();
-            rowRect.anchorMin = new Vector2(0.05f, yPos);
-            rowRect.anchorMax = new Vector2(0.95f, yPos + 0.15f);
-            rowRect.offsetMin = Vector2.zero;
-            rowRect.offsetMax = Vector2.zero;
+            // icon (28×28)
+            if (!string.IsNullOrEmpty(iconName))
+            {
+                Sprite iconSprite = Resources.Load<Sprite>($"Sprites/UI/CharInfo/{iconName}");
+                if (iconSprite != null)
+                {
+                    GameObject iconGO = new GameObject("Icon");
+                    iconGO.transform.SetParent(rowObj.transform);
+                    Image iconImg = iconGO.AddComponent<Image>();
+                    iconImg.sprite = iconSprite;
+                    iconImg.color = Color.white;
+                    iconImg.raycastTarget = false;
+
+                    RectTransform iconRect = iconGO.GetComponent<RectTransform>();
+                    iconRect.anchorMin = new Vector2(0, 0.5f);
+                    iconRect.anchorMax = new Vector2(0, 0.5f);
+                    iconRect.anchoredPosition = new Vector2(18, 0);
+                    iconRect.sizeDelta = new Vector2(28, 28);
+                }
+            }
 
             // 属性标签
             Text labelText = CreateText(rowObj.transform, "Label", label, 22, TextAnchor.MiddleLeft, labelColor);
             labelText.fontStyle = FontStyle.Bold;
             RectTransform labelRect = labelText.GetComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0, 0);
-            labelRect.anchorMax = new Vector2(0.4f, 1);
+            labelRect.anchorMin = new Vector2(0.1f, 0);
+            labelRect.anchorMax = new Vector2(0.55f, 1);
             labelRect.offsetMin = Vector2.zero;
             labelRect.offsetMax = Vector2.zero;
 
             // 属性值
             valueText = CreateText(rowObj.transform, "Value", "0", 22, TextAnchor.MiddleRight, Color.white);
             RectTransform valueRect = valueText.GetComponent<RectTransform>();
-            valueRect.anchorMin = new Vector2(0.4f, 0);
-            valueRect.anchorMax = new Vector2(1, 1);
+            valueRect.anchorMin = new Vector2(0.55f, 0);
+            valueRect.anchorMax = new Vector2(0.98f, 1);
             valueRect.offsetMin = Vector2.zero;
             valueRect.offsetMax = Vector2.zero;
-        }
-
-        private void CreateUpgradeButton(Transform parent)
-        {
-            GameObject btnObj = new GameObject("UpgradeButton");
-            btnObj.transform.SetParent(parent);
-
-            RectTransform btnRect = btnObj.AddComponent<RectTransform>();
-            btnRect.anchorMin = new Vector2(0.5f, 0);
-            btnRect.anchorMax = new Vector2(0.5f, 0);
-            btnRect.pivot = new Vector2(0.5f, 0);
-            btnRect.anchoredPosition = new Vector2(0, 30);
-            btnRect.sizeDelta = new Vector2(300, 70);
-
-            Image btnBg = btnObj.AddComponent<Image>();
-            btnBg.color = new Color(0.2f, 0.6f, 0.3f, 1f);
-
-            // 尝试加载按钮贴图
-            Sprite btnSprite = Resources.Load<Sprite>("Sprites/UI/Common/UI_Button_Primary");
-            if (btnSprite != null)
-            {
-                btnBg.sprite = btnSprite;
-                btnBg.type = Image.Type.Sliced;
-            }
-
-            upgradeButton = btnObj.AddComponent<Button>();
-            upgradeButton.onClick.AddListener(OnUpgradeButtonClick);
-
-            // 按钮文字
-            Text btnText = CreateText(btnObj.transform, "Text", "UPGRADE", 24, TextAnchor.MiddleCenter, Color.white);
-            btnText.fontStyle = FontStyle.Bold;
         }
 
         private void CreateDecorations(Transform parent)
@@ -771,6 +884,13 @@ namespace MoShou.UI
             if (isVisible) return;
 
             gameObject.SetActive(true);
+
+            // 确保UI已初始化（首次Show时Start可能还没执行过）
+            if (!isInitialized)
+            {
+                InitializeUI();
+            }
+
             isVisible = true;
 
             RefreshAll();
@@ -782,6 +902,12 @@ namespace MoShou.UI
 
                 UITween.Instance.FadeTo(canvasGroup, 1f, 0.3f, null);
                 UITween.Instance.ScaleTo(transform, Vector3.one, 0.3f, null);
+            }
+            else if (canvasGroup != null)
+            {
+                // 没有UITween时直接显示
+                canvasGroup.alpha = 1f;
+                transform.localScale = Vector3.one;
             }
         }
 

@@ -1,21 +1,28 @@
 {
     "project": "MoShou",
-    "timestamp": "2026-02-10T21:18:38Z",
-    "error_count": 2,
+    "timestamp": "2026-02-11T22:53:34Z",
+    "error_count": 3,
     "errors": [
         {
-            "file": "Assets\\Scripts\\UI\\MinimapSystem.cs",
-            "line": 603,
-            "column": 17,
-            "message": "Assets\\Scripts\\UI\\MinimapSystem.cs(603,17): error CS0234: The type or namespace name 'GameManager' does not exist in the namespace 'MoShou.Systems' (are you missing an assembly reference?)",
-            "code": "CS0234"
+            "file": "Assets\\Scripts\\Core\\GameSceneSetup.cs",
+            "line": 2976,
+            "column": 19,
+            "message": "Assets\\Scripts\\Core\\GameSceneSetup.cs(2976,19): error CS1061: 'ShopPanel' does not contain a definition for 'pantsTab' and no accessible extension method 'pantsTab' accepting a first argument of type 'ShopPanel' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
         },
         {
-            "file": "Assets\\Scripts\\UI\\MinimapSystem.cs",
-            "line": 605,
-            "column": 24,
-            "message": "Assets\\Scripts\\UI\\MinimapSystem.cs(605,24): error CS0234: The type or namespace name 'GameManager' does not exist in the namespace 'MoShou.Systems' (are you missing an assembly reference?)",
-            "code": "CS0234"
+            "file": "Assets\\Scripts\\Core\\GameSceneSetup.cs",
+            "line": 2977,
+            "column": 19,
+            "message": "Assets\\Scripts\\Core\\GameSceneSetup.cs(2977,19): error CS1061: 'ShopPanel' does not contain a definition for 'ringTab' and no accessible extension method 'ringTab' accepting a first argument of type 'ShopPanel' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
+        },
+        {
+            "file": "Assets\\Scripts\\Core\\GameSceneSetup.cs",
+            "line": 2978,
+            "column": 19,
+            "message": "Assets\\Scripts\\Core\\GameSceneSetup.cs(2978,19): error CS1061: 'ShopPanel' does not contain a definition for 'necklaceTab' and no accessible extension method 'necklaceTab' accepting a first argument of type 'ShopPanel' could be found (are you missing a using directive or an assembly reference?)",
+            "code": "CS1061"
         }
     ]
 }
