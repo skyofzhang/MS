@@ -3,7 +3,7 @@
 ## 项目概述
 
 竖屏 Roguelike 动作手游，Unity 2022.3 + URP。参考分辨率 1080x1920。
-UI 采用 **Prefab + 代码混合方案**：核心面板（商店/选关/战斗HUD）已转为 Editor 生成 Prefab，运行时加载；小地图/角色详情等仍为代码动态创建。通过 `Resources.Load<Sprite>()` 加载散图资源，加载失败时 fallback 到程序化纯色/渐变。
+UI 采用 **Prefab + 代码混合方案**：核心面板（商店/选关/战斗HUD/角色详情/技能升级）已转为 Editor 生成 Prefab，运行时加载；小地图等仍为代码动态创建。通过 `Resources.Load<Sprite>()` 加载散图资源，加载失败时 fallback 到程序化纯色/渐变。
 
 ## 技术栈
 
@@ -28,7 +28,7 @@ UI 采用 **Prefab + 代码混合方案**：核心面板（商店/选关/战斗H
 ```
 Assets/Scripts/
   Core/           # 场景Setup + 管理器
-    GameSceneSetup.cs      (~2600行) 战斗场景：加载BattleHUD Prefab + 动态创建面板(商店/背包/装备/技能/角色信息)
+    GameSceneSetup.cs      (~2400行) 战斗场景：加载Prefab(BattleHUD/商店/角色信息/技能升级) + 动态创建面板(背包/装备)
     MainMenuSceneSetup.cs  (~970行)  主菜单全部UI创建
     StageSelectSceneSetup.cs (~270行) 选关界面Prefab实例化+数据填充
     GameManager.cs          游戏状态管理
@@ -41,7 +41,7 @@ Assets/Scripts/
     GameHUD.cs              战斗HUD控制器(Prefab) — 顶部状态栏/侧边按钮/技能/暂停/头像
     ShopPanel.cs            商店面板 (~370行)
     ShopItemCardUI.cs       商品卡片Prefab控制器
-    SkillUpgradePanel.cs    技能升级面板 (~960行)
+    SkillUpgradePanel.cs    技能升级面板(Prefab) (~900行)
     MinimapSystem.cs        小地图系统(动态创建, 右上角, ~720行)
     SimpleHealthBar.cs      血条组件(从UIManager拆分)
     SimpleInventoryPanel.cs 简化版背包面板
@@ -51,7 +51,7 @@ Assets/Scripts/
     UITween.cs              缓动动画
     StageCardUI.cs          关卡卡片Prefab控制器
     Screens/
-      CharacterInfoScreen.cs  角色信息面板 (~835行)
+      CharacterInfoScreen.cs  角色信息面板(Prefab) (~443行)
       ResultScreen.cs         结算界面
       DefeatScreen.cs         失败界面
     Components/
@@ -64,9 +64,11 @@ Assets/Scripts/
   Systems/        # 系统管理（SaveSystem, InventoryManager, EquipmentManager, AudioManager, LootManager）
   Utils/          # 工具类
   Editor/         # 编辑器脚本
-    BattleHUDPrefabCreator.cs   菜单: MoShou/创建战斗HUD Prefab/0.全部生成
-    ShopPrefabCreator.cs        菜单: MoShou/创建商店Prefab
-    StageSelectPrefabCreator.cs 菜单: MoShou/创建选关Prefab
+    BattleHUDPrefabCreator.cs       菜单: MoShou/创建战斗HUD Prefab/0.全部生成
+    ShopPrefabCreator.cs            菜单: MoShou/创建商店Prefab
+    StageSelectPrefabCreator.cs     菜单: MoShou/创建选关Prefab
+    CharacterInfoPrefabCreator.cs   菜单: MoShou/创建角色信息Prefab
+    SkillUpgradePrefabCreator.cs    菜单: MoShou/创建技能升级Prefab
   Test/           # 测试
 ```
 
@@ -79,6 +81,8 @@ Assets/Resources/Prefabs/UI/
   ShopItemCard.prefab      商品卡片 (⚠️ 用户已手动调整，勿覆盖)
   StageSelectCanvas.prefab 选关界面 (⚠️ 用户已手动调整，勿覆盖)
   StageCard.prefab         关卡卡片 (⚠️ 用户已手动调整，勿覆盖)
+  CharacterInfoScreen.prefab 角色信息面板 (⚠️ 用户已手动调整，勿覆盖)
+  SkillUpgradePanel.prefab   技能升级面板 (⚠️ 用户已手动调整，勿覆盖)
 ```
 
 **⚠️ 重要**: 所有 Prefab 均已由用户在 Unity Inspector 中手动微调布局。禁止重新运行 Editor 菜单生成，否则会覆盖用户调整。如需修改，应在运行时代码中动态调整，或由用户手动编辑 Prefab。
@@ -204,6 +208,25 @@ GameHUD.cs (挂载在BattleHUD Prefab根节点)
   - 调整各 UI 元素位置和尺寸
   - 战斗主界面布局已由用户在 Unity Inspector 中手动优化完成
 
+### Phase 16: 角色详情 + 技能升级转 Prefab
+- **`CharacterInfoScreen.cs`**: 从 ~835行 → ~443行
+  - 删除全部动态UI创建方法 (~550行): `CreateDynamicUI`, `CreateCloseButton`, `CreateTitle`, `CreateCharacterPortrait`, `CreateStatsPanel`, `CreateEquipmentGrid`, `CreateEquipmentGridSlot`, `CreateStatGridItem`, `CreateDecorations`, `CreateLine`, `CreateText`
+  - 新增 `[SerializeField] private Text goldText` 字段 + 金币显示刷新
+  - 新增 `BindEquipmentSlotButton()` — 通过 parent 查找 Button 组件绑定装备槽点击
+  - `InitializeUI()` 简化：仅绑定 closeButton、初始化 equipmentSlots 字典、绑定装备槽按钮
+- **`SkillUpgradePanel.cs`**: 从 ~1062行 → ~900行
+  - 所有 `public` 字段改为 `[SerializeField] private`
+  - 删除 `CreateDetailPanel()` (~160行)
+  - `ShowSkillDetail()` 中移除懒创建逻辑，改为 `if (detailPanel == null) return;`
+  - `Start()` 中 Instance 赋值改为 `if (Instance == null) Instance = this;` 防止覆盖
+  - 保留运行时动态创建: `CreateSkillList/Grid/SlotUI` (与 ShopItemCard 模式一致)
+- **`GameSceneSetup.cs`**: 删除 ~190行
+  - `CreateCharacterInfoPanel()`: ~20行动态创建 → Prefab 加载
+  - `CreateSkillUpgradePanel()`: ~169行动态创建 → Prefab 加载 (含 Instance 预设)
+- 新建 Editor 脚本:
+  - `CharacterInfoPrefabCreator.cs` — 生成 `CharacterInfoScreen.prefab` (18个 SerializeField 绑定)
+  - `SkillUpgradePrefabCreator.cs` — 生成 `SkillUpgradePanel.prefab` (11个 SerializeField 绑定)
+
 ## BattleHUD Prefab 层级结构 (Phase 14+15, 用户已手动调整)
 
 ```
@@ -244,13 +267,13 @@ BattleHUD (全屏透明容器, 挂载GameHUD)
 - [x] 角色详情入口改为头像按钮
 - [x] 左侧5个按钮全部可用 (商店/背包/技能/装备/地图)
 - [x] SimpleHealthBar 从 UIManager 拆分为独立脚本
+- [x] 角色详情面板转 Prefab (`CharacterInfoScreen`, ~835行→~443行)
+- [x] 技能升级面板转 Prefab (`SkillUpgradePanel`, ~1062行→~900行)
 
 ### 仍为动态创建的 UI (不转Prefab)
 - 小地图 (`MinimapSystem.cs`, ~720行)
-- 角色详情面板 (`MinimapSystem.ShowCharacterDetail()` / `CharacterInfoScreen`)
 - 背包面板 (`SimpleInventoryPanel`)
 - 装备面板 (`SimpleEquipmentPanel`)
-- 技能升级面板 (`SkillUpgradePanel`)
 - 伤害数字/拾取反馈 (`UIFeedbackSystem`)
 
 ### 已知非阻塞警告 (不影响运行)
@@ -262,6 +285,6 @@ BattleHUD (全屏透明容器, 挂载GameHUD)
 1. **所有 Prefab 禁止重新生成** — 用户已手动调整布局，重新运行 Editor 菜单会覆盖
 2. **Sprite 路径必须与磁盘一致** — `Resources.Load` 路径不带 .png 后缀，大小写敏感
 3. **9-slice sprite 必须在 Unity Inspector 中设置好 Border** — 否则 `Image.Type.Sliced` 不会正确拉伸
-4. **GameSceneSetup ~2600行** — 改动前先定位具体方法和行号
+4. **GameSceneSetup ~2400行** — 改动前先定位具体方法和行号
 5. **SimpleInventoryPanel 在全局命名空间** — 其余 UI 类在 `MoShou.UI` 命名空间，但 C# 允许跨命名空间访问全局类
 6. **VirtualJoystick 的 background/handle/handleRange 是 public 字段** — 不是 SerializeField，BattleHUDPrefabCreator 中直接赋值

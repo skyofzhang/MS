@@ -15,20 +15,20 @@ namespace MoShou.UI
         public static SkillUpgradePanel Instance { get; set; }
 
         [Header("UI引用")]
-        public Transform skillsContainer;    // 技能列表容器
-        public Text goldText;                // 玩家金币显示
-        public Text skillPointsText;         // 技能点显示
-        public Text titleText;               // 标题
-        public Button closeButton;           // 关闭按钮
+        [SerializeField] private Transform skillsContainer;    // 技能列表容器
+        [SerializeField] private Text goldText;                // 玩家金币显示
+        [SerializeField] private Text skillPointsText;         // 技能点显示
+        [SerializeField] private Text titleText;               // 标题
+        [SerializeField] private Button closeButton;           // 关闭按钮
 
         [Header("技能详情面板")]
-        public GameObject detailPanel;       // 技能详情面板
-        public Image detailIcon;             // 详情技能图标
-        public Text detailName;              // 详情技能名称
-        public Text detailDescription;       // 详情技能描述
-        public Text detailLevel;             // 详情技能等级
-        public Text detailCost;              // 升级消耗
-        public Button upgradeButton;         // 升级按钮
+        [SerializeField] private GameObject detailPanel;       // 技能详情面板
+        [SerializeField] private Image detailIcon;             // 详情技能图标
+        [SerializeField] private Text detailName;              // 详情技能名称
+        [SerializeField] private Text detailDescription;       // 详情技能描述
+        [SerializeField] private Text detailLevel;             // 详情技能等级
+        [SerializeField] private Text detailCost;              // 升级消耗
+        [SerializeField] private Button upgradeButton;         // 升级按钮
 
         // 技能数据
         private List<SkillData> allSkills = new List<SkillData>();
@@ -59,13 +59,16 @@ namespace MoShou.UI
 
             // ★ 关键：只有在技能数据完全加载并恢复后才设置Instance
             // 这样SaveGame()在初始化完成前不会读取到默认的level=1数据
-            Instance = this;
+            // 注意: Prefab方式下Instance由GameSceneSetup在Instantiate后立即设置
+            // 但这里仍需标记isFullyInitialized
+            if (Instance == null)
+                Instance = this;
             isFullyInitialized = true;
 
             // 创建技能列表
             CreateSkillList();
 
-            // 隐藏详情面板
+            // 隐藏详情面板（Prefab中默认已隐藏）
             if (detailPanel != null)
                 detailPanel.SetActive(false);
         }
@@ -456,11 +459,7 @@ namespace MoShou.UI
         /// </summary>
         void ShowSkillDetail(SkillData skill)
         {
-            if (detailPanel == null)
-            {
-                // 动态创建详情面板
-                CreateDetailPanel();
-            }
+            if (detailPanel == null) return;
 
             detailPanel.SetActive(true);
 
@@ -512,169 +511,6 @@ namespace MoShou.UI
                         new Color(0.8f, 0.4f, 0.2f) : new Color(0.2f, 0.6f, 0.8f);
                 }
             }
-        }
-
-        /// <summary>
-        /// 动态创建详情面板
-        /// </summary>
-        void CreateDetailPanel()
-        {
-            // 创建详情面板（右侧50%-95%）
-            GameObject panelGO = new GameObject("DetailPanel");
-            panelGO.transform.SetParent(transform, false);
-            RectTransform panelRect = panelGO.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.50f, 0.1f);
-            panelRect.anchorMax = new Vector2(0.95f, 0.88f);
-            panelRect.offsetMin = Vector2.zero;
-            panelRect.offsetMax = Vector2.zero;
-
-            // 羊皮纸背景sprite
-            Image panelBg = panelGO.AddComponent<Image>();
-            Sprite parchmentSprite = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_RightPanel_Parchment");
-            if (parchmentSprite != null)
-            {
-                panelBg.sprite = parchmentSprite;
-                panelBg.type = Image.Type.Sliced;
-                panelBg.color = Color.white;
-            }
-            else
-            {
-                panelBg.color = new Color(0.2f, 0.2f, 0.25f, 0.95f);
-            }
-            detailPanel = panelGO;
-
-            // 技能图标 (120×120 + 金色帧)
-            GameObject iconGO = new GameObject("Icon");
-            iconGO.transform.SetParent(panelGO.transform, false);
-            RectTransform iconRect = iconGO.AddComponent<RectTransform>();
-            iconRect.anchorMin = new Vector2(0.5f, 1);
-            iconRect.anchorMax = new Vector2(0.5f, 1);
-            iconRect.anchoredPosition = new Vector2(0, -85);
-            iconRect.sizeDelta = new Vector2(120, 120);
-            detailIcon = iconGO.AddComponent<Image>();
-            detailIcon.color = Color.gray;
-
-            // 图标帧sprite
-            Sprite iconFrame = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Skill_Icon_Frame_Gold");
-            if (iconFrame != null)
-            {
-                GameObject frameGO = new GameObject("Frame");
-                frameGO.transform.SetParent(iconGO.transform, false);
-                Image frameImg = frameGO.AddComponent<Image>();
-                frameImg.sprite = iconFrame;
-                frameImg.type = Image.Type.Sliced;
-                frameImg.color = Color.white;
-                frameImg.raycastTarget = false;
-
-                RectTransform frameRect = frameGO.GetComponent<RectTransform>();
-                frameRect.anchorMin = Vector2.zero;
-                frameRect.anchorMax = Vector2.one;
-                frameRect.offsetMin = new Vector2(-8, -8);
-                frameRect.offsetMax = new Vector2(8, 8);
-            }
-
-            // 技能名称
-            GameObject nameGO = new GameObject("Name");
-            nameGO.transform.SetParent(panelGO.transform, false);
-            RectTransform nameRect = nameGO.AddComponent<RectTransform>();
-            nameRect.anchorMin = new Vector2(0, 1);
-            nameRect.anchorMax = new Vector2(1, 1);
-            nameRect.anchoredPosition = new Vector2(0, -165);
-            nameRect.sizeDelta = new Vector2(0, 45);
-            detailName = nameGO.AddComponent<Text>();
-            detailName.fontSize = 30;
-            detailName.fontStyle = FontStyle.Bold;
-            detailName.alignment = TextAnchor.MiddleCenter;
-            detailName.color = Color.white;
-            detailName.font = GetDefaultFont();
-
-            // 技能等级
-            GameObject levelGO = new GameObject("Level");
-            levelGO.transform.SetParent(panelGO.transform, false);
-            RectTransform levelRect = levelGO.AddComponent<RectTransform>();
-            levelRect.anchorMin = new Vector2(0, 1);
-            levelRect.anchorMax = new Vector2(1, 1);
-            levelRect.anchoredPosition = new Vector2(0, -210);
-            levelRect.sizeDelta = new Vector2(0, 35);
-            detailLevel = levelGO.AddComponent<Text>();
-            detailLevel.fontSize = 22;
-            detailLevel.alignment = TextAnchor.MiddleCenter;
-            detailLevel.color = new Color(0.8f, 0.7f, 0.4f);
-            detailLevel.font = GetDefaultFont();
-
-            // 技能描述
-            GameObject descGO = new GameObject("Description");
-            descGO.transform.SetParent(panelGO.transform, false);
-            RectTransform descRect = descGO.AddComponent<RectTransform>();
-            descRect.anchorMin = new Vector2(0.08f, 0.25f);
-            descRect.anchorMax = new Vector2(0.92f, 0.62f);
-            descRect.offsetMin = Vector2.zero;
-            descRect.offsetMax = Vector2.zero;
-            detailDescription = descGO.AddComponent<Text>();
-            detailDescription.fontSize = 20;
-            detailDescription.alignment = TextAnchor.UpperLeft;
-            detailDescription.color = new Color(0.8f, 0.8f, 0.8f);
-            detailDescription.font = GetDefaultFont();
-
-            // 升级消耗 (含coin icon)
-            GameObject costGO = new GameObject("Cost");
-            costGO.transform.SetParent(panelGO.transform, false);
-            RectTransform costRect = costGO.AddComponent<RectTransform>();
-            costRect.anchorMin = new Vector2(0, 0);
-            costRect.anchorMax = new Vector2(1, 0);
-            costRect.anchoredPosition = new Vector2(0, 100);
-            costRect.sizeDelta = new Vector2(0, 30);
-            detailCost = costGO.AddComponent<Text>();
-            detailCost.fontSize = 22;
-            detailCost.alignment = TextAnchor.MiddleCenter;
-            detailCost.color = new Color(1f, 0.85f, 0.2f);
-            detailCost.font = GetDefaultFont();
-
-            // 升级按钮 (200×60, cyan sprite)
-            GameObject btnGO = new GameObject("UpgradeButton");
-            btnGO.transform.SetParent(panelGO.transform, false);
-            RectTransform btnRect = btnGO.AddComponent<RectTransform>();
-            btnRect.anchorMin = new Vector2(0.5f, 0);
-            btnRect.anchorMax = new Vector2(0.5f, 0);
-            btnRect.anchoredPosition = new Vector2(0, 45);
-            btnRect.sizeDelta = new Vector2(200, 60);
-
-            Image btnBg = btnGO.AddComponent<Image>();
-            Sprite upgradeBtnSprite = Resources.Load<Sprite>("Sprites/UI/Skills/UI_Btn_Upgrade_Cyan");
-            if (upgradeBtnSprite != null)
-            {
-                btnBg.sprite = upgradeBtnSprite;
-                btnBg.type = Image.Type.Sliced;
-                btnBg.color = Color.white;
-            }
-            else
-            {
-                btnBg.color = new Color(0.2f, 0.6f, 0.7f);
-            }
-
-            upgradeButton = btnGO.AddComponent<Button>();
-            upgradeButton.targetGraphic = btnBg;
-            upgradeButton.onClick.AddListener(OnUpgradeClick);
-
-            // 按钮文字
-            GameObject btnTextGO = new GameObject("Text");
-            btnTextGO.transform.SetParent(btnGO.transform, false);
-            RectTransform btnTextRect = btnTextGO.AddComponent<RectTransform>();
-            btnTextRect.anchorMin = Vector2.zero;
-            btnTextRect.anchorMax = Vector2.one;
-            btnTextRect.offsetMin = Vector2.zero;
-            btnTextRect.offsetMax = Vector2.zero;
-            Text btnText = btnTextGO.AddComponent<Text>();
-            btnText.text = "升级";
-            btnText.fontSize = 26;
-            btnText.fontStyle = FontStyle.Bold;
-            btnText.alignment = TextAnchor.MiddleCenter;
-            btnText.color = Color.white;
-            btnText.font = GetDefaultFont();
-
-            Outline btnOutline = btnTextGO.AddComponent<Outline>();
-            btnOutline.effectColor = new Color(0, 0, 0, 0.4f);
-            btnOutline.effectDistance = new Vector2(1, -1);
         }
 
         /// <summary>

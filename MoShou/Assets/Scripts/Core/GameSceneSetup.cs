@@ -1973,29 +1973,24 @@ public class GameSceneSetup : MonoBehaviour
     }
 
     /// <summary>
-    /// 创建角色信息面板 — 使用CharacterInfoScreen（新版效果图布局）
-    /// 点击小地图或其他入口时显示
+    /// 创建角色信息面板 — Prefab方式
+    /// 点击头像或其他入口时显示
     /// </summary>
     void CreateCharacterInfoPanel(Transform parent)
     {
-        GameObject charInfoGO = new GameObject("CharacterInfoScreen");
-        charInfoGO.transform.SetParent(parent, false);
-        RectTransform rt = charInfoGO.AddComponent<RectTransform>();
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        GameObject prefab = Resources.Load<GameObject>("Prefabs/UI/CharacterInfoScreen");
+        if (prefab == null)
+        {
+            Debug.LogError("[GameSceneSetup] 找不到 Prefabs/UI/CharacterInfoScreen 预制体！请执行 MoShou/创建角色信息Prefab");
+            return;
+        }
 
-        // 添加CanvasGroup用于淡入淡出（alpha=0避免Start()隐藏前的闪烁）
-        CanvasGroup cg = charInfoGO.AddComponent<CanvasGroup>();
-        cg.alpha = 0f;
+        GameObject panelGO = Instantiate(prefab, parent);
+        panelGO.name = "CharacterInfoScreen";
 
-        // 添加CharacterInfoScreen组件 — Awake()设置Instance，Start()初始化UI并隐藏
-        MoShou.UI.CharacterInfoScreen charScreen = charInfoGO.AddComponent<MoShou.UI.CharacterInfoScreen>();
-
-        // 不在此处SetActive(false)！让Start()执行InitializeUI()后自行隐藏
-        // 否则Start()不会执行，UI不会创建
-        Debug.Log($"[GameSceneSetup] 角色信息面板已创建, Instance={MoShou.UI.CharacterInfoScreen.Instance != null}");
+        // Prefab默认隐藏，确保初始状态正确
+        panelGO.SetActive(false);
+        Debug.Log("[GameSceneSetup] 角色信息面板已创建（Prefab方式）");
     }
 
     /// <summary>
@@ -2025,176 +2020,29 @@ public class GameSceneSetup : MonoBehaviour
     }
 
     /// <summary>
-    /// 创建技能升级面板
+    /// 创建技能升级面板 — Prefab方式
     /// </summary>
     void CreateSkillUpgradePanel(Transform parent)
     {
-        // 技能面板背景
-        GameObject panelGO = new GameObject("SkillUpgradePanel");
-        panelGO.transform.SetParent(parent, false);
-        RectTransform panelRect = panelGO.AddComponent<RectTransform>();
-        panelRect.anchorMin = Vector2.zero;
-        panelRect.anchorMax = Vector2.one;
-        panelRect.offsetMin = Vector2.zero;
-        panelRect.offsetMax = Vector2.zero;
-        UnityEngine.UI.Image bgImage = panelGO.AddComponent<UnityEngine.UI.Image>();
-        bgImage.color = new Color(0, 0, 0, 0.8f);
-
-        // 添加SkillUpgradePanel组件
-        MoShou.UI.SkillUpgradePanel skillPanel = panelGO.AddComponent<MoShou.UI.SkillUpgradePanel>();
-        MoShou.UI.SkillUpgradePanel.Instance = skillPanel;
-
-        // 内容框（左侧技能列表）
-        GameObject contentGO = new GameObject("Content");
-        contentGO.transform.SetParent(panelGO.transform, false);
-        RectTransform contentRect = contentGO.AddComponent<RectTransform>();
-        contentRect.anchorMin = new Vector2(0.03f, 0.1f);
-        contentRect.anchorMax = new Vector2(0.52f, 0.9f);
-        contentRect.offsetMin = Vector2.zero;
-        contentRect.offsetMax = Vector2.zero;
-        UnityEngine.UI.Image contentBg = contentGO.AddComponent<UnityEngine.UI.Image>();
-        // 使用Kenney棕色面板（技能面板）
-        Sprite skillPanelBg = UIResourceLoader.PanelBrown;
-        if (skillPanelBg != null)
+        GameObject prefab = Resources.Load<GameObject>("Prefabs/UI/SkillUpgradePanel");
+        if (prefab == null)
         {
-            contentBg.sprite = skillPanelBg;
-            contentBg.type = UnityEngine.UI.Image.Type.Sliced;
-            contentBg.color = Color.white;
-        }
-        else
-        {
-            contentBg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+            Debug.LogError("[GameSceneSetup] 找不到 Prefabs/UI/SkillUpgradePanel 预制体！请执行 MoShou/创建技能升级Prefab");
+            return;
         }
 
-        // 标题
-        GameObject titleGO = new GameObject("Title");
-        titleGO.transform.SetParent(contentGO.transform, false);
-        RectTransform titleRect = titleGO.AddComponent<RectTransform>();
-        titleRect.anchorMin = new Vector2(0.5f, 1);
-        titleRect.anchorMax = new Vector2(0.5f, 1);
-        titleRect.anchoredPosition = new Vector2(0, -35);
-        titleRect.sizeDelta = new Vector2(200, 50);
-        UnityEngine.UI.Text titleText = titleGO.AddComponent<UnityEngine.UI.Text>();
-        titleText.text = "技能升级";
-        titleText.fontSize = 32;
-        titleText.fontStyle = FontStyle.Bold;
-        titleText.alignment = TextAnchor.MiddleCenter;
-        titleText.color = new Color(1f, 0.9f, 0.6f); // 暖金色文字
-        titleText.font = GetDefaultFont();
-        UnityEngine.UI.Outline skillTitleOutline = titleGO.AddComponent<UnityEngine.UI.Outline>();
-        skillTitleOutline.effectColor = new Color(0, 0, 0, 0.6f);
-        skillTitleOutline.effectDistance = new Vector2(1, -1);
-        skillPanel.titleText = titleText;
+        GameObject panelGO = Instantiate(prefab, parent);
+        panelGO.name = "SkillUpgradePanel";
 
-        // 关闭按钮 - 使用Kenney方形按钮
-        GameObject closeBtnGO = new GameObject("CloseButton");
-        closeBtnGO.transform.SetParent(panelGO.transform, false);
-        RectTransform closeRect = closeBtnGO.AddComponent<RectTransform>();
-        closeRect.anchorMin = new Vector2(1, 1);
-        closeRect.anchorMax = new Vector2(1, 1);
-        closeRect.anchoredPosition = new Vector2(-30, -30);
-        closeRect.sizeDelta = new Vector2(50, 50);
-        UnityEngine.UI.Image closeImg = closeBtnGO.AddComponent<UnityEngine.UI.Image>();
-        Sprite skCloseBtnSprite = UIResourceLoader.ButtonSquareBrown;
-        if (skCloseBtnSprite != null)
+        MoShou.UI.SkillUpgradePanel skillPanel = panelGO.GetComponent<MoShou.UI.SkillUpgradePanel>();
+        if (skillPanel != null)
         {
-            closeImg.sprite = skCloseBtnSprite;
-            closeImg.type = UnityEngine.UI.Image.Type.Sliced;
-            closeImg.color = Color.white;
-        }
-        else
-        {
-            closeImg.color = new Color(0.8f, 0.2f, 0.2f);
-        }
-        UnityEngine.UI.Button closeBtn = closeBtnGO.AddComponent<UnityEngine.UI.Button>();
-        closeBtn.onClick.AddListener(() => skillPanel.Hide());
-        skillPanel.closeButton = closeBtn;
-
-        // 关闭按钮图标
-        GameObject closeTextGO = new GameObject("Text");
-        closeTextGO.transform.SetParent(closeBtnGO.transform, false);
-        RectTransform ctRect = closeTextGO.AddComponent<RectTransform>();
-        ctRect.anchorMin = Vector2.zero;
-        ctRect.anchorMax = Vector2.one;
-        ctRect.offsetMin = Vector2.zero;
-        ctRect.offsetMax = Vector2.zero;
-        Sprite skCrossIcon = UIResourceLoader.IconCrossBrown;
-        if (skCrossIcon != null)
-        {
-            UnityEngine.UI.Image skCrossImg = closeTextGO.AddComponent<UnityEngine.UI.Image>();
-            skCrossImg.sprite = skCrossIcon;
-            skCrossImg.color = Color.white;
-            skCrossImg.raycastTarget = false;
-            ctRect.offsetMin = new Vector2(8, 8);
-            ctRect.offsetMax = new Vector2(-8, -8);
-        }
-        else
-        {
-            UnityEngine.UI.Text closeText = closeTextGO.AddComponent<UnityEngine.UI.Text>();
-            closeText.text = "X";
-            closeText.fontSize = 28;
-            closeText.alignment = TextAnchor.MiddleCenter;
-            closeText.color = Color.white;
-            closeText.font = GetDefaultFont();
+            MoShou.UI.SkillUpgradePanel.Instance = skillPanel;
         }
 
-        // 金币显示
-        GameObject goldGO = new GameObject("GoldDisplay");
-        goldGO.transform.SetParent(contentGO.transform, false);
-        RectTransform goldRect = goldGO.AddComponent<RectTransform>();
-        goldRect.anchorMin = new Vector2(0, 1);
-        goldRect.anchorMax = new Vector2(0, 1);
-        goldRect.anchoredPosition = new Vector2(20, -35);
-        goldRect.sizeDelta = new Vector2(150, 40);
-        UnityEngine.UI.Text goldText = goldGO.AddComponent<UnityEngine.UI.Text>();
-        goldText.text = "金币: 0";
-        goldText.fontSize = 20;
-        goldText.alignment = TextAnchor.MiddleLeft;
-        goldText.color = new Color(1f, 0.85f, 0.2f);
-        goldText.font = GetDefaultFont();
-        skillPanel.goldText = goldText;
-
-        // 技能列表容器（带滚动）
-        GameObject skillsGO = new GameObject("SkillsContainer");
-        skillsGO.transform.SetParent(contentGO.transform, false);
-        RectTransform skillsRect = skillsGO.AddComponent<RectTransform>();
-        skillsRect.anchorMin = new Vector2(0.02f, 0.02f);
-        skillsRect.anchorMax = new Vector2(0.98f, 0.85f);
-        skillsRect.offsetMin = Vector2.zero;
-        skillsRect.offsetMax = Vector2.zero;
-
-        // 添加滚动视图
-        var scrollRect = skillsGO.AddComponent<UnityEngine.UI.ScrollRect>();
-        scrollRect.vertical = true;
-        scrollRect.horizontal = false;
-
-        // 内容容器
-        GameObject scrollContentGO = new GameObject("Content");
-        scrollContentGO.transform.SetParent(skillsGO.transform, false);
-        RectTransform scrollContentRect = scrollContentGO.AddComponent<RectTransform>();
-        scrollContentRect.anchorMin = new Vector2(0, 1);
-        scrollContentRect.anchorMax = new Vector2(1, 1);
-        scrollContentRect.pivot = new Vector2(0.5f, 1);
-        scrollContentRect.anchoredPosition = Vector2.zero;
-        scrollContentRect.sizeDelta = new Vector2(0, 800);
-
-        var verticalLayout = scrollContentGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
-        verticalLayout.childAlignment = TextAnchor.UpperCenter;
-        verticalLayout.spacing = 5;
-        verticalLayout.childControlWidth = true;
-        verticalLayout.childForceExpandWidth = true;
-        verticalLayout.childForceExpandHeight = false;
-        verticalLayout.padding = new RectOffset(5, 5, 5, 5);
-
-        var contentSizeFitter = scrollContentGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
-        contentSizeFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
-
-        scrollRect.content = scrollContentRect;
-        skillPanel.skillsContainer = scrollContentGO.transform;
-
-        // 初始隐藏
+        // Prefab默认隐藏，确保初始状态正确
         panelGO.SetActive(false);
-        Debug.Log("[GameSceneSetup] 技能升级面板已创建");
+        Debug.Log("[GameSceneSetup] 技能升级面板已创建（Prefab方式）");
     }
 
     void CreateCamera()
